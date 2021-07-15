@@ -6,9 +6,6 @@
 # @base=https://apisqa.fromdoppler.net/hello
 
 ###
-GET {{base}}/WeatherForecast
-
-###
 GET {{base}}/swagger/index.html
 
 ###
