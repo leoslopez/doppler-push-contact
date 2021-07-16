@@ -1,17 +1,16 @@
-using Doppler.PushContact.DopplerSecurity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Doppler.PushContact.DopplerSecurity
 {
     public static class DopplerSecurityServiceCollectionExtensions
     {
         public static IServiceCollection AddDopplerSecurity(this IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationHandler, IsSuperUserAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, IsOwnResourceAuthorizationHandler>();
 
             services.ConfigureOptions<ConfigureDopplerSecurityOptions>();
 
@@ -32,16 +31,6 @@ namespace Microsoft.Extensions.DependencyInjection
                         .RequireAuthenticatedUser()
                         .Build();
 
-                    var ownResourceOrSuperUserPolicy = new AuthorizationPolicyBuilder()
-                        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                        .AddRequirements(new DopplerAuthorizationRequirement()
-                        {
-                            AllowSuperUser = true,
-                            AllowOwnResource = true
-                        })
-                        .RequireAuthenticatedUser()
-                        .Build();
-
                     // TODO: I would like to use ownResourceOrSuperUserPolicy as the default policy, but I
                     // cannot override a more restrictive policy with a less restrictive one. So,
                     // for the moment, we have to be carefull and chooses the right one for each
@@ -49,7 +38,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     o.DefaultPolicy = simpleAuthenticationPolicy;
 
                     o.AddPolicy(Policies.ONLY_SUPERUSER, onlySuperUserPolicy);
-                    o.AddPolicy(Policies.OWN_RESOURCE_OR_SUPERUSER, ownResourceOrSuperUserPolicy);
                 });
 
             services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
