@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Doppler.PushContact
+namespace Doppler.PushContact.Test
 {
     public class AuthorizationTest
         : IClassFixture<WebApplicationFactory<Startup>>

@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace Doppler.PushContact
+namespace Doppler.PushContact.Test
 {
     public class UnitTest1
     {

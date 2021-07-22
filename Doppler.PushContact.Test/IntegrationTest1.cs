@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
-namespace Doppler.PushContact
+namespace Doppler.PushContact.Test
 {
     public class IntegrationTest1
         : IClassFixture<WebApplicationFactory<Startup>>
