@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 
-namespace Doppler.PushContact
+namespace Doppler.PushContact.Test
 {
     public static class HttpResponseMessageExtensions
     {
