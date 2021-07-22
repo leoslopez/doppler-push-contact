@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Doppler.PushContact.DopplerSecurity;
+using Doppler.PushContact.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace Doppler.PushContact
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDopplerSecurity();
+            services.AddScoped<IPushContactService, PushContactService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

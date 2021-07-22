@@ -1,6 +1,10 @@
+using AutoFixture;
+using Doppler.PushContact.Models;
+using Doppler.PushContact.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -109,6 +113,44 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(true, HttpStatusCode.OK)]
+        [InlineData(false, HttpStatusCode.InternalServerError)]
+        public async Task Add_should_return_expected_status_code_depending_on_service_add_result
+            (bool added, HttpStatusCode expectedHttpStatusCode)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.AddAsync(It.IsAny<PushContactModel>()))
+                .ReturnsAsync(added);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(expectedHttpStatusCode, response.StatusCode);
         }
     }
 }

@@ -13,10 +13,24 @@ namespace Doppler.PushContact.Controllers
     [Route("[controller]")]
     public class PushContactController : ControllerBase
     {
+        private readonly IPushContactService _pushContactService;
+
+        public PushContactController(IPushContactService pushContactService)
+        {
+            _pushContactService = pushContactService;
+        }
+
         [HttpPost("/push-contact/add")]
         public async Task<IActionResult> Add([FromBody] PushContactModel pushContactModel)
         {
-            throw new NotImplementedException();
+            var added = await _pushContactService.AddAsync(pushContactModel);
+
+            if (!added)
+            {
+                return StatusCode(500);
+            }
+
+            return Ok();
         }
     }
 }
