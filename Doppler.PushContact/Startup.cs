@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 
 namespace Doppler.PushContact
 {
@@ -28,6 +29,8 @@ namespace Doppler.PushContact
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDopplerSecurity();
+            services.Configure<PushContactMongoContextSettings>(Configuration.GetSection(nameof(PushContactMongoContextSettings)));
+            services.AddSingleton<IMongoClient>(x => new MongoClient(Configuration.GetSection(nameof(PushContactMongoContextSettings))["MongoConnectionString"]));
             services.AddScoped<IPushContactService, PushContactService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
