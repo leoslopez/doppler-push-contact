@@ -44,10 +44,7 @@ namespace Doppler.PushContact.Services
 
             try
             {
-                var database = _mongoClient.GetDatabase(_pushContactMongoContextSettings.Value.MongoPushContactDatabaseName);
-                var pushContacts = database.GetCollection<BsonDocument>(_pushContactMongoContextSettings.Value.MongoPushContactCollectionName);
-
-                await pushContacts.InsertOneAsync(pushContactDocument);
+                await PushContacts.InsertOneAsync(pushContactDocument);
             }
             catch (Exception ex)
             {
@@ -58,6 +55,15 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             }
 
             return true;
+        }
+
+        private IMongoCollection<BsonDocument> PushContacts
+        {
+            get
+            {
+                var database = _mongoClient.GetDatabase(_pushContactMongoContextSettings.Value.MongoPushContactDatabaseName);
+                return database.GetCollection<BsonDocument>(_pushContactMongoContextSettings.Value.MongoPushContactCollectionName);
+            }
         }
     }
 }
