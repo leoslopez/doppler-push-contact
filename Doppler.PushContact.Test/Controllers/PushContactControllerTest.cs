@@ -5,9 +5,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -151,6 +154,245 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(expectedHttpStatusCode, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_EMPTY)]
+        [InlineData(TOKEN_BROKEN)]
+        public async Task Get_should_return_unauthorized_when_token_is_not_valid(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
+        public async Task Get_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task Get_should_require_a_valid_token_with_isSU_flag(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Get_should_return_unauthorized_when_authorization_header_is_empty()
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Get_should_return_not_fount_when_domain_param_is_not_present()
+        {
+            /// Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Get_should_return_push_contacts_that_service_get_method_return()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContacts = fixture.CreateMany<PushContactModel>(10);
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
+                .ReturnsAsync(pushContacts);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            var pushContactsResponse = JsonSerializer.Deserialize<IEnumerable<PushContactModel>>
+                (responseAsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.Equal(pushContacts.Count(), pushContactsResponse.Count());
+
+            var pushContactsEnumerator = pushContacts.GetEnumerator();
+            var pushContactsResponseEnumerator = pushContactsResponse.GetEnumerator();
+
+            while (pushContactsEnumerator.MoveNext() && pushContactsResponseEnumerator.MoveNext())
+            {
+                Assert.True(pushContactsEnumerator.Current.Domain == pushContactsResponseEnumerator.Current.Domain);
+                Assert.True(pushContactsEnumerator.Current.DeviceToken == pushContactsResponseEnumerator.Current.DeviceToken);
+            }
+        }
+
+        [Fact]
+        public async Task Get_should_return_not_found_when_service_get_method_return_a_empty_push_contacts_collection()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContacts = Enumerable.Empty<PushContactModel>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
+                .ReturnsAsync(pushContacts);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Get_should_return_not_found_when_service_get_method_return_null()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            IEnumerable<PushContactModel> pushContacts = null;
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
+                .ReturnsAsync(pushContacts);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
