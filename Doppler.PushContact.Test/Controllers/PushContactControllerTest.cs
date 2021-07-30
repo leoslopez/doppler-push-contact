@@ -250,7 +250,7 @@ namespace Doppler.PushContact.Test.Controllers
         [Fact]
         public async Task Get_should_return_method_not_allowed_status_and_allow_header_when_domain_param_is_not_present()
         {
-            /// Arrange
+            // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/");
