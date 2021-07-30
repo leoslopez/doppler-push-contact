@@ -47,7 +47,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add")
+            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -67,7 +67,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add")
+            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -89,7 +89,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add")
+            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -108,7 +108,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add");
+            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact");
 
             // Act
             var response = await client.SendAsync(request);
@@ -142,7 +142,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "push-contact/add")
+            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
             {
                 Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(fixture.Create<PushContactModel>())
@@ -248,7 +248,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Get_should_return_not_fount_when_domain_param_is_not_present()
+        public async Task Get_should_return_method_not_allowed_status_and_allow_header_when_domain_param_is_not_present()
         {
             /// Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -260,7 +260,8 @@ namespace Doppler.PushContact.Test.Controllers
             _output.WriteLine(response.GetHeadersAsString());
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+            Assert.True(response.Content.Headers.Contains("Allow"));
         }
 
         [Fact]
