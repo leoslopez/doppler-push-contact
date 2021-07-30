@@ -5,6 +5,7 @@ using Doppler.PushContact.Models;
 using Doppler.PushContact.DopplerSecurity;
 using System;
 using Doppler.PushContact.Services;
+using System.Linq;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -31,6 +32,21 @@ namespace Doppler.PushContact.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet("{domain}")]
+        public async Task<IActionResult> Get([FromRoute] string domain)
+        {
+            var pushContactFilter = new PushContactFilter(domain);
+
+            var pushContacts = await _pushContactService.GetAsync(pushContactFilter);
+
+            if (pushContacts == null || !pushContacts.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(pushContacts);
         }
     }
 }
