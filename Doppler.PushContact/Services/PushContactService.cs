@@ -72,12 +72,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                     $"'{nameof(pushContactFilter.Domain)}' cannot be null or empty", nameof(pushContactFilter.Domain));
             }
 
-            var filter = Builders<BsonDocument>.Filter.Empty;
-
-            if (pushContactFilter != null && pushContactFilter.Domain != null)
-            {
-                filter = Builders<BsonDocument>.Filter.Eq("domain", pushContactFilter.Domain);
-            }
+            var filter = Builders<BsonDocument>.Filter.Eq("domain", pushContactFilter.Domain);
 
             try
             {
