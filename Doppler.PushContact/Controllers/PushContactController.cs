@@ -21,7 +21,7 @@ namespace Doppler.PushContact.Controllers
             _pushContactService = pushContactService;
         }
 
-        [HttpPost("/push-contact/add")]
+        [HttpPost]
         public async Task<IActionResult> Add([FromBody] PushContactModel pushContactModel)
         {
             var added = await _pushContactService.AddAsync(pushContactModel);
