@@ -76,10 +76,9 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             try
             {
-                var pushContactsFiltered = await PushContacts.FindAsync<BsonDocument>(filter);
+                var pushContactsFiltered = await (await PushContacts.FindAsync<BsonDocument>(filter)).ToListAsync();
 
                 return pushContactsFiltered
-                    .ToEnumerable()
                     .Select(x =>
                     {
                         return new PushContactModel
