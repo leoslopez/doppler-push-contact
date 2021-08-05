@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -394,6 +395,159 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_EMPTY)]
+        [InlineData(TOKEN_BROKEN)]
+        public async Task Delete_should_return_unauthorized_when_token_is_not_valid(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
+        public async Task Delete_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task Delete_should_require_a_valid_token_with_isSU_flag(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Delete_should_return_unauthorized_when_authorization_header_is_empty()
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Delete_should_return_ok_and_deleted_count_when_service_does_not_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deletedCount = fixture.Create<int>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(deletedCount);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<IEnumerable<string>>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            Assert.Equal(deletedCount.ToString(), responseAsString);
+        }
+
+        [Fact]
+        public async Task Delete_should_return_internal_server_error_when_service_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()))
+                .ThrowsAsync(new Exception());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(fixture.Create<IEnumerable<string>>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
     }
 }
