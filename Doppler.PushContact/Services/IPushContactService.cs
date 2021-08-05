@@ -9,5 +9,7 @@ namespace Doppler.PushContact.Services
         Task<bool> AddAsync(PushContactModel pushContactModel);
 
         Task<IEnumerable<PushContactModel>> GetAsync(PushContactFilter pushContactFilter);
+
+        Task<long> DeleteByDeviceTokenAsync(IEnumerable<string> deviceTokens);
     }
 }
