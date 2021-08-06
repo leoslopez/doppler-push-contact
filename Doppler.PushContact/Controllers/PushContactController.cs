@@ -6,6 +6,7 @@ using Doppler.PushContact.DopplerSecurity;
 using System;
 using Doppler.PushContact.Services;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -47,6 +48,14 @@ namespace Doppler.PushContact.Controllers
             }
 
             return Ok(pushContacts);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromBody] IEnumerable<string> deviceTokens)
+        {
+            var deletedCount = await _pushContactService.DeleteByDeviceTokenAsync(deviceTokens);
+
+            return Ok(deletedCount);
         }
     }
 }

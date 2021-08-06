@@ -249,11 +249,123 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             Assert.True(result.All(x => x.Domain == pushContactFilter.Domain));
         }
 
+        [Fact]
+        public async Task DeleteByDeviceTokenAsync_should_throw_argument_exception_when_device_tokens_collection_is_null()
+        {
+            // Arrange
+            IEnumerable<string> deviceTokens = null;
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.DeleteByDeviceTokenAsync(deviceTokens));
+        }
+
+        [Fact]
+        public async Task DeleteByDeviceTokenAsync_should_throw_argument_exception_when_device_tokens_collection_is_empty()
+        {
+            // Arrange
+            IEnumerable<string> deviceTokens = new List<string>();
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.DeleteByDeviceTokenAsync(deviceTokens));
+        }
+
+        [Fact]
+        public async Task DeleteByDeviceTokenAsync_should_throw_exception_and_log_error_when_push_contact_models_cannot_be_deleted()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceTokens = fixture.CreateMany<string>();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.UpdateManyAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<UpdateDefinition<BsonDocument>>(), default, default))
+                .ThrowsAsync(new Exception());
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushContactMongoContextSettings),
+                loggerMock.Object);
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<Exception>(() => sut.DeleteByDeviceTokenAsync(deviceTokens));
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error deleting {nameof(PushContactModel)}s"),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteByDeviceTokenAsync_should_return_deleted_count_when_push_contact_models_can_be_deleted()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceTokens = fixture.CreateMany<string>();
+            var expectedDeletedCount = fixture.Create<long>();
+
+            var updateResultMock = new Mock<UpdateResult>();
+            updateResultMock.Setup(_ => _.IsModifiedCountAvailable).Returns(true);
+            updateResultMock.Setup(_ => _.ModifiedCount).Returns(expectedDeletedCount);
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.UpdateManyAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<UpdateDefinition<BsonDocument>>(), default, default))
+                .ReturnsAsync(updateResultMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            var deletedCount = await sut.DeleteByDeviceTokenAsync(deviceTokens);
+
+            // Assert
+            Assert.Equal(expectedDeletedCount, updateResultMock.Object.ModifiedCount);
+        }
+
         private static List<BsonDocument> FakePushContactDocuments(int count)
         {
             var fixture = new Fixture();
 
-            var pushContactDocumentKeys = new[] { "_id", "domain", "device_token", "modified" };
+            var pushContactDocumentKeys = new[] { "_id", "domain", "device_token", "modified", "deleted" };
             Generator<string> pushContactDocumentValues = fixture.Create<Generator<string>>();
 
             return Enumerable.Repeat(0, count)

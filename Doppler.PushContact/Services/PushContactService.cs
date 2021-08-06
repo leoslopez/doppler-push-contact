@@ -96,6 +96,36 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             }
         }
 
+        public async Task<long> DeleteByDeviceTokenAsync(IEnumerable<string> deviceTokens)
+        {
+            if (deviceTokens == null || !deviceTokens.Any())
+            {
+                throw new ArgumentException(
+                    $"'{nameof(deviceTokens)}' cannot be null or empty", nameof(deviceTokens));
+            }
+
+            var filter = Builders<BsonDocument>.Filter.AnyIn("device_token", deviceTokens);
+
+            var update = new BsonDocument("$set", new BsonDocument
+                {
+                    { "deleted", true },
+                    { "modified", DateTime.UtcNow }
+                });
+
+            try
+            {
+                var result = await PushContacts.UpdateManyAsync(filter, update);
+
+                return result.IsModifiedCountAvailable ? result.ModifiedCount : default;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting {nameof(PushContactModel)}s");
+
+                throw;
+            }
+        }
+
         private IMongoCollection<BsonDocument> PushContacts
         {
             get
