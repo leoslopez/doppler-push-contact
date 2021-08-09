@@ -130,8 +130,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         {
             get
             {
-                var database = _mongoClient.GetDatabase(_pushContactMongoContextSettings.Value.MongoPushContactDatabaseName);
-                return database.GetCollection<BsonDocument>(_pushContactMongoContextSettings.Value.MongoPushContactCollectionName);
+                var database = _mongoClient.GetDatabase(_pushContactMongoContextSettings.Value.DatabaseName);
+                return database.GetCollection<BsonDocument>(_pushContactMongoContextSettings.Value.PushContactsCollectionName);
             }
         }
     }

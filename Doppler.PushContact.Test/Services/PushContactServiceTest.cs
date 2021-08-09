@@ -58,12 +58,12 @@ namespace Doppler.PushContact.Test.Services
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
@@ -106,12 +106,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
@@ -171,12 +171,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
@@ -230,12 +230,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
@@ -292,12 +292,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
@@ -342,12 +342,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.MongoPushContactCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.MongoPushContactDatabaseName, null))
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
