@@ -365,13 +365,17 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         {
             var fixture = new Fixture();
 
-            var pushContactDocumentKeys = new[] { "_id", "domain", "device_token", "modified", "deleted" };
-            Generator<string> pushContactDocumentValues = fixture.Create<Generator<string>>();
-
             return Enumerable.Repeat(0, count)
-                .Select(s => pushContactDocumentKeys.Zip(pushContactDocumentValues, Tuple.Create)
-                .ToDictionary(t => t.Item1, t => t.Item2))
-                .Select(x => { return new BsonDocument(x); })
+                .Select(x =>
+                {
+                    return new BsonDocument {
+                            { "_id", fixture.Create<string>() },
+                            { "domain", fixture.Create<string>() },
+                            { "device_token", fixture.Create<string>() },
+                            { "modified", fixture.Create<DateTime>().ToUniversalTime() },
+                            { "deleted", fixture.Create<bool>() }
+                    };
+                })
                 .ToList();
         }
     }
