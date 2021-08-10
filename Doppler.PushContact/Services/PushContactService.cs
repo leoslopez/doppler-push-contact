@@ -73,7 +73,9 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                     $"'{nameof(pushContactFilter.Domain)}' cannot be null or empty", nameof(pushContactFilter.Domain));
             }
 
-            var filter = Builders<BsonDocument>.Filter.Eq("domain", pushContactFilter.Domain);
+            var FilterBuilder = Builders<BsonDocument>.Filter;
+
+            var filter = FilterBuilder.Eq("domain", pushContactFilter.Domain) & !FilterBuilder.Eq("deleted", true);
 
             try
             {
