@@ -41,6 +41,7 @@ namespace Doppler.PushContact.Services
                 { "_id", key },
                 { "domain", pushContactModel.Domain },
                 { "device_token", pushContactModel.DeviceToken },
+                { "deleted", false },
                 { "modified", now }
             };
 
