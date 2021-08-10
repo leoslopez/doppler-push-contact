@@ -219,9 +219,16 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             pushContactsCursorMock
                 .Setup(_ => _.Current)
                 .Returns(allPushContactDocuments.Where(x => x["domain"].AsString == pushContactFilter.Domain));
+
             pushContactsCursorMock
                 .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
-                .Returns(true);
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -246,6 +253,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var result = await sut.GetAsync(pushContactFilter);
 
             // Assert
+            Assert.True(result.Any());
             Assert.True(result.All(x => x.Domain == pushContactFilter.Domain));
         }
 
