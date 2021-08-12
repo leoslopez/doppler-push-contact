@@ -219,9 +219,16 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             pushContactsCursorMock
                 .Setup(_ => _.Current)
                 .Returns(allPushContactDocuments.Where(x => x["domain"].AsString == pushContactFilter.Domain));
+
             pushContactsCursorMock
                 .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
-                .Returns(true);
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -246,7 +253,65 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var result = await sut.GetAsync(pushContactFilter);
 
             // Assert
+            Assert.True(result.Any());
             Assert.True(result.All(x => x.Domain == pushContactFilter.Domain));
+        }
+
+        [Fact]
+        public async Task GetAsync_should_return_not_deleted_push_contacts()
+        {
+            // Arrange
+            List<BsonDocument> allPushContactDocuments = FakePushContactDocuments(10);
+            var random = new Random();
+            int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
+            allPushContactDocuments[randomPushContactIndex]["deleted"] = false;
+
+            var fixture = new Fixture();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
+            pushContactsCursorMock
+                .Setup(_ => _.Current)
+                .Returns(allPushContactDocuments.Where(x => x["deleted"].AsBoolean == false));
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.FindAsync<BsonDocument>(It.IsAny<FilterDefinition<BsonDocument>>(), null, default))
+                .ReturnsAsync(pushContactsCursorMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            var result = await sut.GetAsync(fixture.Create<PushContactFilter>());
+
+            // Assert
+            Assert.True(result.Any());
+            Assert.True(result.All(x => allPushContactDocuments.Exists(y => y["domain"] == x.Domain
+                                                                            && y["device_token"] == x.DeviceToken
+                                                                            && y["deleted"].AsBoolean == false)));
         }
 
         [Fact]
@@ -365,13 +430,17 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         {
             var fixture = new Fixture();
 
-            var pushContactDocumentKeys = new[] { "_id", "domain", "device_token", "modified", "deleted" };
-            Generator<string> pushContactDocumentValues = fixture.Create<Generator<string>>();
-
             return Enumerable.Repeat(0, count)
-                .Select(s => pushContactDocumentKeys.Zip(pushContactDocumentValues, Tuple.Create)
-                .ToDictionary(t => t.Item1, t => t.Item2))
-                .Select(x => { return new BsonDocument(x); })
+                .Select(x =>
+                {
+                    return new BsonDocument {
+                            { "_id", fixture.Create<string>() },
+                            { "domain", fixture.Create<string>() },
+                            { "device_token", fixture.Create<string>() },
+                            { "modified", fixture.Create<DateTime>().ToUniversalTime() },
+                            { "deleted", fixture.Create<bool>() }
+                    };
+                })
                 .ToList();
         }
     }
