@@ -316,6 +316,7 @@ namespace Doppler.PushContact.Test.Controllers
             {
                 Assert.True(pushContactsEnumerator.Current.Domain == pushContactsResponseEnumerator.Current.Domain);
                 Assert.True(pushContactsEnumerator.Current.DeviceToken == pushContactsResponseEnumerator.Current.DeviceToken);
+                Assert.True(pushContactsEnumerator.Current.Email == pushContactsResponseEnumerator.Current.Email);
             }
         }
 

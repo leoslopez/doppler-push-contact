@@ -5,5 +5,7 @@ namespace Doppler.PushContact.Models
         public string Domain { get; set; }
 
         public string DeviceToken { get; set; }
+
+        public string Email { get; set; }
     }
 }

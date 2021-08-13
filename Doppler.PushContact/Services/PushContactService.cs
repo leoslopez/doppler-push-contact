@@ -41,6 +41,7 @@ namespace Doppler.PushContact.Services
                 { "_id", key },
                 { "domain", pushContactModel.Domain },
                 { "device_token", pushContactModel.DeviceToken },
+                { "email", pushContactModel.Email },
                 { "deleted", false },
                 { "modified", now }
             };
@@ -87,7 +88,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                         return new PushContactModel
                         {
                             Domain = x["domain"].AsString,
-                            DeviceToken = x["device_token"].AsString
+                            DeviceToken = x["device_token"].AsString,
+                            Email = x["email"].AsString
                         };
                     });
             }
