@@ -311,6 +311,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             Assert.True(result.Any());
             Assert.True(result.All(x => allPushContactDocuments.Exists(y => y["domain"] == x.Domain
                                                                             && y["device_token"] == x.DeviceToken
+                                                                            && y["email"] == x.Email
                                                                             && y["deleted"].AsBoolean == false)));
         }
 
@@ -437,6 +438,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                             { "_id", fixture.Create<string>() },
                             { "domain", fixture.Create<string>() },
                             { "device_token", fixture.Create<string>() },
+                            { "email", fixture.Create<string>() },
                             { "modified", fixture.Create<DateTime>().ToUniversalTime() },
                             { "deleted", fixture.Create<bool>() }
                     };
