@@ -316,6 +316,62 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         }
 
         [Fact]
+        public async Task GetAsync_should_not_throw_exceptions_when_push_contacts_documents_have_not_some_property()
+        {
+            // Arrange
+            List<BsonDocument> pushContactDocumentsWithoutProperties = Enumerable.Repeat(0, 10)
+                .Select(x =>
+                {
+                    return new BsonDocument { };
+                })
+                .ToList();
+
+            var fixture = new Fixture();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
+            pushContactsCursorMock
+                .Setup(_ => _.Current)
+                .Returns(pushContactDocumentsWithoutProperties);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.FindAsync<BsonDocument>(It.IsAny<FilterDefinition<BsonDocument>>(), null, default))
+                .ReturnsAsync(pushContactsCursorMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            var result = await sut.GetAsync(fixture.Create<PushContactFilter>());
+
+            // Assert
+            _ = result.ToList();
+        }
+
+        [Fact]
         public async Task DeleteByDeviceTokenAsync_should_throw_argument_exception_when_device_tokens_collection_is_null()
         {
             // Arrange

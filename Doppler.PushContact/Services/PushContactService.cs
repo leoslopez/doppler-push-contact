@@ -87,9 +87,9 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                     {
                         return new PushContactModel
                         {
-                            Domain = x["domain"].AsString,
-                            DeviceToken = x["device_token"].AsString,
-                            Email = x["email"].AsString
+                            Domain = x.GetValue("domain", null)?.AsString,
+                            DeviceToken = x.GetValue("device_token", null)?.AsString,
+                            Email = x.GetValue("email", null)?.AsString
                         };
                     });
             }
