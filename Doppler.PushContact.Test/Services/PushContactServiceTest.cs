@@ -17,6 +17,13 @@ namespace Doppler.PushContact.Test.Services
 {
     public class PushContactServiceTest
     {
+        private const string PushContactDocumentIdPropName = "_id";
+        private const string PushContactDocumentDomainPropName = "domain";
+        private const string PushContactDocumentDeviceTokenPropName = "device_token";
+        private const string PushContactDocumentEmailPropName = "email";
+        private const string PushContactDocumentDeletedPropName = "deleted";
+        private const string PushContactDocumentModifiedPropName = "modified";
+
         private static PushContactService CreateSut(
             IMongoClient mongoClient = null,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings = null,
@@ -209,7 +216,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var random = new Random();
             int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
-            var pushContactFilter = new PushContactFilter(allPushContactDocuments[randomPushContactIndex]["domain"].AsString);
+            var pushContactFilter = new PushContactFilter(allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString);
 
             var fixture = new Fixture();
 
@@ -218,7 +225,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
                 .Setup(_ => _.Current)
-                .Returns(allPushContactDocuments.Where(x => x["domain"].AsString == pushContactFilter.Domain));
+                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentDomainPropName].AsString == pushContactFilter.Domain));
 
             pushContactsCursorMock
                 .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
@@ -264,7 +271,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             List<BsonDocument> allPushContactDocuments = FakePushContactDocuments(10);
             var random = new Random();
             int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
-            allPushContactDocuments[randomPushContactIndex]["deleted"] = false;
+            allPushContactDocuments[randomPushContactIndex][PushContactDocumentDeletedPropName] = false;
 
             var fixture = new Fixture();
 
@@ -273,7 +280,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
                 .Setup(_ => _.Current)
-                .Returns(allPushContactDocuments.Where(x => x["deleted"].AsBoolean == false));
+                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentDeletedPropName].AsBoolean == false));
 
             pushContactsCursorMock
                 .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
@@ -309,10 +316,10 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             // Assert
             Assert.True(result.Any());
-            Assert.True(result.All(x => allPushContactDocuments.Exists(y => y["domain"] == x.Domain
-                                                                            && y["device_token"] == x.DeviceToken
-                                                                            && y["email"] == x.Email
-                                                                            && y["deleted"].AsBoolean == false)));
+            Assert.True(result.All(x => allPushContactDocuments.Exists(y => y[PushContactDocumentDomainPropName] == x.Domain
+                                                                            && y[PushContactDocumentDeviceTokenPropName] == x.DeviceToken
+                                                                            && y[PushContactDocumentEmailPropName] == x.Email
+                                                                            && y[PushContactDocumentDeletedPropName].AsBoolean == false)));
         }
 
         [Fact]
@@ -491,12 +498,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 .Select(x =>
                 {
                     return new BsonDocument {
-                            { "_id", fixture.Create<string>() },
-                            { "domain", fixture.Create<string>() },
-                            { "device_token", fixture.Create<string>() },
-                            { "email", fixture.Create<string>() },
-                            { "modified", fixture.Create<DateTime>().ToUniversalTime() },
-                            { "deleted", fixture.Create<bool>() }
+                            { PushContactDocumentIdPropName, fixture.Create<string>() },
+                            { PushContactDocumentDomainPropName, fixture.Create<string>() },
+                            { PushContactDocumentDeviceTokenPropName, fixture.Create<string>() },
+                            { PushContactDocumentEmailPropName, fixture.Create<string>() },
+                            { PushContactDocumentModifiedPropName, fixture.Create<DateTime>().ToUniversalTime() },
+                            { PushContactDocumentDeletedPropName, fixture.Create<bool>() }
                     };
                 })
                 .ToList();

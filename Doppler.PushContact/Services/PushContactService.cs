@@ -16,6 +16,12 @@ namespace Doppler.PushContact.Services
         private readonly IOptions<PushContactMongoContextSettings> _pushContactMongoContextSettings;
         private readonly ILogger<PushContactService> _logger;
 
+        private const string PushContactDocumentIdPropName = "_id";
+        private const string PushContactDocumentDomainPropName = "domain";
+        private const string PushContactDocumentDeviceTokenPropName = "device_token";
+        private const string PushContactDocumentEmailPropName = "email";
+        private const string PushContactDocumentDeletedPropName = "deleted";
+        private const string PushContactDocumentModifiedPropName = "modified";
         public PushContactService(
             IMongoClient mongoClient,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings,
@@ -38,12 +44,12 @@ namespace Doppler.PushContact.Services
             var key = ObjectId.GenerateNewId(now).ToString();
 
             var pushContactDocument = new BsonDocument {
-                { "_id", key },
-                { "domain", pushContactModel.Domain },
-                { "device_token", pushContactModel.DeviceToken },
-                { "email", pushContactModel.Email },
-                { "deleted", false },
-                { "modified", now }
+                { PushContactDocumentIdPropName, key },
+                { PushContactDocumentDomainPropName, pushContactModel.Domain },
+                { PushContactDocumentDeviceTokenPropName, pushContactModel.DeviceToken },
+                { PushContactDocumentEmailPropName, pushContactModel.Email },
+                { PushContactDocumentDeletedPropName, false },
+                { PushContactDocumentModifiedPropName, now }
             };
 
             try
@@ -76,7 +82,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var FilterBuilder = Builders<BsonDocument>.Filter;
 
-            var filter = FilterBuilder.Eq("domain", pushContactFilter.Domain) & !FilterBuilder.Eq("deleted", true);
+            var filter = FilterBuilder.Eq(PushContactDocumentDomainPropName, pushContactFilter.Domain) & !FilterBuilder.Eq(PushContactDocumentDeletedPropName, true);
 
             try
             {
@@ -87,9 +93,9 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                     {
                         return new PushContactModel
                         {
-                            Domain = x.GetValue("domain", null)?.AsString,
-                            DeviceToken = x.GetValue("device_token", null)?.AsString,
-                            Email = x.GetValue("email", null)?.AsString
+                            Domain = x.GetValue(PushContactDocumentDomainPropName, null)?.AsString,
+                            DeviceToken = x.GetValue(PushContactDocumentDeviceTokenPropName, null)?.AsString,
+                            Email = x.GetValue(PushContactDocumentEmailPropName, null)?.AsString
                         };
                     });
             }
@@ -109,12 +115,12 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                     $"'{nameof(deviceTokens)}' cannot be null or empty", nameof(deviceTokens));
             }
 
-            var filter = Builders<BsonDocument>.Filter.AnyIn("device_token", deviceTokens);
+            var filter = Builders<BsonDocument>.Filter.AnyIn(PushContactDocumentDeviceTokenPropName, deviceTokens);
 
             var update = new BsonDocument("$set", new BsonDocument
                 {
-                    { "deleted", true },
-                    { "modified", DateTime.UtcNow }
+                    { PushContactDocumentDeletedPropName, true },
+                    { PushContactDocumentModifiedPropName, DateTime.UtcNow }
                 });
 
             try
