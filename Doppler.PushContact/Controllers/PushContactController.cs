@@ -57,5 +57,13 @@ namespace Doppler.PushContact.Controllers
 
             return Ok(deletedCount);
         }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents)
+        {
+            await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
+
+            return Ok();
+        }
     }
 }
