@@ -11,5 +11,7 @@ namespace Doppler.PushContact.Services
         Task<IEnumerable<PushContactModel>> GetAsync(PushContactFilter pushContactFilter);
 
         Task<long> DeleteByDeviceTokenAsync(IEnumerable<string> deviceTokens);
+
+        Task AddHistoryEventsAsync(IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents);
     }
 }
