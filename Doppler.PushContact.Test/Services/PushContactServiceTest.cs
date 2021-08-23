@@ -490,6 +490,123 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             Assert.Equal(expectedDeletedCount, updateResultMock.Object.ModifiedCount);
         }
 
+        [Fact]
+        public async Task AddHistoryEventsAsync_should_throw_argument_exception_when_push_contact_history_events_collection_is_null()
+        {
+            // Arrange
+            IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents = null;
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddHistoryEventsAsync(pushContactHistoryEvents));
+        }
+
+        [Fact]
+        public async Task AddHistoryEventsAsync_should_throw_argument_exception_when_push_contact_history_events_collection_is_empty()
+        {
+            // Arrange
+            IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents = new List<PushContactHistoryEvent>();
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddHistoryEventsAsync(pushContactHistoryEvents));
+        }
+
+        [Fact]
+        public async Task AddHistoryEventsAsync_should_throw_exception_and_log_error_when_push_contact_history_events_cannot_be_added()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactHistoryEvents = fixture.CreateMany<PushContactHistoryEvent>();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.BulkWriteAsync(It.IsAny<IEnumerable<UpdateOneModel<BsonDocument>>>(), default, default))
+                .ThrowsAsync(new Exception());
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushContactMongoContextSettings),
+                loggerMock.Object);
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<Exception>(() => sut.AddHistoryEventsAsync(pushContactHistoryEvents));
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error adding {nameof(PushContactHistoryEvent)}s"),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task AddHistoryEventsAsync_should_not_throw_exception_and_not_log_error_when_push_contact_history_events_can_be_added()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactHistoryEvents = fixture.CreateMany<PushContactHistoryEvent>();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.BulkWriteAsync(It.IsAny<IEnumerable<UpdateOneModel<BsonDocument>>>(), default, default))
+                .Returns(Task.FromResult(It.IsAny<BulkWriteResult<BsonDocument>>()));
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings),
+                loggerMock.Object);
+
+            // Act
+            await sut.AddHistoryEventsAsync(pushContactHistoryEvents);
+
+            // Assert
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error adding {nameof(PushContactHistoryEvent)}s"),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Never);
+        }
+
         private static List<BsonDocument> FakePushContactDocuments(int count)
         {
             var fixture = new Fixture();

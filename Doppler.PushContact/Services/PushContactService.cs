@@ -22,6 +22,13 @@ namespace Doppler.PushContact.Services
         private const string PushContactDocumentEmailPropName = "email";
         private const string PushContactDocumentDeletedPropName = "deleted";
         private const string PushContactDocumentModifiedPropName = "modified";
+
+        private const string PushContactDocumentHistoryEventsPropName = "history_events";
+        private const string PushContactDocumentHistoryEvents_SentSuccessPropName = "sent_success";
+        private const string PushContactDocumentHistoryEvents_EventDatePropName = "event_date";
+        private const string PushContactDocumentHistoryEvents_InsertedDatePropName = "inserted_date";
+        private const string PushContactDocumentHistoryEvents_DetailsPropName = "details";
+
         public PushContactService(
             IMongoClient mongoClient,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings,
@@ -132,6 +139,45 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting {nameof(PushContactModel)}s");
+
+                throw;
+            }
+        }
+
+        public async Task AddHistoryEventsAsync(IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents)
+        {
+            if (pushContactHistoryEvents == null || !pushContactHistoryEvents.Any())
+            {
+                throw new ArgumentException(
+                    $"'{nameof(pushContactHistoryEvents)}' cannot be null or empty", nameof(pushContactHistoryEvents));
+            }
+
+            var now = DateTime.UtcNow;
+
+            var updateRequest = pushContactHistoryEvents
+                .Select(x =>
+                {
+                    var historyEvent = new BsonDocument {
+                        { PushContactDocumentHistoryEvents_SentSuccessPropName, x.SentSuccess },
+                        { PushContactDocumentHistoryEvents_EventDatePropName, x.EventDate },
+                        { PushContactDocumentHistoryEvents_InsertedDatePropName, now },
+                        { PushContactDocumentHistoryEvents_DetailsPropName, x.Details }
+                    };
+
+                    var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentDeviceTokenPropName, x.DeviceToken);
+
+                    var update = Builders<BsonDocument>.Update.Push(PushContactDocumentHistoryEventsPropName, historyEvent);
+
+                    return new UpdateOneModel<BsonDocument>(filter, update);
+                });
+
+            try
+            {
+                await PushContacts.BulkWriteAsync(updateRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error adding {nameof(PushContactHistoryEvent)}s");
 
                 throw;
             }
