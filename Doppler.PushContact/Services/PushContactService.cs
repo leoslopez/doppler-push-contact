@@ -74,6 +74,37 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             return true;
         }
 
+        public async Task UpdateEmailAsync(string deviceToken, string email)
+        {
+            if (deviceToken == null)
+            {
+                throw new ArgumentNullException(nameof(deviceToken));
+            }
+
+            if (email == null)
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentDeviceTokenPropName, deviceToken);
+
+            var updateDefinition = Builders<BsonDocument>.Update
+                .Set(PushContactDocumentEmailPropName, email)
+                .Set(PushContactDocumentModifiedPropName, DateTime.UtcNow);
+
+            try
+            {
+                await PushContacts.UpdateOneAsync(filter, updateDefinition);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, @$"Error updating {nameof(PushContactModel)}
+with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can not be updated with following value: {email}");
+
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<PushContactModel>> GetAsync(PushContactFilter pushContactFilter)
         {
             if (pushContactFilter == null)
