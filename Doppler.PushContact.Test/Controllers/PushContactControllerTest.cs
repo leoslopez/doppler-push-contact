@@ -48,7 +48,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -68,7 +68,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -90,7 +90,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -109,7 +109,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact");
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts");
 
             // Act
             var response = await client.SendAsync(request);
@@ -143,7 +143,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
             {
                 Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(fixture.Create<PushContactModel>())
@@ -160,7 +160,7 @@ namespace Doppler.PushContact.Test.Controllers
         [Theory]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
-        public async Task Get_should_return_unauthorized_when_token_is_not_valid(string token)
+        public async Task GetBy_should_return_unauthorized_when_token_is_not_valid(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -168,7 +168,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -183,7 +183,7 @@ namespace Doppler.PushContact.Test.Controllers
 
         [Theory]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
-        public async Task Get_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        public async Task GetBy_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -191,7 +191,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -208,7 +208,7 @@ namespace Doppler.PushContact.Test.Controllers
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
-        public async Task Get_should_require_a_valid_token_with_isSU_flag(string token)
+        public async Task GetBy_should_require_a_valid_token_with_isSU_flag(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -216,7 +216,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -230,7 +230,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Get_should_return_unauthorized_when_authorization_header_is_empty()
+        public async Task GetBy_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
@@ -238,7 +238,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}");
 
             // Act
             var response = await client.SendAsync(request);
@@ -249,24 +249,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Get_should_return_method_not_allowed_status_and_allow_header_when_domain_param_is_not_present()
-        {
-            // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/");
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
-            Assert.True(response.Content.Headers.Contains("Allow"));
-        }
-
-        [Fact]
-        public async Task Get_should_return_push_contacts_that_service_get_method_return()
+        public async Task GetBy_should_return_push_contacts_that_service_get_method_return()
         {
             // Arrange
             var fixture = new Fixture();
@@ -290,10 +273,9 @@ namespace Doppler.PushContact.Test.Controllers
 
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
-                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } }
             };
 
             // Act
@@ -321,7 +303,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Get_should_return_not_found_when_service_get_method_return_a_empty_push_contacts_collection()
+        public async Task GetBy_should_return_not_found_when_service_get_method_return_a_empty_push_contacts_collection()
         {
             // Arrange
             var fixture = new Fixture();
@@ -345,10 +327,9 @@ namespace Doppler.PushContact.Test.Controllers
 
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
-                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } }
             };
 
             // Act
@@ -360,7 +341,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Get_should_return_not_found_when_service_get_method_return_null()
+        public async Task GetBy_should_return_not_found_when_service_get_method_return_null()
         {
             // Arrange
             var fixture = new Fixture();
@@ -384,10 +365,9 @@ namespace Doppler.PushContact.Test.Controllers
 
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pushcontact/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?domain={domain}")
             {
-                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } }
             };
 
             // Act
@@ -401,12 +381,12 @@ namespace Doppler.PushContact.Test.Controllers
         [Theory]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
-        public async Task Delete_should_return_unauthorized_when_token_is_not_valid(string token)
+        public async Task BulkDelete_should_return_unauthorized_when_token_is_not_valid(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -421,12 +401,12 @@ namespace Doppler.PushContact.Test.Controllers
 
         [Theory]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
-        public async Task Delete_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        public async Task BulkDelete_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -443,12 +423,12 @@ namespace Doppler.PushContact.Test.Controllers
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
-        public async Task Delete_should_require_a_valid_token_with_isSU_flag(string token)
+        public async Task BulkDelete_should_require_a_valid_token_with_isSU_flag(string token)
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -462,12 +442,12 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Delete_should_return_unauthorized_when_authorization_header_is_empty()
+        public async Task BulkDelete_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
             var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact");
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk");
 
             // Act
             var response = await client.SendAsync(request);
@@ -478,7 +458,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Delete_should_return_ok_and_deleted_count_when_service_does_not_throw_an_exception()
+        public async Task BulkDelete_should_return_ok_and_deleted_count_when_service_does_not_throw_an_exception()
         {
             // Arrange
             var fixture = new Fixture();
@@ -500,7 +480,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk")
             {
                 Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(fixture.Create<IEnumerable<string>>())
@@ -517,7 +497,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Delete_should_return_internal_server_error_when_service_throw_an_exception()
+        public async Task BulkDelete_should_return_internal_server_error_when_service_throw_an_exception()
         {
             // Arrange
             var fixture = new Fixture();
@@ -537,159 +517,10 @@ namespace Doppler.PushContact.Test.Controllers
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, "pushcontact")
+            var request = new HttpRequestMessage(HttpMethod.Delete, "push-contacts/_bulk")
             {
                 Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(fixture.Create<IEnumerable<string>>())
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-        }
-
-        [Theory]
-        [InlineData(TOKEN_EMPTY)]
-        [InlineData(TOKEN_BROKEN)]
-        public async Task Update_should_return_unauthorized_when_token_is_not_valid(string token)
-        {
-            // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact")
-            {
-                Headers = { { "Authorization", $"Bearer {token}" } }
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        [Theory]
-        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
-        public async Task Update_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
-        {
-            // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact")
-            {
-                Headers = { { "Authorization", $"Bearer {token}" } }
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        [Theory]
-        [InlineData(TOKEN_EXPIRE_20330518)]
-        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
-        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
-        public async Task Update_should_require_a_valid_token_with_isSU_flag(string token)
-        {
-            // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact")
-            {
-                Headers = { { "Authorization", $"Bearer {token}" } }
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Update_should_return_unauthorized_when_authorization_header_is_empty()
-        {
-            // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact");
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Update_should_return_ok_when_service_does_not_throw_an_exception()
-        {
-            // Arrange
-            var fixture = new Fixture();
-
-            var pushContactServiceMock = new Mock<IPushContactService>();
-
-            pushContactServiceMock
-                .Setup(x => x.AddHistoryEventsAsync(It.IsAny<IEnumerable<PushContactHistoryEvent>>()))
-                .Returns(Task.CompletedTask);
-
-            var client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.AddSingleton(pushContactServiceMock.Object);
-                });
-
-            }).CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact")
-            {
-                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(fixture.Create<IEnumerable<PushContactHistoryEvent>>())
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-            _output.WriteLine(response.GetHeadersAsString());
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Update_should_return_internal_server_error_when_service_throw_an_exception()
-        {
-            // Arrange
-            var fixture = new Fixture();
-
-            var pushContactServiceMock = new Mock<IPushContactService>();
-
-            pushContactServiceMock
-                .Setup(x => x.AddHistoryEventsAsync(It.IsAny<IEnumerable<PushContactHistoryEvent>>()))
-                .ThrowsAsync(new Exception());
-
-            var client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.AddSingleton(pushContactServiceMock.Object);
-                });
-
-            }).CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Put, "pushcontact")
-            {
-                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(fixture.Create<IEnumerable<PushContactHistoryEvent>>())
             };
 
             // Act

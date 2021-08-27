@@ -7,12 +7,12 @@ using System;
 using Doppler.PushContact.Services;
 using System.Linq;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Doppler.PushContact.Controllers
 {
     [Authorize(Policies.ONLY_SUPERUSER)]
     [ApiController]
-    [Route("[controller]")]
     public class PushContactController : ControllerBase
     {
         private readonly IPushContactService _pushContactService;
@@ -23,6 +23,7 @@ namespace Doppler.PushContact.Controllers
         }
 
         [HttpPost]
+        [Route("push-contacts")]
         public async Task<IActionResult> Add([FromBody] PushContactModel pushContactModel)
         {
             var added = await _pushContactService.AddAsync(pushContactModel);
@@ -35,8 +36,9 @@ namespace Doppler.PushContact.Controllers
             return Ok();
         }
 
-        [HttpGet("{domain}")]
-        public async Task<IActionResult> Get([FromRoute] string domain)
+        [HttpGet]
+        [Route("push-contacts")]
+        public async Task<IActionResult> GetBy([FromQuery] string domain)
         {
             var pushContactFilter = new PushContactFilter(domain);
 
@@ -51,19 +53,12 @@ namespace Doppler.PushContact.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromBody] IEnumerable<string> deviceTokens)
+        [Route("push-contacts/_bulk")]
+        public async Task<IActionResult> BulkDelete([FromBody] IEnumerable<string> deviceTokens)
         {
             var deletedCount = await _pushContactService.DeleteByDeviceTokenAsync(deviceTokens);
 
             return Ok(deletedCount);
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents)
-        {
-            await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
-
-            return Ok();
         }
     }
 }
