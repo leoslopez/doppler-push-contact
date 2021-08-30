@@ -40,7 +40,7 @@ namespace Doppler.PushContact.Services
             _logger = logger;
         }
 
-        public async Task<bool> AddAsync(PushContactModel pushContactModel)
+        public async Task AddAsync(PushContactModel pushContactModel)
         {
             if (pushContactModel == null)
             {
@@ -68,10 +68,8 @@ namespace Doppler.PushContact.Services
                 _logger.LogError(ex, @$"Error inserting {nameof(pushContactModel)}
 with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceToken}");
 
-                return false;
+                throw;
             }
-
-            return true;
         }
 
         public async Task UpdateEmailAsync(string deviceToken, string email)

@@ -26,12 +26,7 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts")]
         public async Task<IActionResult> Add([FromBody] PushContactModel pushContactModel)
         {
-            var added = await _pushContactService.AddAsync(pushContactModel);
-
-            if (!added)
-            {
-                return StatusCode(500);
-            }
+            await _pushContactService.AddAsync(pushContactModel);
 
             return Ok();
         }

@@ -6,7 +6,7 @@ namespace Doppler.PushContact.Services
 {
     public interface IPushContactService
     {
-        Task<bool> AddAsync(PushContactModel pushContactModel);
+        Task AddAsync(PushContactModel pushContactModel);
 
         Task UpdateEmailAsync(string deviceToken, string email);
 

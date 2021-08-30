@@ -120,10 +120,10 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Theory]
-        [InlineData(true, HttpStatusCode.OK)]
-        [InlineData(false, HttpStatusCode.InternalServerError)]
+        [InlineData(false, HttpStatusCode.OK)]
+        [InlineData(true, HttpStatusCode.InternalServerError)]
         public async Task Add_should_return_expected_status_code_depending_on_service_add_result
-            (bool added, HttpStatusCode expectedHttpStatusCode)
+            (bool addResultWithException, HttpStatusCode expectedHttpStatusCode)
         {
             // Arrange
             var fixture = new Fixture();
@@ -132,7 +132,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             pushContactServiceMock
                 .Setup(x => x.AddAsync(It.IsAny<PushContactModel>()))
-                .ReturnsAsync(added);
+                .Returns(addResultWithException ? Task.FromException(new Exception()) : Task.CompletedTask);
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
