@@ -139,7 +139,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             {
                 _logger.LogError(ex, $"Error getting {nameof(PushContactModel)}s");
 
-                return Enumerable.Empty<PushContactModel>();
+                throw;
             }
         }
 
