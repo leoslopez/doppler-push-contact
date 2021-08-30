@@ -49,7 +49,7 @@ namespace Doppler.PushContact.Test.Services
         }
 
         [Fact]
-        public async Task AddAsync_should_return_false_and_log_error_when_a_push_contact_model_cannot_be_added()
+        public async Task AddAsync_should_throw_exception_and_log_error_when_a_push_contact_model_cannot_be_added()
         {
             // Arrange
             var fixture = new Fixture();
@@ -81,10 +81,9 @@ namespace Doppler.PushContact.Test.Services
                 loggerMock.Object);
 
             // Act
-            var result = await sut.AddAsync(pushContactModel);
-
             // Assert
-            Assert.False(result);
+            await Assert.ThrowsAsync<Exception>(() => sut.AddAsync(pushContactModel));
+
             loggerMock.Verify(
                 x => x.Log(
                     It.Is<LogLevel>(l => l == LogLevel.Error),
@@ -97,7 +96,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         }
 
         [Fact]
-        public async Task AddAsync_should_return_true_when_a_push_contact_model_can_be_added()
+        public async Task AddAsync_should_not_throw_exception_when_a_push_contact_model_can_be_added()
         {
             // Arrange
             var fixture = new Fixture();
@@ -126,10 +125,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 Options.Create(pushContactMongoContextSettings));
 
             // Act
-            var result = await sut.AddAsync(pushContactModel);
-
             // Assert
-            Assert.True(result);
+            await sut.AddAsync(pushContactModel);
         }
 
         [Fact]
@@ -260,7 +257,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
         }
 
         [Fact]
-        public async Task GetAsync_should_return_a_empty_collection_and_log_error_when_push_contacts_cannot_be_getter()
+        public async Task GetAsync_should_throw_exception_and_log_error_when_push_contacts_cannot_be_getter()
         {
             // Arrange
             var fixture = new Fixture();
@@ -292,10 +289,9 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                 loggerMock.Object);
 
             // Act
-            var result = await sut.GetAsync(pushContactFilter);
-
             // Assert
-            Assert.Empty(result);
+            await Assert.ThrowsAsync<Exception>(() => sut.GetAsync(pushContactFilter));
+
             loggerMock.Verify(
                 x => x.Log(
                     It.Is<LogLevel>(l => l == LogLevel.Error),
