@@ -146,6 +146,104 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
         }
 
         [Theory]
+        [InlineData("someDeviceToken", null)]
+        [InlineData(null, "someEmail")]
+        [InlineData(null, null)]
+        public async Task UpdateEmailAsync_should_throw_argument_null_exception_when_device_token_or_email_are_null(string deviceToken, string email)
+        {
+            // Arrange
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentNullException>(() => sut.UpdateEmailAsync(deviceToken, email));
+        }
+
+        [Fact]
+        public async Task UpdateEmailAsync_should_throw_exception_and_log_error_when_push_contact_model_cannot_be_updated()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var email = fixture.Create<string>();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.UpdateOneAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<UpdateDefinition<BsonDocument>>(), default, default))
+                .ThrowsAsync(new Exception());
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushContactMongoContextSettings),
+                loggerMock.Object);
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<Exception>(() => sut.UpdateEmailAsync(deviceToken, email));
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == @$"Error updating {nameof(PushContactModel)}
+with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can not be updated with following value: {email}"),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateEmailAsync_should_not_throw_exception_when_push_contact_model_can_be_updated()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var email = fixture.Create<string>();
+
+            var updateResultMock = new Mock<UpdateResult>();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.UpdateOneAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<UpdateDefinition<BsonDocument>>(), default, default))
+                .ReturnsAsync(updateResultMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            // Assert
+            await sut.UpdateEmailAsync(deviceToken, email);
+        }
+
+        [Theory]
         [InlineData(null)]
         [InlineData("")]
         public async Task GetAsync_should_throw_argument_exception_when_push_contact_filter_domain_is_null_or_empty

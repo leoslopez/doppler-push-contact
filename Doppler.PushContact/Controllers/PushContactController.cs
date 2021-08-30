@@ -60,5 +60,14 @@ namespace Doppler.PushContact.Controllers
 
             return Ok(deletedCount);
         }
+
+        [HttpPut]
+        [Route("push-contacts/{deviceToken}/email")]
+        public async Task<IActionResult> UpdateEmail([FromRoute] string deviceToken, [FromBody] string email)
+        {
+            await _pushContactService.UpdateEmailAsync(deviceToken, email);
+
+            return Ok();
+        }
     }
 }
