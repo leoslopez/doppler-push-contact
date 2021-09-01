@@ -359,6 +359,62 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
         }
 
         [Fact]
+        public async Task GetAsync_should_return_push_contacts_filtered_by_domain_and_email()
+        {
+            // Arrange
+            List<BsonDocument> allPushContactDocuments = FakePushContactDocuments(10);
+
+            var random = new Random();
+            int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
+            var pushContactFilter = new PushContactFilter(allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString, allPushContactDocuments[randomPushContactIndex][PushContactDocumentEmailPropName].AsString);
+
+            var fixture = new Fixture();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
+            pushContactsCursorMock
+                .Setup(_ => _.Current)
+                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentDomainPropName].AsString == pushContactFilter.Domain && x[PushContactDocumentEmailPropName].AsString == pushContactFilter.Email));
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.FindAsync<BsonDocument>(It.IsAny<FilterDefinition<BsonDocument>>(), null, default))
+                .ReturnsAsync(pushContactsCursorMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            var result = await sut.GetAsync(pushContactFilter);
+
+            // Assert
+            Assert.True(result.Any());
+            Assert.True(result.All(x => x.Domain == pushContactFilter.Domain && x.Email == pushContactFilter.Email));
+        }
+
+        [Fact]
         public async Task GetAsync_should_return_not_deleted_push_contacts()
         {
             // Arrange

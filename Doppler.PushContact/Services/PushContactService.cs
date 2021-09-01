@@ -118,7 +118,14 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
 
             var FilterBuilder = Builders<BsonDocument>.Filter;
 
-            var filter = FilterBuilder.Eq(PushContactDocumentDomainPropName, pushContactFilter.Domain) & !FilterBuilder.Eq(PushContactDocumentDeletedPropName, true);
+            var filter = FilterBuilder.Eq(PushContactDocumentDomainPropName, pushContactFilter.Domain);
+
+            if (pushContactFilter.Email != null)
+            {
+                filter &= FilterBuilder.Eq(PushContactDocumentEmailPropName, pushContactFilter.Email);
+            }
+
+            filter &= !FilterBuilder.Eq(PushContactDocumentDeletedPropName, true);
 
             try
             {
