@@ -4,9 +4,12 @@ namespace Doppler.PushContact.Services
     {
         public string Domain { get; }
 
-        public PushContactFilter(string domain)
+        public string Email { get; }
+
+        public PushContactFilter(string domain, string email = null)
         {
             Domain = domain;
+            Email = email;
         }
     }
 }
