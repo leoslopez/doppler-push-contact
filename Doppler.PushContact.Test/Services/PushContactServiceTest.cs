@@ -310,7 +310,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
 
             var random = new Random();
             int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
-            var pushContactFilter = new PushContactFilter(allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString);
+            var domainFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString;
+            var pushContactFilter = new PushContactFilter(domainFilter);
 
             var fixture = new Fixture();
 
@@ -366,7 +367,9 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
 
             var random = new Random();
             int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
-            var pushContactFilter = new PushContactFilter(allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString, allPushContactDocuments[randomPushContactIndex][PushContactDocumentEmailPropName].AsString);
+            var domainFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentDomainPropName].AsString;
+            var emailFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentEmailPropName].AsString;
+            var pushContactFilter = new PushContactFilter(domainFilter, emailFilter);
 
             var fixture = new Fixture();
 
