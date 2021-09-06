@@ -257,6 +257,27 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
         }
 
         [Fact]
+        public async Task
+            GetAsync_should_throw_argument_exception_when_push_contact_filter_modified_from_is_greater_than_modified_to()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<string>();
+            var modifiedFrom = fixture.Create<DateTime>();
+            var modifiedTo = modifiedFrom.AddDays(-1);
+
+            var pushContactFilter = new PushContactFilter(domain: domain, modifiedFrom: modifiedFrom, modifiedTo: modifiedTo);
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.GetAsync(pushContactFilter));
+            Assert.Equal($"'{nameof(pushContactFilter.ModifiedFrom)}' cannot be greater than '{nameof(pushContactFilter.ModifiedTo)}'", result.Message);
+        }
+
+        [Fact]
         public async Task GetAsync_should_throw_exception_and_log_error_when_push_contacts_cannot_be_getter()
         {
             // Arrange
