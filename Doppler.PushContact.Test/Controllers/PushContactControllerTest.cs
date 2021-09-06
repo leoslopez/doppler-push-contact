@@ -562,6 +562,29 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
+        [Fact]
+        public async Task GetBy_should_return_internal_server_error_when_domain_param_is_not_in_query_string()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var email = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?email={email}")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
         [Theory]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
