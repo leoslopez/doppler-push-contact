@@ -116,6 +116,12 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                     $"'{nameof(pushContactFilter.Domain)}' cannot be null or empty", nameof(pushContactFilter.Domain));
             }
 
+            if (pushContactFilter.ModifiedFrom > pushContactFilter.ModifiedTo)
+            {
+                throw new ArgumentException(
+                    $"'{nameof(pushContactFilter.ModifiedFrom)}' cannot be greater than '{nameof(pushContactFilter.ModifiedTo)}'");
+            }
+
             var FilterBuilder = Builders<BsonDocument>.Filter;
 
             var filter = FilterBuilder.Eq(PushContactDocumentDomainPropName, pushContactFilter.Domain);
@@ -123,6 +129,16 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             if (pushContactFilter.Email != null)
             {
                 filter &= FilterBuilder.Eq(PushContactDocumentEmailPropName, pushContactFilter.Email);
+            }
+
+            if (pushContactFilter.ModifiedFrom != null)
+            {
+                filter &= FilterBuilder.Gte(PushContactDocumentModifiedPropName, pushContactFilter.ModifiedFrom);
+            }
+
+            if (pushContactFilter.ModifiedTo != null)
+            {
+                filter &= FilterBuilder.Lte(PushContactDocumentModifiedPropName, pushContactFilter.ModifiedTo);
             }
 
             filter &= !FilterBuilder.Eq(PushContactDocumentDeletedPropName, true);
