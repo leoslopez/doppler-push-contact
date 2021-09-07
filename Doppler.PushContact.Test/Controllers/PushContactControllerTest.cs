@@ -563,16 +563,21 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task GetBy_should_return_internal_server_error_when_domain_param_is_not_in_query_string()
+        public async Task GetBy_should_return_bad_request_when_domain_param_is_not_in_query_string()
         {
             // Arrange
-            var fixture = new Fixture();
+            var pushContactServiceMock = new Mock<IPushContactService>();
 
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
 
-            var email = fixture.Create<string>();
+            }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts?email={email}")
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts")
             {
                 Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } }
             };
@@ -582,7 +587,7 @@ namespace Doppler.PushContact.Test.Controllers
             _output.WriteLine(response.GetHeadersAsString());
 
             // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Theory]
