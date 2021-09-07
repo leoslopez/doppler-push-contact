@@ -1,3 +1,5 @@
+using System;
+
 namespace Doppler.PushContact.Services
 {
     public class PushContactFilter
@@ -6,10 +8,16 @@ namespace Doppler.PushContact.Services
 
         public string Email { get; }
 
-        public PushContactFilter(string domain, string email = null)
+        public DateTime? ModifiedFrom { get; }
+
+        public DateTime? ModifiedTo { get; }
+
+        public PushContactFilter(string domain, string email = null, DateTime? modifiedFrom = null, DateTime? modifiedTo = null)
         {
             Domain = domain;
             Email = email;
+            ModifiedFrom = modifiedFrom;
+            ModifiedTo = modifiedTo;
         }
     }
 }
