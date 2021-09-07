@@ -285,7 +285,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
 
             var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
 
-            var pushContactFilter = fixture.Create<PushContactFilter>();
+            var domain = fixture.Create<string>();
+            var pushContactFilter = new PushContactFilter(domain);
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -485,8 +486,11 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                 mongoClient.Object,
                 Options.Create(pushContactMongoContextSettings));
 
+            var domain = fixture.Create<string>();
+            var pushContactFilter = new PushContactFilter(domain);
+
             // Act
-            var result = await sut.GetAsync(fixture.Create<PushContactFilter>());
+            var result = await sut.GetAsync(pushContactFilter);
 
             // Assert
             Assert.True(result.Any());
@@ -545,8 +549,11 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                 mongoClient.Object,
                 Options.Create(pushContactMongoContextSettings));
 
+            var domain = fixture.Create<string>();
+            var pushContactFilter = new PushContactFilter(domain);
+
             // Act
-            var result = await sut.GetAsync(fixture.Create<PushContactFilter>());
+            var result = await sut.GetAsync(pushContactFilter);
 
             // Assert
             _ = result.ToList();
