@@ -20,6 +20,8 @@ namespace Doppler.PushContact.Services
 
             services.AddSingleton<IMongoClient>(x => new MongoClient(mongoClientSettings));
 
+            services.AddScoped<IDeviceTokenValidator, DeviceTokenValidator>();
+
             services.AddScoped<IPushContactService, PushContactService>();
 
             return services;
