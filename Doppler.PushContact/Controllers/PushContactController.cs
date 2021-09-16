@@ -22,6 +22,7 @@ namespace Doppler.PushContact.Controllers
             _pushContactService = pushContactService;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("push-contacts")]
         public async Task<IActionResult> Add([FromBody] PushContactModel pushContactModel)
@@ -56,6 +57,7 @@ namespace Doppler.PushContact.Controllers
             return Ok(deletedCount);
         }
 
+        [AllowAnonymous]
         [HttpPut]
         [Route("push-contacts/{deviceToken}/email")]
         public async Task<IActionResult> UpdateEmail([FromRoute] string deviceToken, [FromBody] string email)

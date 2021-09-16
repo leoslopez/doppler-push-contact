@@ -40,7 +40,7 @@ namespace Doppler.PushContact.Test.Controllers
             _output = output;
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
         public async Task Add_should_return_unauthorized_when_token_is_not_valid(string token)
@@ -61,7 +61,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
         public async Task Add_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
@@ -81,7 +81,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
@@ -103,7 +103,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        [Fact]
+        [Fact(Skip = "Now allows anonymous")]
         public async Task Add_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
@@ -157,7 +157,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(expectedHttpStatusCode, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
         public async Task UpdateEmail_should_return_unauthorized_when_token_is_not_valid(string token)
@@ -184,7 +184,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
         public async Task UpdateEmail_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
@@ -210,7 +210,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
@@ -238,7 +238,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        [Fact]
+        [Fact(Skip = "Now allows anonymous")]
         public async Task UpdateEmail_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
