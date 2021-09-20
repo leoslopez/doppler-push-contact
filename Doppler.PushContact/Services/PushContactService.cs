@@ -14,6 +14,7 @@ namespace Doppler.PushContact.Services
     {
         private readonly IMongoClient _mongoClient;
         private readonly IOptions<PushContactMongoContextSettings> _pushContactMongoContextSettings;
+        private readonly IDeviceTokenValidator _deviceTokenValidator;
         private readonly ILogger<PushContactService> _logger;
 
         private const string PushContactDocumentIdPropName = "_id";
@@ -32,11 +33,13 @@ namespace Doppler.PushContact.Services
         public PushContactService(
             IMongoClient mongoClient,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings,
+            IDeviceTokenValidator deviceTokenValidator,
             ILogger<PushContactService> logger)
         {
 
             _mongoClient = mongoClient;
             _pushContactMongoContextSettings = pushContactMongoContextSettings;
+            _deviceTokenValidator = deviceTokenValidator;
             _logger = logger;
         }
 
@@ -45,6 +48,11 @@ namespace Doppler.PushContact.Services
             if (pushContactModel == null)
             {
                 throw new ArgumentNullException(nameof(pushContactModel));
+            }
+
+            if (!await _deviceTokenValidator.IsValidAsync(pushContactModel.DeviceToken))
+            {
+                throw new ArgumentException($"{nameof(pushContactModel.DeviceToken)} is not valid");
             }
 
             var now = DateTime.UtcNow;

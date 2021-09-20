@@ -27,11 +27,13 @@ namespace Doppler.PushContact.Test.Services
         private static PushContactService CreateSut(
             IMongoClient mongoClient = null,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings = null,
+            IDeviceTokenValidator deviceTokenValidator = null,
             ILogger<PushContactService> logger = null)
         {
             return new PushContactService(
                 mongoClient ?? Mock.Of<IMongoClient>(),
                 pushContactMongoContextSettings ?? Mock.Of<IOptions<PushContactMongoContextSettings>>(),
+                deviceTokenValidator ?? Mock.Of<IDeviceTokenValidator>(),
                 logger ?? Mock.Of<ILogger<PushContactService>>());
         }
 
@@ -49,12 +51,37 @@ namespace Doppler.PushContact.Test.Services
         }
 
         [Fact]
+        public async Task AddAsync_should_throw_argument_exception_when_device_token_is_not_valid()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactModel = fixture.Create<PushContactModel>();
+
+            var deviceTokenValidator = new Mock<IDeviceTokenValidator>();
+            deviceTokenValidator
+                .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
+                .ReturnsAsync(false);
+
+            var sut = CreateSut(deviceTokenValidator: deviceTokenValidator.Object);
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => sut.AddAsync(pushContactModel));
+        }
+
+        [Fact]
         public async Task AddAsync_should_throw_exception_and_log_error_when_a_push_contact_model_cannot_be_added()
         {
             // Arrange
             var fixture = new Fixture();
 
             var pushContactModel = fixture.Create<PushContactModel>();
+
+            var deviceTokenValidator = new Mock<IDeviceTokenValidator>();
+            deviceTokenValidator
+                .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
+                .ReturnsAsync(true);
 
             var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
 
@@ -78,6 +105,7 @@ namespace Doppler.PushContact.Test.Services
             var sut = CreateSut(
                 mongoClientMock.Object,
                 Options.Create(pushContactMongoContextSettings),
+                deviceTokenValidator.Object,
                 loggerMock.Object);
 
             // Act
@@ -103,6 +131,11 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var pushContactModel = fixture.Create<PushContactModel>();
 
+            var deviceTokenValidator = new Mock<IDeviceTokenValidator>();
+            deviceTokenValidator
+                .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
+                .ReturnsAsync(true);
+
             var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
@@ -122,7 +155,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushContactMongoContextSettings),
+                deviceTokenValidator.Object);
 
             // Act
             // Assert
@@ -187,7 +221,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var sut = CreateSut(
                 mongoClientMock.Object,
                 Options.Create(pushContactMongoContextSettings),
-                loggerMock.Object);
+                logger: loggerMock.Object);
 
             // Act
             // Assert
@@ -308,7 +342,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             var sut = CreateSut(
                 mongoClientMock.Object,
                 Options.Create(pushContactMongoContextSettings),
-                loggerMock.Object);
+                logger: loggerMock.Object);
 
             // Act
             // Assert
@@ -615,7 +649,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             var sut = CreateSut(
                 mongoClientMock.Object,
                 Options.Create(pushContactMongoContextSettings),
-                loggerMock.Object);
+                logger: loggerMock.Object);
 
             // Act
             // Assert
@@ -727,7 +761,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             var sut = CreateSut(
                 mongoClientMock.Object,
                 Options.Create(pushContactMongoContextSettings),
-                loggerMock.Object);
+                logger: loggerMock.Object);
 
             // Act
             // Assert
@@ -772,7 +806,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
             var sut = CreateSut(
                 mongoClient.Object,
                 Options.Create(pushContactMongoContextSettings),
-                loggerMock.Object);
+                logger: loggerMock.Object);
 
             // Act
             await sut.AddHistoryEventsAsync(pushContactHistoryEvents);
