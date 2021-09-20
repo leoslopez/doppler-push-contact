@@ -40,7 +40,75 @@ namespace Doppler.PushContact.Test.Controllers
             _output = output;
         }
 
+        [Fact]
+        public async Task Add_should_not_require_token()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
+            {
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
         [Theory]
+        [InlineData(TOKEN_EMPTY)]
+        [InlineData(TOKEN_BROKEN)]
+        [InlineData(TOKEN_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
+        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task Add_should_accept_any_token(string token)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "push-contacts")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } },
+                Content = JsonContent.Create(fixture.Create<PushContactModel>())
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
         public async Task Add_should_return_unauthorized_when_token_is_not_valid(string token)
@@ -61,7 +129,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
         public async Task Add_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
@@ -81,7 +149,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
@@ -103,7 +171,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        [Fact]
+        [Fact(Skip = "Now allows anonymous")]
         public async Task Add_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
@@ -157,7 +225,81 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(expectedHttpStatusCode, response.StatusCode);
         }
 
+        [Fact]
+        public async Task UpdateEmail_should_not_require_token()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var email = fixture.Create<string>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/email")
+            {
+                Content = JsonContent.Create(email)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
         [Theory]
+        [InlineData(TOKEN_EMPTY)]
+        [InlineData(TOKEN_BROKEN)]
+        [InlineData(TOKEN_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
+        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task UpdateEmail_should_accept_any_token(string token)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var email = fixture.Create<string>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/email")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } },
+                Content = JsonContent.Create(email)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EMPTY)]
         [InlineData(TOKEN_BROKEN)]
         public async Task UpdateEmail_should_return_unauthorized_when_token_is_not_valid(string token)
@@ -184,7 +326,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
         public async Task UpdateEmail_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
         {
@@ -210,7 +352,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
-        [Theory]
+        [Theory(Skip = "Now allows anonymous")]
         [InlineData(TOKEN_EXPIRE_20330518)]
         [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
         [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
@@ -238,7 +380,7 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        [Fact]
+        [Fact(Skip = "Now allows anonymous")]
         public async Task UpdateEmail_should_return_unauthorized_when_authorization_header_is_empty()
         {
             // Arrange
