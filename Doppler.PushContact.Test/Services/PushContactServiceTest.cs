@@ -156,6 +156,53 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             await sut.AddAsync(pushContactModel);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task AddAsync_should_allow_null_or_empty_email(string email)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactModel = new PushContactModel
+            {
+                Domain = fixture.Create<string>(),
+                DeviceToken = fixture.Create<string>(),
+                Email = email
+            };
+
+            var deviceTokenValidator = new Mock<IDeviceTokenValidator>();
+            deviceTokenValidator
+                .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
+                .ReturnsAsync(true);
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.InsertOneAsync(It.IsAny<BsonDocument>(), null, default))
+                .Returns(Task.CompletedTask);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings),
+                deviceTokenValidator.Object);
+
+            // Act
+            // Assert
+            await sut.AddAsync(pushContactModel);
+        }
+
         [Fact]
         public async Task GetAsync_should_throw_argument_null_exception_when_push_contact_filter_is_null()
         {
