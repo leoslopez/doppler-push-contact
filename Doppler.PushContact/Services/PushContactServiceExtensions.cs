@@ -27,7 +27,7 @@ namespace Doppler.PushContact.Services
                 var pushContacts = database.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName);
 
                 var deviceTokenAsUniqueIndex = new CreateIndexModel<BsonDocument>(
-                    Builders<BsonDocument>.IndexKeys.Ascending("device_token"),
+                    Builders<BsonDocument>.IndexKeys.Ascending(PushContactDocumentProps.DeviceTokenPropName),
                     new CreateIndexOptions { Unique = true });
                 pushContacts.Indexes.CreateOne(deviceTokenAsUniqueIndex);
 

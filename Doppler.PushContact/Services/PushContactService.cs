@@ -17,19 +17,6 @@ namespace Doppler.PushContact.Services
         private readonly IDeviceTokenValidator _deviceTokenValidator;
         private readonly ILogger<PushContactService> _logger;
 
-        private const string PushContactDocumentIdPropName = "_id";
-        private const string PushContactDocumentDomainPropName = "domain";
-        private const string PushContactDocumentDeviceTokenPropName = "device_token";
-        private const string PushContactDocumentEmailPropName = "email";
-        private const string PushContactDocumentDeletedPropName = "deleted";
-        private const string PushContactDocumentModifiedPropName = "modified";
-
-        private const string PushContactDocumentHistoryEventsPropName = "history_events";
-        private const string PushContactDocumentHistoryEvents_SentSuccessPropName = "sent_success";
-        private const string PushContactDocumentHistoryEvents_EventDatePropName = "event_date";
-        private const string PushContactDocumentHistoryEvents_InsertedDatePropName = "inserted_date";
-        private const string PushContactDocumentHistoryEvents_DetailsPropName = "details";
-
         public PushContactService(
             IMongoClient mongoClient,
             IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings,
@@ -59,12 +46,12 @@ namespace Doppler.PushContact.Services
             var key = ObjectId.GenerateNewId(now).ToString();
 
             var pushContactDocument = new BsonDocument {
-                { PushContactDocumentIdPropName, key },
-                { PushContactDocumentDomainPropName, pushContactModel.Domain },
-                { PushContactDocumentDeviceTokenPropName, pushContactModel.DeviceToken },
-                { PushContactDocumentEmailPropName, pushContactModel.Email },
-                { PushContactDocumentDeletedPropName, false },
-                { PushContactDocumentModifiedPropName, now }
+                { PushContactDocumentProps.IdPropName, key },
+                { PushContactDocumentProps.DomainPropName, pushContactModel.Domain },
+                { PushContactDocumentProps.DeviceTokenPropName, pushContactModel.DeviceToken },
+                { PushContactDocumentProps.EmailPropName, pushContactModel.Email },
+                { PushContactDocumentProps.DeletedPropName, false },
+                { PushContactDocumentProps.ModifiedPropName, now }
             };
 
             try
@@ -92,11 +79,11 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 throw new ArgumentNullException(nameof(email));
             }
 
-            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentDeviceTokenPropName, deviceToken);
+            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, deviceToken);
 
             var updateDefinition = Builders<BsonDocument>.Update
-                .Set(PushContactDocumentEmailPropName, email)
-                .Set(PushContactDocumentModifiedPropName, DateTime.UtcNow);
+                .Set(PushContactDocumentProps.EmailPropName, email)
+                .Set(PushContactDocumentProps.ModifiedPropName, DateTime.UtcNow);
 
             try
             {
@@ -105,7 +92,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             catch (Exception ex)
             {
                 _logger.LogError(ex, @$"Error updating {nameof(PushContactModel)}
-with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can not be updated with following value: {email}");
+with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropName} can not be updated with following value: {email}");
 
                 throw;
             }
@@ -132,24 +119,24 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
 
             var FilterBuilder = Builders<BsonDocument>.Filter;
 
-            var filter = FilterBuilder.Eq(PushContactDocumentDomainPropName, pushContactFilter.Domain);
+            var filter = FilterBuilder.Eq(PushContactDocumentProps.DomainPropName, pushContactFilter.Domain);
 
             if (pushContactFilter.Email != null)
             {
-                filter &= FilterBuilder.Eq(PushContactDocumentEmailPropName, pushContactFilter.Email);
+                filter &= FilterBuilder.Eq(PushContactDocumentProps.EmailPropName, pushContactFilter.Email);
             }
 
             if (pushContactFilter.ModifiedFrom != null)
             {
-                filter &= FilterBuilder.Gte(PushContactDocumentModifiedPropName, pushContactFilter.ModifiedFrom);
+                filter &= FilterBuilder.Gte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedFrom);
             }
 
             if (pushContactFilter.ModifiedTo != null)
             {
-                filter &= FilterBuilder.Lte(PushContactDocumentModifiedPropName, pushContactFilter.ModifiedTo);
+                filter &= FilterBuilder.Lte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedTo);
             }
 
-            filter &= !FilterBuilder.Eq(PushContactDocumentDeletedPropName, true);
+            filter &= !FilterBuilder.Eq(PushContactDocumentProps.DeletedPropName, true);
 
             try
             {
@@ -160,9 +147,9 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                     {
                         return new PushContactModel
                         {
-                            Domain = x.GetValue(PushContactDocumentDomainPropName, null)?.AsString,
-                            DeviceToken = x.GetValue(PushContactDocumentDeviceTokenPropName, null)?.AsString,
-                            Email = x.GetValue(PushContactDocumentEmailPropName, null)?.AsString
+                            Domain = x.GetValue(PushContactDocumentProps.DomainPropName, null)?.AsString,
+                            DeviceToken = x.GetValue(PushContactDocumentProps.DeviceTokenPropName, null)?.AsString,
+                            Email = x.GetValue(PushContactDocumentProps.EmailPropName, null)?.AsString
                         };
                     });
             }
@@ -182,12 +169,12 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                     $"'{nameof(deviceTokens)}' cannot be null or empty", nameof(deviceTokens));
             }
 
-            var filter = Builders<BsonDocument>.Filter.AnyIn(PushContactDocumentDeviceTokenPropName, deviceTokens);
+            var filter = Builders<BsonDocument>.Filter.AnyIn(PushContactDocumentProps.DeviceTokenPropName, deviceTokens);
 
             var update = new BsonDocument("$set", new BsonDocument
                 {
-                    { PushContactDocumentDeletedPropName, true },
-                    { PushContactDocumentModifiedPropName, DateTime.UtcNow }
+                    { PushContactDocumentProps.DeletedPropName, true },
+                    { PushContactDocumentProps.ModifiedPropName, DateTime.UtcNow }
                 });
 
             try
@@ -218,15 +205,15 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentEmailPropName} can
                 .Select(x =>
                 {
                     var historyEvent = new BsonDocument {
-                        { PushContactDocumentHistoryEvents_SentSuccessPropName, x.SentSuccess },
-                        { PushContactDocumentHistoryEvents_EventDatePropName, x.EventDate },
-                        { PushContactDocumentHistoryEvents_InsertedDatePropName, now },
-                        { PushContactDocumentHistoryEvents_DetailsPropName, x.Details }
+                        { PushContactDocumentProps.HistoryEvents_SentSuccessPropName, x.SentSuccess },
+                        { PushContactDocumentProps.HistoryEvents_EventDatePropName, x.EventDate },
+                        { PushContactDocumentProps.HistoryEvents_InsertedDatePropName, now },
+                        { PushContactDocumentProps.HistoryEvents_DetailsPropName, x.Details }
                     };
 
-                    var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentDeviceTokenPropName, x.DeviceToken);
+                    var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, x.DeviceToken);
 
-                    var update = Builders<BsonDocument>.Update.Push(PushContactDocumentHistoryEventsPropName, historyEvent);
+                    var update = Builders<BsonDocument>.Update.Push(PushContactDocumentProps.HistoryEventsPropName, historyEvent);
 
                     return new UpdateOneModel<BsonDocument>(filter, update);
                 });
