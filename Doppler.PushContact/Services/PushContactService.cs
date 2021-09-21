@@ -79,7 +79,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 throw new ArgumentNullException(nameof(email));
             }
 
-            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, deviceToken);
+            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, deviceToken)
+                & Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeletedPropName, false);
 
             var updateDefinition = Builders<BsonDocument>.Update
                 .Set(PushContactDocumentProps.EmailPropName, email)
