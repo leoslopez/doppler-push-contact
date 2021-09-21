@@ -49,7 +49,7 @@ namespace Doppler.PushContact.Services
                 { PushContactDocumentProps.IdPropName, key },
                 { PushContactDocumentProps.DomainPropName, pushContactModel.Domain },
                 { PushContactDocumentProps.DeviceTokenPropName, pushContactModel.DeviceToken },
-                { PushContactDocumentProps.EmailPropName, pushContactModel.Email },
+                { PushContactDocumentProps.EmailPropName, string.IsNullOrEmpty(pushContactModel.Email) ? BsonNull.Value : pushContactModel.Email },
                 { PushContactDocumentProps.DeletedPropName, false },
                 { PushContactDocumentProps.ModifiedPropName, now }
             };
