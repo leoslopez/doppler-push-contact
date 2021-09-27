@@ -1,0 +1,27 @@
+### Create push contact
+POST /push-contacts
+Content-Type: application/json
+
+{
+  "domain": "string",
+  "deviceToken": "string",
+  "email": "string"
+}
+
+### Set push contact email
+PUT /push-contacts/{deviceToken}/email
+Content-Type: application/json
+
+"string"
+
+### Send push notification by domain
+POST /push-contacts/{domain}/message
+Content-Type: application/json
+
+{
+  "notificationTitle": "string",
+  "notificationBody": "string"
+}
+
+## Success Response Body
+# "messageId"
