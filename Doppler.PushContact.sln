@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc Files", "Misc Files", 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		.prettierignore = .prettierignore
+		docs\add-new-push-contact-sd.png = docs\add-new-push-contact-sd.png
 		api-contracts.http = api-contracts.http
 		build-n-publish.sh = build-n-publish.sh
 		demo.http = demo.http
@@ -21,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc Files", "Misc Files", 
 		Jenkinsfile = Jenkinsfile
 		package.json = package.json
 		README.md = README.md
+		docs\send-push-notification-from-doppler-by-domain.png = docs\send-push-notification-from-doppler-by-domain.png
 		verify-w-docker.sh = verify-w-docker.sh
 	EndProjectSection
 EndProject
