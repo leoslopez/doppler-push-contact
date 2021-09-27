@@ -66,5 +66,12 @@ namespace Doppler.PushContact.Controllers
 
             return Ok();
         }
+
+        [HttpPost]
+        [Route("push-contacts/{domain}/message")]
+        public async Task<IActionResult> Message([FromRoute] string domain, [FromBody] Message message)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
