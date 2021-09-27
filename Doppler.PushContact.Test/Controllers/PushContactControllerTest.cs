@@ -884,5 +884,139 @@ namespace Doppler.PushContact.Test.Controllers
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
+
+        [Theory]
+        [InlineData(TOKEN_EMPTY)]
+        [InlineData(TOKEN_BROKEN)]
+        public async Task Message_should_return_unauthorized_when_token_is_not_valid(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_SUPERUSER_EXPIRE_20010908)]
+        public async Task Message_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TOKEN_EXPIRE_20330518)]
+        [InlineData(TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task Message_should_require_a_valid_token_with_isSU_flag(string token)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Message_should_return_unauthorized_when_authorization_header_is_empty()
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(null, "some body")]
+        [InlineData("some title", null)]
+        [InlineData(null, null)]
+        [InlineData("", "some body")]
+        [InlineData("some title", "")]
+        [InlineData("", "")]
+        public async Task Message_should_return_bad_request_when_title_or_body_are_missing(string title, string body)
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = title,
+                Body = body
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
     }
 }
