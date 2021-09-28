@@ -64,8 +64,8 @@ PushContactApi-x+PushContactApiWorker: send async
 PushContactApi-->>-Doppler: messageId
 Doppler-->>-DopplerUser: shipment in progress!
 
-PushContactApiWorker->>+MongoDb: get push contacts by domain
-MongoDb-->>-PushContactApiWorker: push contacts
+PushContactApiWorker->>+MongoDb: get device tokens by domain
+MongoDb-->>-PushContactApiWorker: device tokens
 PushContactApiWorker->>+PushApi: POST /message
 PushApi-->>-PushContactApiWorker: shipping results
 PushContactApiWorker->>MongoDb: delete not valid push contacts
