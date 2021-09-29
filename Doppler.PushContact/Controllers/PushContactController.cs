@@ -71,6 +71,13 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{domain}/message")]
         public async Task<IActionResult> Message([FromRoute] string domain, [FromBody] Message message)
         {
+            var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
+
+            // TODO: send message to target device tokens,
+            // delete not valid device tokens from storage,
+            // add history events related to sent messages,
+            // response a MessageId and run all steps asynchronous
+
             throw new NotImplementedException();
         }
     }

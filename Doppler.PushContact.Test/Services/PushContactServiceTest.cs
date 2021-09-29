@@ -910,6 +910,122 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 Times.Never);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task GetAllDeviceTokensByDomainAsync_should_throw_argument_exception_when_domain_is_null_or_empty
+            (string domain)
+        {
+            // Arrange
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.GetAllDeviceTokensByDomainAsync(domain));
+        }
+
+        [Fact]
+        public async Task GetAllDeviceTokensByDomainAsync_should_throw_exception_and_log_error_when_push_contacts_cannot_be_getter_from_storage()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var domain = fixture.Create<string>();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.FindAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<FindOptions<BsonDocument, BsonDocument>>(), default))
+                .ThrowsAsync(new Exception());
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushContactMongoContextSettings),
+                logger: loggerMock.Object);
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<Exception>(() => sut.GetAllDeviceTokensByDomainAsync(domain));
+
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error getting {nameof(PushContactModel)}s by {nameof(domain)} {domain}"),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAllDeviceTokensByDomainAsync_should_return_device_tokens_filtered_by_domain()
+        {
+            // Arrange
+            List<BsonDocument> allPushContactDocuments = FakePushContactDocuments(10);
+
+            var random = new Random();
+            int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
+            var domainFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentProps.DomainPropName].AsString;
+
+            var fixture = new Fixture();
+
+            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+
+            var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
+            pushContactsCursorMock
+                .Setup(_ => _.Current)
+                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentProps.DomainPropName].AsString == domainFilter));
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
+                .Returns(true)
+                .Returns(false);
+
+            pushContactsCursorMock
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                .Returns(Task.FromResult(false));
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.FindAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<FindOptions<BsonDocument, BsonDocument>>(), default))
+                .ReturnsAsync(pushContactsCursorMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushContactMongoContextSettings));
+
+            // Act
+            var result = await sut.GetAllDeviceTokensByDomainAsync(domainFilter);
+
+            // Assert
+            Assert.All(result, x => allPushContactDocuments
+                                    .Single(y => y[PushContactDocumentProps.DomainPropName].AsString == domainFilter && y[PushContactDocumentProps.DeviceTokenPropName].AsString == x));
+        }
+
         private static List<BsonDocument> FakePushContactDocuments(int count)
         {
             var fixture = new Fixture();
