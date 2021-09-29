@@ -76,10 +76,19 @@ namespace Doppler.PushContact.Controllers
         {
             var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-            await _messageSender.SendAsync(message.Title, message.Body, deviceTokens);
+            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens);
 
-            // TODO: delete not valid device tokens from storage,
-            // add history events related to sent messages,
+            var notValidTargetDeviceToken = sendMessageResult
+                .SendMessageTargetResult?
+                .Where(x => !x.IsValidTargetDeviceToken)
+                .Select(x => x.TargetDeviceToken);
+
+            if (notValidTargetDeviceToken != null && notValidTargetDeviceToken.Any())
+            {
+                await _pushContactService.DeleteByDeviceTokenAsync(notValidTargetDeviceToken);
+            }
+
+            // TODO: add history events related to sent messages,
             // response a MessageId and run all steps asynchronous
 
             throw new NotImplementedException();
