@@ -8,6 +8,7 @@ using Doppler.PushContact.Services;
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Doppler.PushContact.Services.Messages;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -16,10 +17,12 @@ namespace Doppler.PushContact.Controllers
     public class PushContactController : ControllerBase
     {
         private readonly IPushContactService _pushContactService;
+        private readonly IMessageSender _messageSender;
 
-        public PushContactController(IPushContactService pushContactService)
+        public PushContactController(IPushContactService pushContactService, IMessageSender messageSender)
         {
             _pushContactService = pushContactService;
+            _messageSender = messageSender;
         }
 
         [AllowAnonymous]
@@ -73,8 +76,9 @@ namespace Doppler.PushContact.Controllers
         {
             var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-            // TODO: send message to target device tokens,
-            // delete not valid device tokens from storage,
+            await _messageSender.SendAsync(message.Title, message.Body, deviceTokens);
+
+            // TODO: delete not valid device tokens from storage,
             // add history events related to sent messages,
             // response a MessageId and run all steps asynchronous
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,10 @@ namespace Doppler.PushContact
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDopplerSecurity();
+            services.AddHttpContextAccessor();
+            services.AddScoped<IPushApiTokenGetter, PushApiTokenGetter>();
             services.AddPushContactService(Configuration);
+            services.AddMessageSender(Configuration);
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
