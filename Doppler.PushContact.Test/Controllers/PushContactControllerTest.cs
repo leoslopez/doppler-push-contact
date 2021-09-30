@@ -1,6 +1,7 @@
 using AutoFixture;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -1017,6 +1018,201 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Message_should_does_not_call_DeleteByDeviceTokenAsync_when_all_device_tokens_returned_by_message_sender_are_valid()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var sendMessageResult = new SendMessageResult
+            {
+                SendMessageTargetResult = fixture.CreateMany<SendMessageTargetResult>(10)
+            };
+            sendMessageResult.SendMessageTargetResult.ToList().ForEach(x => x.IsValidTargetDeviceToken = true);
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(sendMessageResult);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            pushContactServiceMock
+                .Verify(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task Message_should_does_not_call_DeleteByDeviceTokenAsync_when_message_sender_returned_an_empty_target_result_collection()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var sendMessageResult = new SendMessageResult
+            {
+                SendMessageTargetResult = new List<SendMessageTargetResult>()
+            };
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(sendMessageResult);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            pushContactServiceMock
+                .Verify(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task Message_should_does_not_call_DeleteByDeviceTokenAsync_when_message_sender_returned_null_as_target_result_collection()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var sendMessageResult = new SendMessageResult
+            {
+                SendMessageTargetResult = null
+            };
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(sendMessageResult);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            pushContactServiceMock
+                .Verify(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task Message_should_call_DeleteByDeviceTokenAsync_with_not_valid_target_device_tokens_returned_by_message_sender()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var sendMessageResult = new SendMessageResult
+            {
+                SendMessageTargetResult = fixture.CreateMany<SendMessageTargetResult>(10)
+            };
+            sendMessageResult.SendMessageTargetResult.First().IsValidTargetDeviceToken = false;
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(sendMessageResult);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            pushContactServiceMock
+                .Verify(x => x.DeleteByDeviceTokenAsync(
+                    It.Is<IEnumerable<string>>(y => y.All(z => sendMessageResult.SendMessageTargetResult.Any(w => w.TargetDeviceToken == z && !w.IsValidTargetDeviceToken)))), Times.Once());
         }
     }
 }
