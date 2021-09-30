@@ -108,9 +108,13 @@ namespace Doppler.PushContact.Controllers
                 await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
             }
 
-            // TODO: response a MessageId and run all steps asynchronous
+            // TODO: run all steps asynchronous
+            // and response an 202-accepted with the message id instead
 
-            throw new NotImplementedException();
+            return Ok(new MessageResult
+            {
+                MessageId = Guid.NewGuid()
+            });
         }
     }
 }
