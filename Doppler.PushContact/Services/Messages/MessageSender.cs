@@ -59,7 +59,7 @@ namespace Doppler.PushContact.Services.Messages
                 {
                     TargetDeviceToken = x.DeviceToken,
                     IsSuccess = x.IsSuccess,
-                    IsValidTargetDeviceToken = !x.IsSuccess && _messageSenderSettings.FatalMessagingErrorCodes.Any(y => y == x.Exception.MessagingErrorCode),
+                    IsValidTargetDeviceToken = x.IsSuccess || _messageSenderSettings.FatalMessagingErrorCodes.All(y => y != x.Exception.MessagingErrorCode),
                     NotSuccessErrorDetails = !x.IsSuccess ? $"{nameof(x.Exception.MessagingErrorCode)} {x.Exception.MessagingErrorCode} - {nameof(x.Exception.Message)} {x.Exception.Message}" : null
                 })
             };
