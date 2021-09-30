@@ -88,8 +88,27 @@ namespace Doppler.PushContact.Controllers
                 await _pushContactService.DeleteByDeviceTokenAsync(notValidTargetDeviceToken);
             }
 
-            // TODO: add history events related to sent messages,
-            // response a MessageId and run all steps asynchronous
+            var now = DateTime.UtcNow;
+
+            var pushContactHistoryEvents = sendMessageResult
+                .SendMessageTargetResult?
+                    .Select(x =>
+                    {
+                        return new PushContactHistoryEvent
+                        {
+                            DeviceToken = x.TargetDeviceToken,
+                            SentSuccess = x.IsSuccess,
+                            EventDate = now,
+                            Details = x.NotSuccessErrorDetails
+                        };
+                    });
+
+            if (pushContactHistoryEvents != null && pushContactHistoryEvents.Any())
+            {
+                await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
+            }
+
+            // TODO: response a MessageId and run all steps asynchronous
 
             throw new NotImplementedException();
         }
