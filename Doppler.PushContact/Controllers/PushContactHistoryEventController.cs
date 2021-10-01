@@ -18,14 +18,5 @@ namespace Doppler.PushContact.Controllers
         {
             _pushContactService = pushContactService;
         }
-
-        [HttpPost]
-        [Route("history-events/_bulk")]
-        public async Task<IActionResult> BulkAdd([FromBody] IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents)
-        {
-            await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
-
-            return Ok();
-        }
     }
 }
