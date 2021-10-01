@@ -51,15 +51,6 @@ namespace Doppler.PushContact.Controllers
             return Ok(pushContacts);
         }
 
-        [HttpDelete]
-        [Route("push-contacts/_bulk")]
-        public async Task<IActionResult> BulkDelete([FromBody] IEnumerable<string> deviceTokens)
-        {
-            var deletedCount = await _pushContactService.DeleteByDeviceTokenAsync(deviceTokens);
-
-            return Ok(deletedCount);
-        }
-
         [AllowAnonymous]
         [HttpPut]
         [Route("push-contacts/{deviceToken}/email")]
