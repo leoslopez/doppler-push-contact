@@ -1361,5 +1361,143 @@ namespace Doppler.PushContact.Test.Controllers
                 .Verify(x => x.AddHistoryEventsAsync(
                 It.Is<IEnumerable<PushContactHistoryEvent>>(x => sendMessageResult.SendMessageTargetResult.All(y => x.Any(z => z.DeviceToken == y.TargetDeviceToken)))), Times.Once());
         }
+
+        [Fact]
+        public async Task Message_should_return_ok_and_a_message_result_when_send_message_steps_do_not_throw_a_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            pushContactServiceMock
+            .Setup(x => x.GetAllDeviceTokensByDomainAsync(It.IsAny<string>()))
+            .ReturnsAsync(fixture.Create<IEnumerable<string>>());
+
+            pushContactServiceMock
+            .Setup(x => x.DeleteByDeviceTokenAsync(It.IsAny<IEnumerable<string>>()))
+            .ReturnsAsync(fixture.Create<int>());
+
+            pushContactServiceMock
+            .Setup(x => x.AddHistoryEventsAsync(It.IsAny<IEnumerable<PushContactHistoryEvent>>()))
+            .Returns(Task.CompletedTask);
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(fixture.Create<SendMessageResult>());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            var messageResult = await response.Content.ReadFromJsonAsync<MessageResult>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Message_should_return_internal_server_error_when_GetAllDeviceTokensByDomainAsync_throw_a_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            pushContactServiceMock
+                .Setup(x => x.GetAllDeviceTokensByDomainAsync(It.IsAny<string>()))
+                .ThrowsAsync(new Exception());
+
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Message_should_return_internal_server_error_when_SendAsync_throw_a_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            var messageSenderMock = new Mock<IMessageSender>();
+            messageSenderMock
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .ThrowsAsync(new Exception());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>()
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
     }
 }
