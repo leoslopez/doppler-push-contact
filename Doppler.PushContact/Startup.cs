@@ -35,6 +35,7 @@ namespace Doppler.PushContact
             services.AddPushContactService(Configuration);
             services.AddMessageSender(Configuration);
             services.AddControllers();
+            services.AddCors();
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer",
@@ -81,6 +82,12 @@ namespace Doppler.PushContact
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors(policy => policy
+                .SetIsOriginAllowed(isOriginAllowed: _ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials());
 
             app.UseAuthorization();
 
