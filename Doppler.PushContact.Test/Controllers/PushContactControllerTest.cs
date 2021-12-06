@@ -1003,7 +1003,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = title,
-                Body = body
+                Body = body,
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1036,7 +1037,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1052,7 +1053,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1084,7 +1086,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1100,7 +1102,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1132,7 +1135,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1148,7 +1151,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1181,7 +1185,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1197,7 +1201,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1231,7 +1236,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1247,7 +1252,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1280,7 +1286,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1296,7 +1302,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1328,7 +1335,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1344,7 +1351,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1383,7 +1391,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ReturnsAsync(fixture.Create<SendMessageResult>());
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1399,7 +1407,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1442,7 +1451,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
@@ -1468,7 +1478,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .ThrowsAsync(new Exception());
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1484,7 +1494,8 @@ namespace Doppler.PushContact.Test.Controllers
             var message = new Message
             {
                 Title = fixture.Create<string>(),
-                Body = fixture.Create<string>()
+                Body = fixture.Create<string>(),
+                OnClickLink = fixture.Create<string>()
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
