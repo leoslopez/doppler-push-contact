@@ -136,5 +136,64 @@ namespace Doppler.PushContact.Test.Services.Messages
                 .WithVerb(HttpMethod.Post)
                 .Times(1);
         }
+
+        [Theory]
+        [InlineData("http://urlwithhttpschema.com/random-resource.img")]
+        [InlineData("urlwithoutschema.com/random-resource.img")]
+        [InlineData("//not/absolute/url/random-resource.img")]
+        [InlineData("https:invalidurl.com/random-resource.img")]
+        [InlineData("https://invalidurl.com<>/random-resource.img")]
+        public async Task
+            SendAsync_should_throw_argument_exception_and_not_have_made_a_http_call_when_onClickLink_is_a_not_valid_url(string notValidOnClickLink)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var targetDeviceTokens = fixture.CreateMany<string>();
+
+            using var httpTest = new HttpTest();
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => sut.SendAsync(title, body, targetDeviceTokens, notValidOnClickLink));
+            httpTest.ShouldNotHaveMadeACall();
+        }
+
+        [Theory]
+        [InlineData("https://valid-domain.com/")]
+        [InlineData("https://valid-domain.com")]
+        [InlineData("https://valid-domain.com/random-resource.img")]
+        [InlineData("https://www.valid-domain.com/random-resource.img")]
+        [InlineData("https://valid-domain.com/random-resource.img?someParam=paramValue&otherParam=otherValue")]
+        [InlineData("https://valid-domain.com/random-resource.img#L6")]
+        public async Task
+            SendAsync_should_does_not_throw_exception_and_have_made_a_http_call_when_all_params_are_valid(string validOnClickLink)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var validTitle = "Valid title";
+            var validBody = "Valid body";
+            var validTargetDeviceTokens = new string[] { "someTargetDeviceToken" };
+
+            var sendMessageResponse = fixture.Create<SendMessageResponse>();
+
+            using var httpTest = new HttpTest();
+            httpTest.RespondWithJson(sendMessageResponse, 200);
+
+            var sut = CreateSut();
+
+            // Act
+            await sut.SendAsync(validTitle, validBody, validTargetDeviceTokens, validOnClickLink);
+
+            // Assert
+            httpTest.ShouldHaveCalled($"{messageSenderSettingsDefault.PushApiUrl}/message")
+                .WithVerb(HttpMethod.Post)
+                .Times(1);
+        }
     }
 }

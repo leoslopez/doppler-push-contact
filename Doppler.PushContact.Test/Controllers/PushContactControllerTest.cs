@@ -1510,5 +1510,47 @@ namespace Doppler.PushContact.Test.Controllers
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task Message_should_allow_missing_onClickLink_param(string onClickLink)
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+                OnClickLink = onClickLink
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.NotEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        }
     }
 }
