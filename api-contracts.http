@@ -19,8 +19,8 @@ POST /push-contacts/{domain}/message
 Content-Type: application/json
 
 {
-  "notificationTitle": "string",
-  "notificationBody": "string"
+  "title": "string",
+  "body": "string"
 }
 
 ## Success Response Body
