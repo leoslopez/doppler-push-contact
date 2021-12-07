@@ -20,7 +20,8 @@ Content-Type: application/json
 
 {
   "title": "string",
-  "body": "string"
+  "body": "string",
+  "onClickLink": "string"
 }
 
 ## Success Response Body

@@ -67,7 +67,7 @@ namespace Doppler.PushContact.Controllers
         {
             var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens);
+            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink);
 
             var notValidTargetDeviceToken = sendMessageResult
                 .SendMessageTargetResult?

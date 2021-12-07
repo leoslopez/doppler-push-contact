@@ -9,5 +9,7 @@ namespace Doppler.PushContact.Models
 
         [Required]
         public string Body { get; set; }
+
+        public string OnClickLink { get; set; }
     }
 }
