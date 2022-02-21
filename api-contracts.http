@@ -26,3 +26,17 @@ Content-Type: application/json
 
 ## Success Response Body
 # "messageId"
+
+### Create/Update domain
+PUT /domains/{name}
+Content-Type: application/json
+
+{
+  "isPushFeatureEnabled": false
+}
+
+### Get push feature status by domain name
+GET /domains/{name}/isPushFeatureEnabled
+
+## Success Response Body
+# isPushFeatureEnabled
