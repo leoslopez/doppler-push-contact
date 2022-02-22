@@ -91,3 +91,19 @@ PushContactApi->>+MongoDb: upsert domain
 PushContactApi-->>-Doppler: success
 Doppler-->>-DopplerUser: done!
 ```
+
+# Get push feature status by domain name
+
+![](docs/get-push-feature-status-by-domain-name.png)
+
+### Mermaid sequence diagram
+
+```mermaid
+sequenceDiagram
+  participant ApiConsumer
+  participant PushContactApi
+  participant MongoDb
+ApiConsumer->>+PushContactApi: GET /domains/{name}/isPushFeatureEnabled
+PushContactApi->>+MongoDb: get push feature status by domain
+PushContactApi-->>-ApiConsumer: push feature status
+```
