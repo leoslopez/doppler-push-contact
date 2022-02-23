@@ -72,3 +72,38 @@ PushContactApiWorker->>MongoDb: delete not valid push contacts
 PushContactApiWorker->>MongoDb: add push contacts history events
 deactivate PushContactApiWorker
 ```
+
+# Enable/disable push feature in specific domain from Doppler
+
+![](docs/enable-disable-push-feature-in-specific-domain-from-doppler.png)
+
+### Mermaid sequence diagram
+
+```mermaid
+sequenceDiagram
+  participant DopplerUser
+  participant Doppler
+  participant PushContactApi
+  participant MongoDb
+DopplerUser->>+Doppler: enable/disable push feature in specific domain
+Doppler->>+PushContactApi: PUT /domains/{name}
+PushContactApi->>+MongoDb: upsert domain
+PushContactApi-->>-Doppler: success
+Doppler-->>-DopplerUser: done!
+```
+
+# Get push feature status by domain name
+
+![](docs/get-push-feature-status-by-domain-name.png)
+
+### Mermaid sequence diagram
+
+```mermaid
+sequenceDiagram
+  participant ApiConsumer
+  participant PushContactApi
+  participant MongoDb
+ApiConsumer->>+PushContactApi: GET /domains/{name}/isPushFeatureEnabled
+PushContactApi->>+MongoDb: get push feature status by domain
+PushContactApi-->>-ApiConsumer: push feature status
+```
