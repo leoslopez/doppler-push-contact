@@ -1,6 +1,6 @@
 namespace Doppler.PushContact.Services
 {
-    public class PushContactMongoContextSettings
+    public class PushMongoContextSettings
     {
         public string Host { get; set; }
 

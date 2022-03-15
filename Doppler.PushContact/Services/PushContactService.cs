@@ -13,19 +13,19 @@ namespace Doppler.PushContact.Services
     public class PushContactService : IPushContactService
     {
         private readonly IMongoClient _mongoClient;
-        private readonly IOptions<PushContactMongoContextSettings> _pushContactMongoContextSettings;
+        private readonly IOptions<PushMongoContextSettings> _pushMongoContextSettings;
         private readonly IDeviceTokenValidator _deviceTokenValidator;
         private readonly ILogger<PushContactService> _logger;
 
         public PushContactService(
             IMongoClient mongoClient,
-            IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings,
+            IOptions<PushMongoContextSettings> pushMongoContextSettings,
             IDeviceTokenValidator deviceTokenValidator,
             ILogger<PushContactService> logger)
         {
 
             _mongoClient = mongoClient;
-            _pushContactMongoContextSettings = pushContactMongoContextSettings;
+            _pushMongoContextSettings = pushMongoContextSettings;
             _deviceTokenValidator = deviceTokenValidator;
             _logger = logger;
         }
@@ -269,8 +269,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
         {
             get
             {
-                var database = _mongoClient.GetDatabase(_pushContactMongoContextSettings.Value.DatabaseName);
-                return database.GetCollection<BsonDocument>(_pushContactMongoContextSettings.Value.PushContactsCollectionName);
+                var database = _mongoClient.GetDatabase(_pushMongoContextSettings.Value.DatabaseName);
+                return database.GetCollection<BsonDocument>(_pushMongoContextSettings.Value.PushContactsCollectionName);
             }
         }
     }

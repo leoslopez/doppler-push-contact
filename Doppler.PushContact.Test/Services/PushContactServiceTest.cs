@@ -19,13 +19,13 @@ namespace Doppler.PushContact.Test.Services
     {
         private static PushContactService CreateSut(
             IMongoClient mongoClient = null,
-            IOptions<PushContactMongoContextSettings> pushContactMongoContextSettings = null,
+            IOptions<PushMongoContextSettings> pushMongoContextSettings = null,
             IDeviceTokenValidator deviceTokenValidator = null,
             ILogger<PushContactService> logger = null)
         {
             return new PushContactService(
                 mongoClient ?? Mock.Of<IMongoClient>(),
-                pushContactMongoContextSettings ?? Mock.Of<IOptions<PushContactMongoContextSettings>>(),
+                pushMongoContextSettings ?? Mock.Of<IOptions<PushMongoContextSettings>>(),
                 deviceTokenValidator ?? Mock.Of<IDeviceTokenValidator>(),
                 logger ?? Mock.Of<ILogger<PushContactService>>());
         }
@@ -76,7 +76,7 @@ namespace Doppler.PushContact.Test.Services
                 .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
                 .ReturnsAsync(true);
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -85,19 +85,19 @@ namespace Doppler.PushContact.Test.Services
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 deviceTokenValidator.Object,
                 loggerMock.Object);
 
@@ -129,7 +129,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
                 .ReturnsAsync(true);
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -138,17 +138,17 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 deviceTokenValidator.Object);
 
             // Act
@@ -176,7 +176,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
                 .ReturnsAsync(true);
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -185,17 +185,17 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 deviceTokenValidator.Object);
 
             // Act
@@ -224,7 +224,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
                 .ReturnsAsync(true);
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -233,17 +233,17 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 deviceTokenValidator.Object);
 
             // Act
@@ -287,7 +287,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             var deviceToken = fixture.Create<string>();
             var email = fixture.Create<string>();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -296,19 +296,19 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -336,7 +336,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var updateResultMock = new Mock<UpdateResult>();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -345,17 +345,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             // Act
             // Assert
@@ -405,7 +405,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             // Arrange
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var domain = fixture.Create<string>();
             var pushContactFilter = new PushContactFilter(domain);
@@ -417,19 +417,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -459,7 +459,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
@@ -483,17 +483,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             // Act
             var result = await sut.GetAsync(pushContactFilter);
@@ -517,7 +517,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
@@ -541,17 +541,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             // Act
             var result = await sut.GetAsync(pushContactFilter);
@@ -572,7 +572,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
@@ -596,17 +596,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             var domain = fixture.Create<string>();
             var pushContactFilter = new PushContactFilter(domain);
@@ -635,7 +635,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
@@ -659,17 +659,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             var domain = fixture.Create<string>();
             var pushContactFilter = new PushContactFilter(domain);
@@ -715,7 +715,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var deviceTokens = fixture.CreateMany<string>();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -724,19 +724,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -765,7 +765,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             updateResultMock.Setup(_ => _.IsModifiedCountAvailable).Returns(true);
             updateResultMock.Setup(_ => _.ModifiedCount).Returns(expectedDeletedCount);
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -774,17 +774,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             // Act
             var deletedCount = await sut.DeleteByDeviceTokenAsync(deviceTokens);
@@ -827,7 +827,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var pushContactHistoryEvents = fixture.CreateMany<PushContactHistoryEvent>();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -836,19 +836,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -872,7 +872,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var pushContactHistoryEvents = fixture.CreateMany<PushContactHistoryEvent>();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollection
@@ -881,19 +881,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollection.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -930,7 +930,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             // Arrange
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var domain = fixture.Create<string>();
 
@@ -941,19 +941,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabaseMock = new Mock<IMongoDatabase>();
             mongoDatabaseMock
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClientMock = new Mock<IMongoClient>();
             mongoClientMock
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabaseMock.Object);
 
             var loggerMock = new Mock<ILogger<PushContactService>>();
 
             var sut = CreateSut(
                 mongoClientMock.Object,
-                Options.Create(pushContactMongoContextSettings),
+                Options.Create(pushMongoContextSettings),
                 logger: loggerMock.Object);
 
             // Act
@@ -982,7 +982,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var fixture = new Fixture();
 
-            var pushContactMongoContextSettings = fixture.Create<PushContactMongoContextSettings>();
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
@@ -1006,17 +1006,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var mongoDatabase = new Mock<IMongoDatabase>();
             mongoDatabase
-                .Setup(x => x.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName, null))
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
                 .Returns(pushContactsCollectionMock.Object);
 
             var mongoClient = new Mock<IMongoClient>();
             mongoClient
-                .Setup(x => x.GetDatabase(pushContactMongoContextSettings.DatabaseName, null))
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
                 .Returns(mongoDatabase.Object);
 
             var sut = CreateSut(
                 mongoClient.Object,
-                Options.Create(pushContactMongoContextSettings));
+                Options.Create(pushMongoContextSettings));
 
             // Act
             var result = await sut.GetAllDeviceTokensByDomainAsync(domainFilter);
