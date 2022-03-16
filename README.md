@@ -2,10 +2,6 @@
 
 # Add new push contact
 
-![](docs/add-new-push-contact-sd.png)
-
-### Mermaid sequence diagram
-
 ```mermaid
 sequenceDiagram
   participant User
@@ -46,10 +42,6 @@ deactivate PushScript
 
 # Send push notification from Doppler by domain
 
-![](docs/send-push-notification-from-doppler-by-domain.png)
-
-### Mermaid sequence diagram
-
 ```mermaid
 sequenceDiagram
   participant DopplerUser
@@ -75,10 +67,6 @@ deactivate PushContactApiWorker
 
 # Enable/disable push feature in specific domain from Doppler
 
-![](docs/enable-disable-push-feature-in-specific-domain-from-doppler.png)
-
-### Mermaid sequence diagram
-
 ```mermaid
 sequenceDiagram
   participant DopplerUser
@@ -93,10 +81,6 @@ Doppler-->>-DopplerUser: done!
 ```
 
 # Get push feature status by domain name
-
-![](docs/get-push-feature-status-by-domain-name.png)
-
-### Mermaid sequence diagram
 
 ```mermaid
 sequenceDiagram
