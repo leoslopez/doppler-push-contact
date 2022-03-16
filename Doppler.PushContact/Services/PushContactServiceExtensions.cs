@@ -9,22 +9,22 @@ namespace Doppler.PushContact.Services
     {
         public static IServiceCollection AddPushContactService(this IServiceCollection services, IConfiguration configuration)
         {
-            var pushContactMongoContextSettingsSection = configuration.GetSection(nameof(PushContactMongoContextSettings));
+            var pushMongoContextSettingsSection = configuration.GetSection(nameof(PushMongoContextSettings));
 
-            services.Configure<PushContactMongoContextSettings>(pushContactMongoContextSettingsSection);
+            services.Configure<PushMongoContextSettings>(pushMongoContextSettingsSection);
 
-            var pushContactMongoContextSettings = new PushContactMongoContextSettings();
-            pushContactMongoContextSettingsSection.Bind(pushContactMongoContextSettings);
+            var pushMongoContextSettings = new PushMongoContextSettings();
+            pushMongoContextSettingsSection.Bind(pushMongoContextSettings);
 
             var mongoClientSettings = MongoClientSettings.FromConnectionString(
-                $"mongodb+srv://{pushContactMongoContextSettings.Username}:{pushContactMongoContextSettings.Password}@{pushContactMongoContextSettings.Host}");
+                $"mongodb+srv://{pushMongoContextSettings.Username}:{pushMongoContextSettings.Password}@{pushMongoContextSettings.Host}");
 
             services.AddSingleton<IMongoClient>(x =>
             {
                 var mongoClient = new MongoClient(mongoClientSettings);
 
-                var database = mongoClient.GetDatabase(pushContactMongoContextSettings.DatabaseName);
-                var pushContacts = database.GetCollection<BsonDocument>(pushContactMongoContextSettings.PushContactsCollectionName);
+                var database = mongoClient.GetDatabase(pushMongoContextSettings.DatabaseName);
+                var pushContacts = database.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName);
 
                 var deviceTokenAsUniqueIndex = new CreateIndexModel<BsonDocument>(
                     Builders<BsonDocument>.IndexKeys.Ascending(PushContactDocumentProps.DeviceTokenPropName),
