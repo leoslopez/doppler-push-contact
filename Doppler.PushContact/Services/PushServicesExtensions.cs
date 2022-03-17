@@ -31,6 +31,13 @@ namespace Doppler.PushContact.Services
                     new CreateIndexOptions { Unique = true });
                 pushContacts.Indexes.CreateOne(deviceTokenAsUniqueIndex);
 
+                var domains = database.GetCollection<BsonDocument>(pushMongoContextSettings.DomainsCollectionName);
+
+                var domainNameAsUniqueIndex = new CreateIndexModel<BsonDocument>(
+                    Builders<BsonDocument>.IndexKeys.Ascending(DomainDocumentProps.DomainNamePropName),
+                    new CreateIndexOptions { Unique = true });
+                domains.Indexes.CreateOne(domainNameAsUniqueIndex);
+
                 return mongoClient;
             });
 
