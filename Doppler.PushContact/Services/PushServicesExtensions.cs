@@ -47,6 +47,8 @@ namespace Doppler.PushContact.Services
 
             services.AddScoped<IPushContactService, PushContactService>();
 
+            services.AddScoped<IDomainService, DomainService>();
+
             return services;
         }
     }
