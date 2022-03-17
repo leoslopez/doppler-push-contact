@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace Doppler.PushContact.Services
 {
-    public static class PushContactServiceExtensions
+    public static class PushServicesExtensions
     {
-        public static IServiceCollection AddPushContactService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPushServices(this IServiceCollection services, IConfiguration configuration)
         {
             var pushMongoContextSettingsSection = configuration.GetSection(nameof(PushMongoContextSettings));
 

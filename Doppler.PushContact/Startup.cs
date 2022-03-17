@@ -32,7 +32,7 @@ namespace Doppler.PushContact
             services.AddDopplerSecurity();
             services.AddHttpContextAccessor();
             services.AddScoped<IPushApiTokenGetter, PushApiTokenGetter>();
-            services.AddPushContactService(Configuration);
+            services.AddPushServices(Configuration);
             services.AddMessageSender(Configuration);
             services.AddControllers();
             services.AddCors();
