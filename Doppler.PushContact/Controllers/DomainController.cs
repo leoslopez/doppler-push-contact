@@ -1,5 +1,6 @@
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,11 +12,21 @@ namespace Doppler.PushContact.Controllers
     [ApiController]
     public class DomainController : ControllerBase
     {
+        private readonly IDomainService _domainService;
+
+        public DomainController(IDomainService domainService)
+        {
+            _domainService = domainService;
+        }
+
         [HttpPut]
         [Route("domains/{name}")]
-        public Task<IActionResult> Upsert([FromRoute] string name, [FromBody] Domain domain)
+        public async Task<IActionResult> Upsert([FromRoute] string name, [FromBody] Domain domain)
         {
-            throw new NotImplementedException();
+            domain.Name = name;
+            await _domainService.UpsertAsync(domain);
+
+            return Ok();
         }
 
         [AllowAnonymous]

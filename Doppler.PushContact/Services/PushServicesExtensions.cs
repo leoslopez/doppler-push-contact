@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace Doppler.PushContact.Services
 {
-    public static class PushContactServiceExtensions
+    public static class PushServicesExtensions
     {
-        public static IServiceCollection AddPushContactService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPushServices(this IServiceCollection services, IConfiguration configuration)
         {
             var pushMongoContextSettingsSection = configuration.GetSection(nameof(PushMongoContextSettings));
 
@@ -31,6 +31,13 @@ namespace Doppler.PushContact.Services
                     new CreateIndexOptions { Unique = true });
                 pushContacts.Indexes.CreateOne(deviceTokenAsUniqueIndex);
 
+                var domains = database.GetCollection<BsonDocument>(pushMongoContextSettings.DomainsCollectionName);
+
+                var domainNameAsUniqueIndex = new CreateIndexModel<BsonDocument>(
+                    Builders<BsonDocument>.IndexKeys.Ascending(DomainDocumentProps.DomainNamePropName),
+                    new CreateIndexOptions { Unique = true });
+                domains.Indexes.CreateOne(domainNameAsUniqueIndex);
+
                 return mongoClient;
             });
 
@@ -39,6 +46,8 @@ namespace Doppler.PushContact.Services
             services.AddScoped<IDeviceTokenValidator, DeviceTokenValidator>();
 
             services.AddScoped<IPushContactService, PushContactService>();
+
+            services.AddScoped<IDomainService, DomainService>();
 
             return services;
         }
