@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Moq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -117,6 +118,61 @@ namespace Doppler.PushContact.Test.Services
             // Act
             // Assert
             await sut.UpsertAsync(domain);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(" \n ")]
+        [InlineData("\t")]
+        [InlineData("\r")]
+        public async Task GetByNameAsync_should_throw_argument_exception_when_domain_name_is_null_or_whitespace(string name)
+        {
+            // Arrange
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.GetByNameAsync(name));
+        }
+
+        [Fact]
+        public async Task GetByNameAsync_should_return_null_when_domains_documents_are_empty()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domainsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
+            domainsCursorMock
+                .Setup(_ => _.Current)
+                .Returns(Enumerable.Empty<BsonDocument>());
+
+            var domainsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            domainsCollectionMock
+                .Setup(x => x.FindAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<FindOptions<BsonDocument, BsonDocument>>(), default))
+                .ReturnsAsync(domainsCursorMock.Object);
+
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.DomainsCollectionName, null))
+                .Returns(domainsCollectionMock.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushMongoContextSettings));
+
+            // Act
+            var result = await sut.GetByNameAsync(fixture.Create<string>());
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }
