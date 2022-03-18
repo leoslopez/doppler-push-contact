@@ -55,6 +55,38 @@ namespace Doppler.PushContact.Services
             }
         }
 
+        public async Task<Domain> GetByNameAsync(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.", nameof(name));
+            }
+
+            var filter = Builders<BsonDocument>.Filter.Eq(DomainDocumentProps.DomainNamePropName, name);
+
+            try
+            {
+                var domainDocument = await (await Domains.FindAsync<BsonDocument>(filter)).SingleOrDefaultAsync();
+
+                if (domainDocument == null)
+                {
+                    return null;
+                }
+
+                return new Domain
+                {
+                    Name = domainDocument.GetValue(DomainDocumentProps.DomainNamePropName).AsString,
+                    IsPushFeatureEnabled = domainDocument.GetValue(DomainDocumentProps.IsPushFeatureEnabledPropName).AsBoolean
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting {nameof(Domain)} with name equals to {name}");
+
+                throw;
+            }
+        }
+
         private IMongoCollection<BsonDocument> Domains
         {
             get
