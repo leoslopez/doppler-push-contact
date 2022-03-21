@@ -20,7 +20,7 @@ RUN dotnet restore
 
 FROM restore AS build
 COPY . .
-RUN dotnet format --verify-no-changes
+RUN dotnet format --verify-no-changes --verbosity d
 RUN dotnet build -c Release
 
 FROM build AS test
