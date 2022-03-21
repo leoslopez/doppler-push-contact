@@ -32,9 +32,16 @@ namespace Doppler.PushContact.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("domains/{name}/isPushFeatureEnabled")]
-        public Task<ActionResult<bool>> GetPushFeatureStatus([FromRoute] string name)
+        public async Task<ActionResult<bool>> GetPushFeatureStatus([FromRoute] string name)
         {
-            throw new NotImplementedException();
+            var domain = await _domainService.GetByNameAsync(name);
+
+            if (domain == null)
+            {
+                return NotFound();
+            }
+
+            return domain.IsPushFeatureEnabled;
         }
     }
 }

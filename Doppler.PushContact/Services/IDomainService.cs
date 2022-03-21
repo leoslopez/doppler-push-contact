@@ -6,5 +6,7 @@ namespace Doppler.PushContact.Services
     public interface IDomainService
     {
         Task UpsertAsync(Domain domain);
+
+        Task<Domain> GetByNameAsync(string name);
     }
 }

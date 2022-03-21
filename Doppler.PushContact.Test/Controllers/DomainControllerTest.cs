@@ -193,5 +193,139 @@ namespace Doppler.PushContact.Test.Controllers
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
+
+        [Fact]
+        public async Task GetPushFeatureStatus_should_not_require_token()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<Domain>();
+
+            var domainServiceMock = new Mock<IDomainService>();
+            domainServiceMock.Setup(x => x.GetByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(domain);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(domainServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var name = fixture.Create<string>();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"domains/{name}/isPushFeatureEnabled");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetPushFeatureStatus_should_response_not_found_when_domain_service_return_null()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var name = fixture.Create<string>();
+            Domain domain = null;
+
+            var domainServiceMock = new Mock<IDomainService>();
+            domainServiceMock.Setup(x => x.GetByNameAsync(name))
+                .ReturnsAsync(domain);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(domainServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"domains/{name}/isPushFeatureEnabled");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(true, "true")]
+        [InlineData(false, "false")]
+        public async Task GetPushFeatureStatus_should_response_push_feature_status_returned_by_domain_service(bool isPushFeatureEnabledValue, string expectedResponse)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var name = fixture.Create<string>();
+            var domain = fixture.Create<Domain>();
+            domain.IsPushFeatureEnabled = isPushFeatureEnabledValue;
+
+            var domainServiceMock = new Mock<IDomainService>();
+            domainServiceMock.Setup(x => x.GetByNameAsync(name))
+                .ReturnsAsync(domain);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(domainServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"domains/{name}/isPushFeatureEnabled");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var isPushFeatureEnabledResponse = await response.Content.ReadAsStringAsync();
+            Assert.Equal(expectedResponse, isPushFeatureEnabledResponse);
+        }
+
+        [Fact]
+        public async Task GetPushFeatureStatus_should_response_internal_server_error_when_domain_service_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var name = fixture.Create<string>();
+            var domain = fixture.Create<Domain>();
+
+            var domainServiceMock = new Mock<IDomainService>();
+            domainServiceMock.Setup(x => x.GetByNameAsync(name))
+                .ThrowsAsync(new Exception());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(domainServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"domains/{name}/isPushFeatureEnabled");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
     }
 }
