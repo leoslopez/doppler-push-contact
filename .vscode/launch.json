@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Doppler.PushContact/bin/Debug/net5.0/Doppler.PushContact.dll",
+            "program": "${workspaceFolder}/Doppler.PushContact/bin/Debug/net6.0/Doppler.PushContact.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Doppler.PushContact",
             "stopAtEntry": false,
