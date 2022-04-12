@@ -118,26 +118,26 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     $"'{nameof(pushContactFilter.ModifiedFrom)}' cannot be greater than '{nameof(pushContactFilter.ModifiedTo)}'");
             }
 
-            var FilterBuilder = Builders<BsonDocument>.Filter;
+            var filterBuilder = Builders<BsonDocument>.Filter;
 
-            var filter = FilterBuilder.Eq(PushContactDocumentProps.DomainPropName, pushContactFilter.Domain);
+            var filter = filterBuilder.Eq(PushContactDocumentProps.DomainPropName, pushContactFilter.Domain);
 
             if (pushContactFilter.Email != null)
             {
-                filter &= FilterBuilder.Eq(PushContactDocumentProps.EmailPropName, pushContactFilter.Email);
+                filter &= filterBuilder.Eq(PushContactDocumentProps.EmailPropName, pushContactFilter.Email);
             }
 
             if (pushContactFilter.ModifiedFrom != null)
             {
-                filter &= FilterBuilder.Gte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedFrom);
+                filter &= filterBuilder.Gte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedFrom);
             }
 
             if (pushContactFilter.ModifiedTo != null)
             {
-                filter &= FilterBuilder.Lte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedTo);
+                filter &= filterBuilder.Lte(PushContactDocumentProps.ModifiedPropName, pushContactFilter.ModifiedTo);
             }
 
-            filter &= !FilterBuilder.Eq(PushContactDocumentProps.DeletedPropName, true);
+            filter &= !filterBuilder.Eq(PushContactDocumentProps.DeletedPropName, true);
 
             try
             {
@@ -238,10 +238,10 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 throw new ArgumentException($"'{nameof(domain)}' cannot be null or empty.", nameof(domain));
             }
 
-            var FilterBuilder = Builders<BsonDocument>.Filter;
+            var filterBuilder = Builders<BsonDocument>.Filter;
 
-            var filter = FilterBuilder.Eq(PushContactDocumentProps.DomainPropName, domain)
-                & FilterBuilder.Eq(PushContactDocumentProps.DeletedPropName, false);
+            var filter = filterBuilder.Eq(PushContactDocumentProps.DomainPropName, domain)
+                & filterBuilder.Eq(PushContactDocumentProps.DeletedPropName, false);
 
             var options = new FindOptions<BsonDocument>
             {
