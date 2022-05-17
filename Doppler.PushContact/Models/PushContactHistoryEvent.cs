@@ -11,5 +11,7 @@ namespace Doppler.PushContact.Models
         public DateTime EventDate { get; set; }
 
         public string Details { get; set; }
+
+        public Guid MessageId { get; set; }
     }
 }

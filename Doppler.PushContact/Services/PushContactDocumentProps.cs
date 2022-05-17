@@ -23,5 +23,7 @@ namespace Doppler.PushContact.Services
         public const string HistoryEvents_InsertedDatePropName = "inserted_date";
 
         public const string HistoryEvents_DetailsPropName = "details";
+
+        public const string HistoryEvents_MessageIdPropName = "message_id";
     }
 }

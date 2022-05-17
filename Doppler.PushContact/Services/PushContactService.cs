@@ -209,7 +209,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                         { PushContactDocumentProps.HistoryEvents_SentSuccessPropName, x.SentSuccess },
                         { PushContactDocumentProps.HistoryEvents_EventDatePropName, x.EventDate },
                         { PushContactDocumentProps.HistoryEvents_InsertedDatePropName, now },
-                        { PushContactDocumentProps.HistoryEvents_DetailsPropName, string.IsNullOrEmpty(x.Details) ? BsonNull.Value : x.Details }
+                        { PushContactDocumentProps.HistoryEvents_DetailsPropName, string.IsNullOrEmpty(x.Details) ? BsonNull.Value : x.Details },
+                        { PushContactDocumentProps.HistoryEvents_MessageIdPropName, new BsonBinaryData(x.MessageId, GuidRepresentation.Standard) }
                     };
 
                     var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, x.DeviceToken);

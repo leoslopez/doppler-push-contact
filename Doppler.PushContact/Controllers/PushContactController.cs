@@ -80,6 +80,7 @@ namespace Doppler.PushContact.Controllers
             }
 
             var now = DateTime.UtcNow;
+            var messageId = Guid.NewGuid();
 
             var pushContactHistoryEvents = sendMessageResult
                 .SendMessageTargetResult?
@@ -90,7 +91,8 @@ namespace Doppler.PushContact.Controllers
                             DeviceToken = x.TargetDeviceToken,
                             SentSuccess = x.IsSuccess,
                             EventDate = now,
-                            Details = x.NotSuccessErrorDetails
+                            Details = x.NotSuccessErrorDetails,
+                            MessageId = messageId
                         };
                     });
 
@@ -104,7 +106,7 @@ namespace Doppler.PushContact.Controllers
 
             return Ok(new MessageResult
             {
-                MessageId = Guid.NewGuid()
+                MessageId = messageId
             });
         }
     }
