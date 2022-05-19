@@ -62,6 +62,7 @@ PushContactApiWorker->>+PushApi: POST /message
 PushApi-->>-PushContactApiWorker: shipping results
 PushContactApiWorker->>MongoDb: delete not valid push contacts
 PushContactApiWorker->>MongoDb: add push contacts history events
+PushContactApiWorker->>MongoDb: add sent message details
 deactivate PushContactApiWorker
 ```
 
