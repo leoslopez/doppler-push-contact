@@ -38,6 +38,16 @@ namespace Doppler.PushContact.Services
                     Builders<BsonDocument>.IndexKeys.Ascending(DomainDocumentProps.DomainNamePropName),
                     new CreateIndexOptions { Unique = true });
                     domains.Indexes.CreateOne(domainNameAsUniqueIndex);
+
+                    var messages = database.GetCollection<BsonDocument>(pushMongoContextSettings.MessagesCollectionName);
+
+                    var messageIdAsUniqueIndex = new CreateIndexModel<BsonDocument>(
+                    Builders<BsonDocument>.IndexKeys
+                    .Ascending(MessageDocumentProps.DomainPropName)
+                    .Ascending(MessageDocumentProps.MessageIdPropName),
+                    new CreateIndexOptions { Unique = true });
+                    messages.Indexes.CreateOne(messageIdAsUniqueIndex);
+
                     return mongoClient;
                 });
 
