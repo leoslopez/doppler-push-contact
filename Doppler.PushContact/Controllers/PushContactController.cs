@@ -116,5 +116,21 @@ namespace Doppler.PushContact.Controllers
                 MessageId = messageId
             });
         }
+
+        [HttpGet]
+        [Route("push-contacts/{domain}/messages/{messageId}/details")]
+        public async Task<IActionResult> GetMessageDetails([FromRoute] string domain, [FromRoute] Guid messageId)
+        {
+            var messageDetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId);
+
+            return Ok(new
+            {
+                messageDetails.Domain,
+                messageDetails.MessageId,
+                messageDetails.Sent,
+                messageDetails.Delivered,
+                messageDetails.NotDelivered
+            });
+        }
     }
 }
