@@ -91,3 +91,21 @@ ApiConsumer->>+PushContactApi: GET /domains/{name}/isPushFeatureEnabled
 PushContactApi->>+MongoDb: get push feature status by domain
 PushContactApi-->>-ApiConsumer: push feature status
 ```
+
+# Get Automation report
+
+```mermaid
+sequenceDiagram
+  participant DopplerUser
+  participant Doppler
+  participant PushContactApi
+  participant MongoDb
+DopplerUser->>+Doppler: get Automation report
+loop for each sent message
+  Doppler->>+PushContactApi: GET push-contacts/{domain}/messages/{messageId}/details
+  PushContactApi->>+MongoDb: get message details
+  MongoDb->>-PushContactApi: message details
+  PushContactApi-->>-Doppler: message details
+end
+Doppler->>+DopplerUser: Automation report
+```
