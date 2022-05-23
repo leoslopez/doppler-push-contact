@@ -18,11 +18,13 @@ namespace Doppler.PushContact.Controllers
     {
         private readonly IPushContactService _pushContactService;
         private readonly IMessageSender _messageSender;
+        private readonly IMessageRepository _messageRepository;
 
-        public PushContactController(IPushContactService pushContactService, IMessageSender messageSender)
+        public PushContactController(IPushContactService pushContactService, IMessageSender messageSender, IMessageRepository messageRepository)
         {
             _pushContactService = pushContactService;
             _messageSender = messageSender;
+            _messageRepository = messageRepository;
         }
 
         [AllowAnonymous]
@@ -101,12 +103,33 @@ namespace Doppler.PushContact.Controllers
                 await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
             }
 
+            var sent = sendMessageResult.SendMessageTargetResult.Count();
+            var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+            var notDelivered = sent - delivered;
+            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, sent, delivered, notDelivered);
+
             // TODO: run all steps asynchronous
             // and response an 202-accepted with the message id instead
 
             return Ok(new MessageResult
             {
                 MessageId = messageId
+            });
+        }
+
+        [HttpGet]
+        [Route("push-contacts/{domain}/messages/{messageId}/details")]
+        public async Task<IActionResult> GetMessageDetails([FromRoute] string domain, [FromRoute] Guid messageId)
+        {
+            var messageDetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId);
+
+            return Ok(new
+            {
+                messageDetails.Domain,
+                messageDetails.MessageId,
+                messageDetails.Sent,
+                messageDetails.Delivered,
+                messageDetails.NotDelivered
             });
         }
     }

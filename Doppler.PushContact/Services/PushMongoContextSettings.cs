@@ -13,5 +13,7 @@ namespace Doppler.PushContact.Services
         public string PushContactsCollectionName { get; set; }
 
         public string DomainsCollectionName { get; set; }
+
+        public string MessagesCollectionName { get; set; }
     }
 }

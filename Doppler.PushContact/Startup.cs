@@ -31,9 +31,11 @@ namespace Doppler.PushContact
         {
             services.AddDopplerSecurity();
             services.AddHttpContextAccessor();
+            services.AddPushMongoContext(Configuration);
             services.AddScoped<IPushApiTokenGetter, PushApiTokenGetter>();
             services.AddPushServices(Configuration);
             services.AddMessageSender(Configuration);
+            services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddControllers();
             services.AddCors();
             services.AddSwaggerGen(c =>
