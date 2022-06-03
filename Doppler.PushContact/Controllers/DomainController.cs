@@ -32,6 +32,7 @@ namespace Doppler.PushContact.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("domains/{name}/isPushFeatureEnabled")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 120)]
         public async Task<ActionResult<bool>> GetPushFeatureStatus([FromRoute] string name)
         {
             var domain = await _domainService.GetByNameAsync(name);
