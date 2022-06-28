@@ -110,3 +110,7 @@ loop for each sent message
 end
 Doppler->>+DopplerUser: Automation report
 ```
+
+# MongoDB ER diagram
+
+![diagrama ER mongodb push notifications](https://user-images.githubusercontent.com/57307782/176199725-dc81a9aa-4ff6-4a14-beb1-dac2ebe9aa17.png)
