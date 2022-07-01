@@ -23,7 +23,6 @@ namespace Doppler.PushContact.Services
             IDeviceTokenValidator deviceTokenValidator,
             ILogger<PushContactService> logger)
         {
-
             _mongoClient = mongoClient;
             _pushMongoContextSettings = pushMongoContextSettings;
             _deviceTokenValidator = deviceTokenValidator;
