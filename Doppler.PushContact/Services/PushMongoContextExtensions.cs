@@ -17,13 +17,17 @@ namespace Doppler.PushContact.Services
             var pushMongoContextSettings = new PushMongoContextSettings();
             pushMongoContextSettingsSection.Bind(pushMongoContextSettings);
 
-            var mongoClientSettings = MongoClientSettings.FromConnectionString(
-                $"mongodb+srv://{pushMongoContextSettings.Username}:{pushMongoContextSettings.Password}@{pushMongoContextSettings.Host}");
+            var mongoUrlBuilder = new MongoUrlBuilder(pushMongoContextSettings.ConnectionString)
+            {
+                Password = pushMongoContextSettings.Password,
+                DatabaseName = pushMongoContextSettings.DatabaseName
+            };
+
+            var mongoUrl = mongoUrlBuilder.ToMongoUrl();
 
             services.AddSingleton<IMongoClient>(x =>
                 {
-                    var mongoClient = new MongoClient(mongoClientSettings);
-
+                    var mongoClient = new MongoClient(mongoUrl);
                     var database = mongoClient.GetDatabase(pushMongoContextSettings.DatabaseName);
                     var pushContacts = database.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName);
 
