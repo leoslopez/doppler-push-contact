@@ -9,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Doppler.PushContact.Services.Messages;
+using Doppler.PushContact.ApiModels;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -131,6 +132,13 @@ namespace Doppler.PushContact.Controllers
                 messageDetails.Delivered,
                 messageDetails.NotDelivered
             });
+        }
+
+        [HttpGet]
+        [Route("push-contacts/messages/delivery-results")]
+        public async Task<ApiPage<MessageDeliveryResult>> GetMessages([FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
+        {
+            throw new NotImplementedException();
         }
     }
 }
