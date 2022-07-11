@@ -6,6 +6,6 @@ namespace Doppler.PushContact.ApiModels
     {
         public List<T> Items { get; set; }
 
-        //TO DO: implement pagination
+        public int Position { get; set; }
     }
 }
