@@ -4,8 +4,14 @@ namespace Doppler.PushContact.ApiModels
 {
     public class ApiPage<T>
     {
-        public List<T> Items { get; set; }
+        public List<T> Items { get; }
 
-        public int Position { get; set; }
+        public int Page { get; }
+
+        public ApiPage(List<T> items, int page)
+        {
+            Items = items;
+            Page = page;
+        }
     }
 }

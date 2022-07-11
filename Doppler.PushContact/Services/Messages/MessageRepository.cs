@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Doppler.PushContact.ApiModels;
 
 namespace Doppler.PushContact.Services.Messages
 {
@@ -99,6 +100,56 @@ namespace Doppler.PushContact.Services.Messages
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error getting message with {nameof(domain)} {domain} and {nameof(messageId)} {messageId}");
+
+                throw;
+            }
+        }
+
+        public async Task<ApiPage<MessageDeliveryResult>> GetMessages(int page, int per_page, DateTimeOffset from, DateTimeOffset to)
+        {
+            if (from > to)
+            {
+                throw new ArgumentException($"'{nameof(from)}' cannot be greater than '{nameof(to)}'.", $"'{nameof(from)}', '{nameof(to)}'");
+            }
+
+            if (page < 0)
+            {
+                throw new ArgumentException($"'{nameof(page)}' cannot be lesser than 0.");
+            }
+
+            if (per_page <= 0)
+            {
+                throw new ArgumentException($"'{nameof(per_page)}' cannot be lesser or equal than 0.");
+            }
+
+            var filterBuilder = Builders<BsonDocument>.Filter;
+
+            var filter = filterBuilder.Gte(MessageDocumentProps.InsertedDatePropName, from.UtcDateTime);
+
+            filter &= filterBuilder.Lt(MessageDocumentProps.InsertedDatePropName, to.UtcDateTime);
+
+            try
+            {
+                var messages = await Messages.Find(filter).Skip(page).Limit(per_page).ToListAsync();
+
+                var list = messages
+                    .Select(x => new MessageDeliveryResult()
+                    {
+                        Domain = x.GetValue(MessageDocumentProps.DomainPropName, null).AsString,
+                        SentQuantity = x.GetValue(MessageDocumentProps.SentPropName, null).ToInt32(),
+                        Delivered = x.GetValue(MessageDocumentProps.DeliveredPropName, null).ToInt32(),
+                        NotDelivered = x.GetValue(MessageDocumentProps.NotDeliveredPropName, null).ToInt32(),
+                        Date = x.GetValue(MessageDocumentProps.InsertedDatePropName, null).ToUniversalTime()
+                    })
+                    .ToList();
+
+                var newPage = page + list.Count;
+
+                return new ApiPage<MessageDeliveryResult>(list, newPage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting messages from {from} to {to}");
 
                 throw;
             }
