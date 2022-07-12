@@ -134,13 +134,27 @@ namespace Doppler.PushContact.Controllers
             });
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("push-contacts/messages/delivery-results")]
-        public async Task<ApiPage<MessageDeliveryResult>> GetMessages([FromQuery] int page, [FromQuery] int per_page, [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
+        public async Task<ActionResult<ApiPage<MessageDeliveryResult>>> GetMessages([FromQuery] int page, [FromQuery] int per_page, [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
         {
+            if (from > to)
+            {
+                return BadRequest($"'{nameof(from)}' cannot be greater than '{nameof(to)}'.");
+            }
+
+            if (page < 0)
+            {
+                return BadRequest($"'{nameof(page)}' cannot be lesser than 0.");
+            }
+
+            if (per_page <= 0 || per_page > 100)
+            {
+                return BadRequest($"'{nameof(per_page)}' has to be greater than 0 and lesser than 100.");
+            }
+
             var apiPage = await _messageRepository.GetMessages(page, per_page, from, to);
-            return apiPage;
+            return Ok(apiPage);
         }
     }
 }

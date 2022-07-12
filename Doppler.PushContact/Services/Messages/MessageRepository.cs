@@ -107,21 +107,6 @@ namespace Doppler.PushContact.Services.Messages
 
         public async Task<ApiPage<MessageDeliveryResult>> GetMessages(int page, int per_page, DateTimeOffset from, DateTimeOffset to)
         {
-            if (from > to)
-            {
-                throw new ArgumentException($"'{nameof(from)}' cannot be greater than '{nameof(to)}'.", $"'{nameof(from)}', '{nameof(to)}'");
-            }
-
-            if (page < 0)
-            {
-                throw new ArgumentException($"'{nameof(page)}' cannot be lesser than 0.");
-            }
-
-            if (per_page <= 0)
-            {
-                throw new ArgumentException($"'{nameof(per_page)}' cannot be lesser or equal than 0.");
-            }
-
             var filterBuilder = Builders<BsonDocument>.Filter;
 
             var filter = filterBuilder.Gte(MessageDocumentProps.InsertedDatePropName, from.UtcDateTime);
@@ -145,7 +130,7 @@ namespace Doppler.PushContact.Services.Messages
 
                 var newPage = page + list.Count;
 
-                return new ApiPage<MessageDeliveryResult>(list, newPage);
+                return new ApiPage<MessageDeliveryResult>(list, newPage, per_page);
             }
             catch (Exception ex)
             {

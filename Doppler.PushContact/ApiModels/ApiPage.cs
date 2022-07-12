@@ -8,10 +8,13 @@ namespace Doppler.PushContact.ApiModels
 
         public int Page { get; }
 
-        public ApiPage(List<T> items, int page)
+        public int Per_page { get; }
+
+        public ApiPage(List<T> items, int page, int per_page)
         {
             Items = items;
             Page = page;
+            Per_page = per_page;
         }
     }
 }
