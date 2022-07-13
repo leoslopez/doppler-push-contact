@@ -156,5 +156,12 @@ namespace Doppler.PushContact.Controllers
             var apiPage = await _messageRepository.GetMessages(page, per_page, from, to);
             return Ok(apiPage);
         }
+
+        [HttpGet]
+        [Route("push-contacts/domains")]
+        public async Task<ActionResult<ApiPage<DomainInfo>>> GetDomains()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
