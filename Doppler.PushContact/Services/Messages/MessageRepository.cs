@@ -28,7 +28,7 @@ namespace Doppler.PushContact.Services.Messages
             _logger = logger;
         }
 
-        public async Task AddAsync(Guid messageId, string domain, string title, string body, string onClickLink, int sent, int delivered, int notDelivered)
+        public async Task AddAsync(Guid messageId, string domain, string title, string body, string onClickLink, int sent, int delivered, int notDelivered, string imageUrl)
         {
             if (string.IsNullOrEmpty(domain))
             {
@@ -58,6 +58,7 @@ namespace Doppler.PushContact.Services.Messages
                 { MessageDocumentProps.SentPropName, sent },
                 { MessageDocumentProps.DeliveredPropName, delivered },
                 { MessageDocumentProps.NotDeliveredPropName, notDelivered },
+                { MessageDocumentProps.ImageUrlPropName, string.IsNullOrEmpty(imageUrl) ? BsonNull.Value : imageUrl},
                 { MessageDocumentProps.InsertedDatePropName, now }
             };
 

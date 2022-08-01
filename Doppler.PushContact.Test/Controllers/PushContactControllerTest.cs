@@ -1049,7 +1049,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1098,7 +1098,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1147,7 +1147,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1198,7 +1198,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1250,7 +1250,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1300,7 +1300,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1350,7 +1350,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(sendMessageResult);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -1407,7 +1407,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fixture.Create<SendMessageResult>());
 
             var messageRepositoryMock = new Mock<IMessageRepository>();
@@ -1497,7 +1497,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var messageSenderMock = new Mock<IMessageSender>();
             messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
+                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new Exception());
 
             var client = _factory.WithWebHostBuilder(builder =>

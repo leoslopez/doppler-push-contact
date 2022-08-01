@@ -20,7 +20,7 @@ namespace Doppler.PushContact.Services.Messages
             _pushApiTokenGetter = pushApiTokenGetter;
         }
 
-        public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null)
+        public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null)
         {
             if (string.IsNullOrEmpty(title))
             {
@@ -43,6 +43,12 @@ namespace Doppler.PushContact.Services.Messages
                 throw new ArgumentException($"'{nameof(onClickLink)}' must be an absolute URL with HTTPS scheme.", nameof(onClickLink));
             }
 
+            if (!string.IsNullOrEmpty(imageUrl)
+                && (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imgUrlResult) || imgUrlResult.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException($"'{nameof(imageUrl)}' must be an absolute URL with HTTPS scheme.", nameof(imageUrl));
+            }
+
             // TODO: use adhock token here.
             // It is recovering our client API request to be resusen to request to Push API,
             // but maybe it will not be acceptable in all scenarios.
@@ -56,7 +62,8 @@ namespace Doppler.PushContact.Services.Messages
                     notificationTitle = title,
                     notificationBody = body,
                     NotificationOnClickLink = onClickLink,
-                    tokens = targetDeviceTokens
+                    tokens = targetDeviceTokens,
+                    ImageUrl = imageUrl
                 })
                 .ReceiveJson<SendMessageResponse>();
 

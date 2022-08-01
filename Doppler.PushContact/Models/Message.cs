@@ -11,5 +11,7 @@ namespace Doppler.PushContact.Models
         public string Body { get; set; }
 
         public string OnClickLink { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }
