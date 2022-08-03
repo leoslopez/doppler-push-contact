@@ -70,7 +70,7 @@ namespace Doppler.PushContact.Controllers
         {
             var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink);
+            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl);
 
             var notValidTargetDeviceToken = sendMessageResult
                 .SendMessageTargetResult?
@@ -107,7 +107,7 @@ namespace Doppler.PushContact.Controllers
             var sent = sendMessageResult.SendMessageTargetResult.Count();
             var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
             var notDelivered = sent - delivered;
-            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, sent, delivered, notDelivered);
+            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, sent, delivered, notDelivered, message.ImageUrl);
 
             // TODO: run all steps asynchronous
             // and response an 202-accepted with the message id instead

@@ -21,5 +21,7 @@ namespace Doppler.PushContact.Services.Messages
         public const string NotDeliveredPropName = "not_delivered";
 
         public const string InsertedDatePropName = "inserted_date";
+
+        public const string ImageUrlPropName = "image_url";
     }
 }

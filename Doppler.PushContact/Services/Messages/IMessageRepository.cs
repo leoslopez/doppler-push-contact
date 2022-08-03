@@ -6,7 +6,7 @@ namespace Doppler.PushContact.Services.Messages
 {
     public interface IMessageRepository
     {
-        Task AddAsync(Guid messageId, string domain, string title, string body, string onClickLink, int sent, int delivered, int notDelivered);
+        Task AddAsync(Guid messageId, string domain, string title, string body, string onClickLink, int sent, int delivered, int notDelivered, string imageUrl);
 
         Task<MessageDetails> GetMessageDetailsAsync(string domain, Guid messageId);
 
