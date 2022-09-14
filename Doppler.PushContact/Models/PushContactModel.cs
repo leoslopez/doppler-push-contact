@@ -7,5 +7,7 @@ namespace Doppler.PushContact.Models
         public string DeviceToken { get; set; }
 
         public string Email { get; set; }
+
+        public string VisitorGuid { get; set; }
     }
 }
