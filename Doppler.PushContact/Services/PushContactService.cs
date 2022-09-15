@@ -51,7 +51,7 @@ namespace Doppler.PushContact.Services
                 { PushContactDocumentProps.DomainPropName, pushContactModel.Domain },
                 { PushContactDocumentProps.DeviceTokenPropName, pushContactModel.DeviceToken },
                 { PushContactDocumentProps.EmailPropName, string.IsNullOrEmpty(pushContactModel.Email) ? BsonNull.Value : pushContactModel.Email },
-                { PushContactDocumentProps.VisitorGuid, string.IsNullOrEmpty(pushContactModel.VisitorGuid) ? BsonNull.Value : pushContactModel.VisitorGuid},
+                { PushContactDocumentProps.VisitorGuidPropName, string.IsNullOrEmpty(pushContactModel.VisitorGuid) ? BsonNull.Value : pushContactModel.VisitorGuid},
                 { PushContactDocumentProps.DeletedPropName, false },
                 { PushContactDocumentProps.ModifiedPropName, now }
             };
