@@ -10,6 +10,8 @@ namespace Doppler.PushContact.Services
 
         public const string EmailPropName = "email";
 
+        public const string VisitorGuid = "visitor_guid";
+
         public const string DeletedPropName = "deleted";
 
         public const string ModifiedPropName = "modified";
