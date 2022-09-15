@@ -118,6 +118,57 @@ namespace Doppler.PushContact.Controllers
             });
         }
 
+        [HttpPost]
+        [Route("push-contacts/{domain}/{visitorGuid}/message")]
+        public async Task<IActionResult> MessageByVisitorGuid([FromRoute] string domain, [FromRoute] string visitorGuid, [FromBody] Message message)
+        {
+            var deviceTokens = await _pushContactService.GetAllDeviceTokensByVisitorGuidAsync(visitorGuid);
+
+            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl);
+
+            var notValidTargetDeviceToken = sendMessageResult
+                .SendMessageTargetResult?
+                .Where(x => !x.IsValidTargetDeviceToken)
+                .Select(x => x.TargetDeviceToken);
+
+            if (notValidTargetDeviceToken != null && notValidTargetDeviceToken.Any())
+            {
+                await _pushContactService.DeleteByDeviceTokenAsync(notValidTargetDeviceToken);
+            }
+
+            var now = DateTime.UtcNow;
+            var messageId = Guid.NewGuid();
+
+            var pushContactHistoryEvents = sendMessageResult
+                .SendMessageTargetResult?
+                    .Select(x =>
+                    {
+                        return new PushContactHistoryEvent
+                        {
+                            DeviceToken = x.TargetDeviceToken,
+                            SentSuccess = x.IsSuccess,
+                            EventDate = now,
+                            Details = x.NotSuccessErrorDetails,
+                            MessageId = messageId
+                        };
+                    });
+
+            if (pushContactHistoryEvents != null && pushContactHistoryEvents.Any())
+            {
+                await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
+            }
+
+            var sent = sendMessageResult.SendMessageTargetResult.Count();
+            var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+            var notDelivered = sent - delivered;
+            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, sent, delivered, notDelivered, message.ImageUrl);
+
+            return Ok(new MessageResult
+            {
+                MessageId = messageId
+            });
+        }
+
         [HttpGet]
         [Route("push-contacts/{domain}/messages/{messageId}/details")]
         public async Task<IActionResult> GetMessageDetails([FromRoute] string domain, [FromRoute] Guid messageId)
