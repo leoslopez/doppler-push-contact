@@ -22,5 +22,7 @@ namespace Doppler.PushContact.Services
         Task<IEnumerable<string>> GetAllDeviceTokensByVisitorGuidAsync(string domain);
 
         Task<ApiPage<DomainInfo>> GetDomains(int page, int per_page);
+
+        Task<ApiPage<string>> GetAllVisitorGuidByDomain(string domain, int page, int per_page);
     }
 }

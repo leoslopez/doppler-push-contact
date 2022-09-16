@@ -186,6 +186,29 @@ namespace Doppler.PushContact.Controllers
         }
 
         [HttpGet]
+        [Route("push-contacts/{domain}/visitor-guids")]
+        public async Task<ActionResult<ApiPage<string>>> GetAllVisitorGuidByDomain([FromRoute] string domain, [FromQuery] int page, [FromQuery] int per_page)
+        {
+            if (string.IsNullOrEmpty(domain) || string.IsNullOrWhiteSpace(domain))
+            {
+                return BadRequest($"'{nameof(domain)}' cannot be null, empty or whitespace.");
+            }
+            if (page < 0)
+            {
+                return BadRequest($"'{nameof(page)}' cannot be lesser than 0.");
+            }
+
+            if (per_page <= 0 || per_page > 100)
+            {
+                return BadRequest($"'{nameof(per_page)}' has to be greater than 0 and lesser than 100.");
+            }
+
+            var visitorGuidsList = await _pushContactService.GetAllVisitorGuidByDomain(domain, page, per_page);
+
+            return Ok(new { items = visitorGuidsList });
+        }
+
+        [HttpGet]
         [Route("push-contacts/messages/delivery-results")]
         public async Task<ActionResult<ApiPage<MessageDeliveryResult>>> GetMessages([FromQuery] int page, [FromQuery] int per_page, [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
         {
