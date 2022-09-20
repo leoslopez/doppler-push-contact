@@ -268,6 +268,40 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             }
         }
 
+        public async Task<IEnumerable<string>> GetAllDeviceTokensByVisitorGuidAsync(string visitorGuid)
+        {
+            if (string.IsNullOrEmpty(visitorGuid))
+            {
+                throw new ArgumentException($"'{nameof(visitorGuid)}' cannot be null or empty.", nameof(visitorGuid));
+            }
+
+            var filterBuilder = Builders<BsonDocument>.Filter;
+
+            var filter = filterBuilder.Eq(PushContactDocumentProps.VisitorGuidPropName, visitorGuid)
+                & filterBuilder.Eq(PushContactDocumentProps.DeletedPropName, false);
+
+            var options = new FindOptions<BsonDocument>
+            {
+                Projection = Builders<BsonDocument>.Projection
+                .Include(PushContactDocumentProps.DeviceTokenPropName)
+                .Exclude(PushContactDocumentProps.IdPropName)
+            };
+
+            try
+            {
+                var pushContactsFiltered = await (await PushContacts.FindAsync(filter, options)).ToListAsync();
+
+                return pushContactsFiltered
+                    .Select(x => x.GetValue(PushContactDocumentProps.DeviceTokenPropName).AsString);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting {nameof(PushContactModel)}s by {nameof(visitorGuid)} {visitorGuid}");
+
+                throw;
+            }
+        }
+
         public async Task<ApiPage<DomainInfo>> GetDomains(int page, int per_page)
         {
             try
