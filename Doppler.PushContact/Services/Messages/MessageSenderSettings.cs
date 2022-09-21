@@ -8,6 +8,6 @@ namespace Doppler.PushContact.Services.Messages
 
         public List<int> FatalMessagingErrorCodes { get; set; }
 
-        public int PUSH_TOKENS_LIMIT { get; set; }
+        public int PushTokensLimit { get; set; }
     }
 }

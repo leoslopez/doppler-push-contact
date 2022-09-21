@@ -21,7 +21,7 @@ namespace Doppler.PushContact.Test.Services.Messages
             {
                 PushApiUrl = "https://localhost:9999",
                 FatalMessagingErrorCodes = new List<int>() { 1, 2, 3, 4 },
-                PUSH_TOKENS_LIMIT = 400
+                PushTokensLimit = 400
             };
 
         private static MessageSender CreateSut(
