@@ -61,7 +61,7 @@ namespace Doppler.PushContact.Services.Messages
 
             do
             {
-                IEnumerable<string> tokensSelected = targetDeviceTokens.Skip(tokensSkipped).Take(_messageSenderSettings.PUSH_TOKENS_LIMIT);
+                IEnumerable<string> tokensSelected = targetDeviceTokens.Skip(tokensSkipped).Take(_messageSenderSettings.PushTokensLimit);
                 tokensSkipped += tokensSelected.Count();
 
                 SendMessageResponse messageResponse = await _messageSenderSettings.PushApiUrl
