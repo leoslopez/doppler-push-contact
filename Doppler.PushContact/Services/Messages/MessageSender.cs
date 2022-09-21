@@ -54,7 +54,17 @@ namespace Doppler.PushContact.Services.Messages
             // but maybe it will not be acceptable in all scenarios.
             var pushApiToken = await _pushApiTokenGetter.GetTokenAsync();
 
-            var responseBody = await _messageSenderSettings.PushApiUrl
+            SendMessageResponse responseBody = new();
+            responseBody.Responses = new();
+
+            var tokensSkipped = 0;
+
+            do
+            {
+                IEnumerable<string> tokensSelected = targetDeviceTokens.Skip(tokensSkipped).Take(_messageSenderSettings.PUSH_TOKENS_LIMIT);
+                tokensSkipped += tokensSelected.Count();
+
+                SendMessageResponse messageResponse = await _messageSenderSettings.PushApiUrl
                 .AppendPathSegment("message")
                 .WithOAuthBearerToken(pushApiToken)
                 .PostJsonAsync(new
@@ -62,10 +72,14 @@ namespace Doppler.PushContact.Services.Messages
                     notificationTitle = title,
                     notificationBody = body,
                     NotificationOnClickLink = onClickLink,
-                    tokens = targetDeviceTokens,
+                    tokens = tokensSelected,
                     ImageUrl = imageUrl
                 })
                 .ReceiveJson<SendMessageResponse>();
+
+                responseBody.Responses.AddRange(messageResponse.Responses);
+
+            } while (tokensSkipped < targetDeviceTokens.Count());
 
             return new SendMessageResult
             {

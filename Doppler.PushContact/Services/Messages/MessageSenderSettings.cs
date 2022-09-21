@@ -7,5 +7,7 @@ namespace Doppler.PushContact.Services.Messages
         public string PushApiUrl { get; set; }
 
         public List<int> FatalMessagingErrorCodes { get; set; }
+
+        public int PUSH_TOKENS_LIMIT { get; set; }
     }
 }
