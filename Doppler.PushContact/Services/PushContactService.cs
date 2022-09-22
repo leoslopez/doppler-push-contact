@@ -373,6 +373,26 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             }
         }
 
+        public async Task UpdatePushContactVisitorGuid(string deviceToken, string visitorGuid)
+        {
+            try
+            {
+                var filterBuilder = Builders<BsonDocument>.Filter;
+
+                var filter = filterBuilder.Eq(PushContactDocumentProps.DeviceTokenPropName, deviceToken)
+                    & filterBuilder.Eq(PushContactDocumentProps.DeletedPropName, false);
+
+                var updateDefinition = Builders<BsonDocument>.Update
+                .Set(PushContactDocumentProps.VisitorGuidPropName, visitorGuid);
+
+                await PushContacts.UpdateOneAsync(filter, updateDefinition);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred updating visitor-guid: {visitorGuid} for the push contact with the {nameof(deviceToken)} {deviceToken}", ex);
+            }
+        }
+
         public async Task<ApiPage<string>> GetAllVisitorGuidByDomain(string domain, int page, int per_page)
         {
             var filterBuilder = Builders<BsonDocument>.Filter;
