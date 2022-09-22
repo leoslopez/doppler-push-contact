@@ -2579,5 +2579,180 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_EMPTY, "example.com")]
+        [InlineData(TestApiUsersData.TOKEN_BROKEN, "example.com")]
+        public async Task GetAllVisitorGuidByDomain_should_return_unauthorized_when_token_is_not_valid(string token, string domain)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20010908, "example.com")]
+        public async Task GetAllVisitorGuidByDomain_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token, string domain)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_EXPIRE_20330518, "example.com")]
+        [InlineData(TestApiUsersData.TOKEN_SUPERUSER_FALSE_EXPIRE_20330518, "example.com")]
+        [InlineData(TestApiUsersData.TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518, "example.com")]
+        public async Task GetAllVisitorGuidByDomain_should_require_a_valid_token_with_isSU_flag(string token, string domain)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("example.com")]
+        public async Task GetAllVisitorGuidByDomain_should_return_unauthorized_when_authorization_header_is_empty(string domain)
+        {
+            // Arrange
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids");
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(" ")]
+        public async Task GetAllVisitorGuidByDomain_should_throw_bad_request_when_domain_is_whitespace(string domain)
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var url = $"push-contacts/{domain}/visitor-guids";
+            var request = new HttpRequestMessage(HttpMethod.Get, url)
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("example.com", -1, 1)]
+        public async Task GetAllVisitorGuidByDomain_should_throw_exception_when_page_are_lesser_than_zero(string domain, int _page, int _per_page)
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids?page={_page}&per_page={_per_page}")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("example.com", 0, 0)]
+        [InlineData("example.com", 0, -1)]
+        public async Task GetAllVisitorGuidByDomain_should_throw_exception_when_per_page_are_zero_or_lesser(string domain, int _page, int _per_page)
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/visitor-guids?page={_page}&per_page={_per_page}")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
     }
 }

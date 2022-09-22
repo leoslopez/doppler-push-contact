@@ -913,7 +913,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public async Task GetAllDeviceTokensByDomainAsync_should_throw_argument_exception_when_domain_is_null_or_empty(string domain)
+        public async Task GetAllDeviceTokensByDomainAsync_should_throw_argument_exception_when_domain_is_null_or_empty
+            (string domain)
         {
             // Arrange
             var sut = CreateSut();
@@ -1025,28 +1026,19 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                                     .Single(y => y[PushContactDocumentProps.DomainPropName].AsString == domainFilter && y[PushContactDocumentProps.DeviceTokenPropName].AsString == x));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        public async Task GetAllDeviceTokensByVisitorGuidAsync_should_throw_argument_exception_when_domain_is_null_or_empty(string visitorGuid)
-        {
-            // Arrange
-            var sut = CreateSut();
-
-            // Act
-            // Assert
-            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.GetAllDeviceTokensByVisitorGuidAsync(visitorGuid));
-        }
-
         [Fact]
-        public async Task GetAllDeviceTokensByVisitorGuidAsync_should_throw_exception_and_log_error_when_push_contacts_cannot_be_getter_from_storage()
+        public async Task GetAllVisitorGuidByDomain_should_throw_exception_and_log_error_when_push_contacts_cannot_be_getter_from_storage()
         {
             // Arrange
             var fixture = new Fixture();
 
             var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
-            var visitorGuid = fixture.Create<string>();
+            var domain = fixture.Create<string>();
+
+            var page = fixture.Create<int>();
+
+            var per_page = fixture.Create<int>();
 
             var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
             pushContactsCollectionMock
@@ -1072,36 +1064,40 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             // Act
             // Assert
-            await Assert.ThrowsAsync<Exception>(() => sut.GetAllDeviceTokensByVisitorGuidAsync(visitorGuid));
+            await Assert.ThrowsAsync<Exception>(() => sut.GetAllVisitorGuidByDomain(domain, page, per_page));
 
             loggerMock.Verify(
                 x => x.Log(
                     It.Is<LogLevel>(l => l == LogLevel.Error),
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error getting {nameof(PushContactModel)}s by {nameof(visitorGuid)} {visitorGuid}"),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString() == $"Error getting {nameof(PushContactModel)}s by {nameof(domain)} {domain}"),
                     It.IsAny<Exception>(),
                     It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
                 Times.Once);
         }
 
         [Fact]
-        public async Task GetAllDeviceTokensByVisitorGuidAsync_should_return_device_tokens_filtered_by_visitor_guid()
+        public async Task GetAllVisitorGuidByDomain_should_return_visitor_guids_filtered_by_domain()
         {
             // Arrange
             List<BsonDocument> allPushContactDocuments = FakePushContactDocuments(10);
 
             var random = new Random();
             int randomPushContactIndex = random.Next(allPushContactDocuments.Count);
-            var visitorGuidFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentProps.VisitorGuidPropName].AsString;
+            var domainFilter = allPushContactDocuments[randomPushContactIndex][PushContactDocumentProps.DomainPropName].AsString;
 
             var fixture = new Fixture();
+
+            var page = fixture.Create<int>();
+
+            var per_page = fixture.Create<int>();
 
             var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
 
             var pushContactsCursorMock = new Mock<IAsyncCursor<BsonDocument>>();
             pushContactsCursorMock
                 .Setup(_ => _.Current)
-                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentProps.VisitorGuidPropName].AsString == visitorGuidFilter));
+                .Returns(allPushContactDocuments.Where(x => x[PushContactDocumentProps.DomainPropName].AsString == domainFilter));
 
             pushContactsCursorMock
                 .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
@@ -1133,11 +1129,11 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 Options.Create(pushMongoContextSettings));
 
             // Act
-            var result = await sut.GetAllDeviceTokensByVisitorGuidAsync(visitorGuidFilter);
+            var result = await sut.GetAllVisitorGuidByDomain(domainFilter, page, per_page);
 
             // Assert
-            Assert.All(result, x => allPushContactDocuments
-                                    .Single(y => y[PushContactDocumentProps.VisitorGuidPropName].AsString == visitorGuidFilter && y[PushContactDocumentProps.DeviceTokenPropName].AsString == x));
+            Assert.All(result.Items, x => allPushContactDocuments
+                                    .Single(y => y[PushContactDocumentProps.DomainPropName].AsString == domainFilter && y[PushContactDocumentProps.VisitorGuidPropName].AsString == x));
         }
 
         private static List<BsonDocument> FakePushContactDocuments(int count)
