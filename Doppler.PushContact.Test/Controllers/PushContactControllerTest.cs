@@ -1,4 +1,5 @@
 using AutoFixture;
+using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -481,6 +482,231 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_EMPTY)]
+        [InlineData(TestApiUsersData.TOKEN_BROKEN)]
+        public async Task UpdatePushContactVisitorGuid_should_return_unauthorized_when_token_is_not_valid(string token)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20010908)]
+        public async Task UpdatePushContactVisitorGuid_should_return_unauthorized_when_token_is_a_expired_superuser_token(string token)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(TestApiUsersData.TOKEN_EXPIRE_20330518)]
+        [InlineData(TestApiUsersData.TOKEN_SUPERUSER_FALSE_EXPIRE_20330518)]
+        [InlineData(TestApiUsersData.TOKEN_ACCOUNT_123_TEST1_AT_TEST_DOT_COM_EXPIRE_20330518)]
+        public async Task UpdatePushContactVisitorGuid_should_require_a_valid_token_with_isSU_flag(string token)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {token}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdatePushContactVisitorGuid_should_return_unauthorized_when_authorization_header_is_empty()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdatePushContactVisitorGuid_should_return_ok_when_service_does_not_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdatePushContactVisitorGuid_should_return_internal_server_error_when_service_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ThrowsAsync(new Exception());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(" ", "")]
+        [InlineData("example_device_token", "")]
+        [InlineData("example_device_token", " ")]
+        [InlineData("example_device_token", null)]
+        [InlineData(" ", "example_visitor_guid")]
+        public async Task UpdatePushContactVisitorGuid_should_return_bad_request_when_device_token_or_visitor_guid_are_empty_or_hite_space(string deviceToken, string visitorGuid)
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/visitor-guid")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(visitorGuid)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Theory]
