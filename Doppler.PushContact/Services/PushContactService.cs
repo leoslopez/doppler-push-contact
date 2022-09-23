@@ -395,7 +395,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             {
                 var pushContactsFiltered = await (await PushContacts.FindAsync(filter, options)).ToListAsync();
                 var visitorGuids = pushContactsFiltered.Select(x => x.GetValue(PushContactDocumentProps.VisitorGuidPropName).AsString).ToList();
-                var newPage = page + per_page;
+                var newPage = page + pushContactsFiltered.Count;
 
                 return new ApiPage<string>(visitorGuids, newPage, per_page);
             }
