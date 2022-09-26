@@ -362,6 +362,43 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             await sut.UpdateEmailAsync(deviceToken, email);
         }
 
+        [Fact]
+        public async Task UpdatePushContactVisitorGuid_should_not_throw_exception_when_push_contact_model_can_be_updated()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var visitorGuid = fixture.Create<string>();
+
+            var updateResultMock = new Mock<UpdateResult>();
+
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.UpdateOneAsync(It.IsAny<FilterDefinition<BsonDocument>>(), It.IsAny<UpdateDefinition<BsonDocument>>(), default, default))
+                .ReturnsAsync(updateResultMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushMongoContextSettings));
+
+            // Act
+            // Assert
+            await sut.UpdatePushContactVisitorGuid(deviceToken, visitorGuid);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]

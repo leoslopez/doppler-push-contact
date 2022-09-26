@@ -54,6 +54,24 @@ namespace Doppler.PushContact.Controllers
             return Ok(pushContacts);
         }
 
+        [HttpPut]
+        [Route("/push-contacts/{deviceToken}/visitor-guid")]
+        public async Task<IActionResult> UpdatePushContactVisitorGuid([FromRoute] string deviceToken, [FromBody] string visitorGuid)
+        {
+            if (string.IsNullOrEmpty(deviceToken) || string.IsNullOrWhiteSpace(deviceToken))
+            {
+                return BadRequest($"'{nameof(deviceToken)}' cannot be null, empty or whitespace.");
+            }
+
+            if (string.IsNullOrEmpty(visitorGuid) || string.IsNullOrWhiteSpace(visitorGuid))
+            {
+                return BadRequest($"'{nameof(visitorGuid)}' cannot be null, empty or whitespace.");
+            }
+
+            await _pushContactService.UpdatePushContactVisitorGuid(deviceToken, visitorGuid);
+            return Ok();
+        }
+
         [AllowAnonymous]
         [HttpPut]
         [Route("push-contacts/{deviceToken}/email")]
