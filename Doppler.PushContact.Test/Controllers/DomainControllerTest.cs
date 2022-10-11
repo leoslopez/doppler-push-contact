@@ -441,6 +441,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var domainServiceMock = new Mock<IDomainService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var messageSenderMock = new Mock<IMessageSender>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -448,8 +449,8 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(domainServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
                 });
-
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"domains/{domain}/message")

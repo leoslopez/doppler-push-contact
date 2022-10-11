@@ -15,11 +15,13 @@ namespace Doppler.PushContact.Controllers
     {
         private readonly IDomainService _domainService;
         private readonly IMessageRepository _messageRepository;
+        private readonly IMessageSender _messageSender;
 
-        public DomainController(IDomainService domainService, IMessageRepository messageRepository)
+        public DomainController(IDomainService domainService, IMessageRepository messageRepository, IMessageSender messageSender)
         {
             _domainService = domainService;
             _messageRepository = messageRepository;
+            _messageSender = messageSender;
         }
 
         [HttpPut]
@@ -52,6 +54,9 @@ namespace Doppler.PushContact.Controllers
         [Route("domains/{name}/message")]
         public async Task<IActionResult> CreateMessageAssociatedToDomain([FromRoute] string name, [FromBody] Message message)
         {
+            // TODO: treat error and return a proper error message
+            _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+
             var messageId = Guid.NewGuid();
 
             await _messageRepository.AddAsync(messageId, name, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
