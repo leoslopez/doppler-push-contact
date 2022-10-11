@@ -480,5 +480,50 @@ namespace Doppler.PushContact.Test.Controllers
             var messageResult = await response.Content.ReadFromJsonAsync<MessageResult>();
             Assert.IsType<Guid>(messageResult.MessageId);
         }
+
+        [Fact]
+        public async Task CreateMessageAssociatedToDomain_should_return_internal_server_error_when_messageSender_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = "aTestDomain";
+            var message = new Message
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+            };
+
+            var domainServiceMock = new Mock<IDomainService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            messageSenderMock
+                .Setup(x => x.ValidateMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Throws(new ArgumentException());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(domainServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"domains/{domain}/message")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
     }
 }
