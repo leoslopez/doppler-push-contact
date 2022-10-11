@@ -482,7 +482,7 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task CreateMessageAssociatedToDomain_should_return_internal_server_error_when_messageSender_throw_an_exception()
+        public async Task CreateMessageAssociatedToDomain_should_return_UnprocessableEntity_error_when_messageSender_throw_an_exception()
         {
             // Arrange
             var fixture = new Fixture();
@@ -523,7 +523,7 @@ namespace Doppler.PushContact.Test.Controllers
             _output.WriteLine(response.GetHeadersAsString());
 
             // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
     }
 }

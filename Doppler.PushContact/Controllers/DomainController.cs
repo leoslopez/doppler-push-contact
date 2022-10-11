@@ -54,8 +54,14 @@ namespace Doppler.PushContact.Controllers
         [Route("domains/{name}/message")]
         public async Task<IActionResult> CreateMessageAssociatedToDomain([FromRoute] string name, [FromBody] Message message)
         {
-            // TODO: treat error and return a proper error message
-            _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+            try
+            {
+                _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+            }
+            catch (ArgumentException argExc)
+            {
+                return UnprocessableEntity(argExc.Message);
+            }
 
             var messageId = Guid.NewGuid();
 
