@@ -1,6 +1,7 @@
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -13,10 +14,14 @@ namespace Doppler.PushContact.Controllers
     public class DomainController : ControllerBase
     {
         private readonly IDomainService _domainService;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IMessageSender _messageSender;
 
-        public DomainController(IDomainService domainService)
+        public DomainController(IDomainService domainService, IMessageRepository messageRepository, IMessageSender messageSender)
         {
             _domainService = domainService;
+            _messageRepository = messageRepository;
+            _messageSender = messageSender;
         }
 
         [HttpPut]
@@ -43,6 +48,29 @@ namespace Doppler.PushContact.Controllers
             }
 
             return domain.IsPushFeatureEnabled;
+        }
+
+        [HttpPost]
+        [Route("domains/{name}/message")]
+        public async Task<IActionResult> CreateMessageAssociatedToDomain([FromRoute] string name, [FromBody] Message message)
+        {
+            try
+            {
+                _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+            }
+            catch (ArgumentException argExc)
+            {
+                return UnprocessableEntity(argExc.Message);
+            }
+
+            var messageId = Guid.NewGuid();
+
+            await _messageRepository.AddAsync(messageId, name, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
+
+            return Ok(new MessageResult
+            {
+                MessageId = messageId
+            });
         }
     }
 }

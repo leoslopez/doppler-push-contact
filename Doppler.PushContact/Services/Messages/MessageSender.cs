@@ -22,31 +22,11 @@ namespace Doppler.PushContact.Services.Messages
 
         public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null)
         {
-            if (string.IsNullOrEmpty(title))
-            {
-                throw new ArgumentException($"'{nameof(title)}' cannot be null or empty.", nameof(title));
-            }
-
-            if (string.IsNullOrEmpty(body))
-            {
-                throw new ArgumentException($"'{nameof(body)}' cannot be null or empty.", nameof(body));
-            }
+            ValidateMessage(title, body, onClickLink, imageUrl);
 
             if (targetDeviceTokens == null || !targetDeviceTokens.Any())
             {
                 throw new ArgumentException($"'{nameof(targetDeviceTokens)}' cannot be null or empty.", nameof(targetDeviceTokens));
-            }
-
-            if (!string.IsNullOrEmpty(onClickLink)
-                && (!Uri.TryCreate(onClickLink, UriKind.Absolute, out var onClickLinkResult) || onClickLinkResult.Scheme != Uri.UriSchemeHttps))
-            {
-                throw new ArgumentException($"'{nameof(onClickLink)}' must be an absolute URL with HTTPS scheme.", nameof(onClickLink));
-            }
-
-            if (!string.IsNullOrEmpty(imageUrl)
-                && (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imgUrlResult) || imgUrlResult.Scheme != Uri.UriSchemeHttps))
-            {
-                throw new ArgumentException($"'{nameof(imageUrl)}' must be an absolute URL with HTTPS scheme.", nameof(imageUrl));
             }
 
             // TODO: use adhock token here.
@@ -91,6 +71,31 @@ namespace Doppler.PushContact.Services.Messages
                     NotSuccessErrorDetails = !x.IsSuccess ? $"{nameof(x.Exception.MessagingErrorCode)} {x.Exception.MessagingErrorCode} - {nameof(x.Exception.Message)} {x.Exception.Message}" : null
                 })
             };
+        }
+
+        public void ValidateMessage(string title, string body, string onClickLink, string imageUrl)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                throw new ArgumentException($"'{nameof(title)}' cannot be null or empty.", nameof(title));
+            }
+
+            if (string.IsNullOrEmpty(body))
+            {
+                throw new ArgumentException($"'{nameof(body)}' cannot be null or empty.", nameof(body));
+            }
+
+            if (!string.IsNullOrEmpty(onClickLink)
+                && (!Uri.TryCreate(onClickLink, UriKind.Absolute, out var onClickLinkResult) || onClickLinkResult.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException($"'{nameof(onClickLink)}' must be an absolute URL with HTTPS scheme.", nameof(onClickLink));
+            }
+
+            if (!string.IsNullOrEmpty(imageUrl)
+                && (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var imgUrlResult) || imgUrlResult.Scheme != Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException($"'{nameof(imageUrl)}' must be an absolute URL with HTTPS scheme.", nameof(imageUrl));
+            }
         }
     }
 }
