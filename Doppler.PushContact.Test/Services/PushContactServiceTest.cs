@@ -947,6 +947,17 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 Times.Never);
         }
 
+        [Fact]
+        public async Task UpdatePushContactsAsync_should_throw_argument_exception_when_SendMessageResult_is_null()
+        {
+            // Arrange
+            var messageId = new Guid("ccf7ad9b-bd9a-465a-b240-602c93141bf3");
+            var sut = CreateSut();
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentNullException>(() => sut.UpdatePushContactsAsync(messageId, null));
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]

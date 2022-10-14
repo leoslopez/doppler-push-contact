@@ -1,5 +1,7 @@
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Services.Messages;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +18,8 @@ namespace Doppler.PushContact.Services
         Task<long> DeleteByDeviceTokenAsync(IEnumerable<string> deviceTokens);
 
         Task AddHistoryEventsAsync(IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents);
+
+        Task UpdatePushContactsAsync(Guid messageId, SendMessageResult sendMessageResult);
 
         Task<IEnumerable<string>> GetAllDeviceTokensByDomainAsync(string domain);
 

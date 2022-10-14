@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Doppler.PushContact.ApiModels;
+using Doppler.PushContact.Services.Messages;
 using System.Linq.Expressions;
 
 namespace Doppler.PushContact.Services
@@ -231,6 +232,43 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 _logger.LogError(ex, $"Error adding {nameof(PushContactHistoryEvent)}s");
 
                 throw;
+            }
+        }
+
+        public async Task UpdatePushContactsAsync(Guid messageId, SendMessageResult sendMessageResult)
+        {
+            //TO DO: implement abstraction
+            if (sendMessageResult == null)
+            {
+                throw new ArgumentNullException($"{typeof(SendMessageResult)} cannot be null");
+            }
+
+            var notValidTargetDeviceToken = sendMessageResult
+            .SendMessageTargetResult?
+            .Where(x => !x.IsValidTargetDeviceToken)
+            .Select(x => x.TargetDeviceToken);
+
+            if (notValidTargetDeviceToken != null && notValidTargetDeviceToken.Any())
+            {
+                await DeleteByDeviceTokenAsync(notValidTargetDeviceToken);
+            }
+
+            var now = DateTime.UtcNow;
+
+            var pushContactHistoryEvents = sendMessageResult
+                .SendMessageTargetResult?
+                .Select(x => new PushContactHistoryEvent
+                {
+                    DeviceToken = x.TargetDeviceToken,
+                    SentSuccess = x.IsSuccess,
+                    EventDate = now,
+                    Details = x.NotSuccessErrorDetails,
+                    MessageId = messageId
+                });
+
+            if (pushContactHistoryEvents != null && pushContactHistoryEvents.Any())
+            {
+                await AddHistoryEventsAsync(pushContactHistoryEvents);
             }
         }
 
