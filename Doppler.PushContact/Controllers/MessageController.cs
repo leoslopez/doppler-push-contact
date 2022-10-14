@@ -49,5 +49,38 @@ namespace Doppler.PushContact.Controllers
                 MessageId = messageId
             });
         }
+
+        [HttpPost]
+        [Route("message")]
+        public async Task<IActionResult> CreateMessage([FromBody] MessageBody messageBody)
+        {
+            try
+            {
+                // TODO: analyze remotion of validation for the title and body, it's being doing during model binding with annotations.
+                _messageSender.ValidateMessage(messageBody.Message.Title, messageBody.Message.Body, messageBody.Message.OnClickLink, messageBody.Message.ImageUrl);
+            }
+            catch (ArgumentException argExc)
+            {
+                return UnprocessableEntity(argExc.Message);
+            }
+
+            var messageId = Guid.NewGuid();
+
+            await _messageRepository.AddAsync(
+                messageId, messageBody.Domain,
+                messageBody.Message.Title,
+                messageBody.Message.Body,
+                messageBody.Message.OnClickLink,
+                0,
+                0,
+                0,
+                messageBody.Message.ImageUrl
+            );
+
+            return Ok(new MessageResult
+            {
+                MessageId = messageId
+            });
+        }
     }
 }

@@ -49,28 +49,5 @@ namespace Doppler.PushContact.Controllers
 
             return domain.IsPushFeatureEnabled;
         }
-
-        [HttpPost]
-        [Route("domains/{name}/message")]
-        public async Task<IActionResult> CreateMessageAssociatedToDomain([FromRoute] string name, [FromBody] Message message)
-        {
-            try
-            {
-                _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
-            }
-            catch (ArgumentException argExc)
-            {
-                return UnprocessableEntity(argExc.Message);
-            }
-
-            var messageId = Guid.NewGuid();
-
-            await _messageRepository.AddAsync(messageId, name, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
-
-            return Ok(new MessageResult
-            {
-                MessageId = messageId
-            });
-        }
     }
 }
