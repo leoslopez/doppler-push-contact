@@ -1408,59 +1408,6 @@ namespace Doppler.PushContact.Test.Controllers
         }
 
         [Fact]
-        public async Task Message_should_call_DeleteByDeviceTokenAsync_with_not_valid_target_device_tokens_returned_by_message_sender()
-        {
-            // Arrange
-            var fixture = new Fixture();
-
-            var pushContactServiceMock = new Mock<IPushContactService>();
-            var messageRepositoryMock = new Mock<IMessageRepository>();
-
-            var sendMessageResult = new SendMessageResult
-            {
-                SendMessageTargetResult = fixture.CreateMany<SendMessageTargetResult>(10)
-            };
-            sendMessageResult.SendMessageTargetResult.First().IsValidTargetDeviceToken = false;
-
-            var messageSenderMock = new Mock<IMessageSender>();
-            messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(sendMessageResult);
-
-            var client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.AddSingleton(pushContactServiceMock.Object);
-                    services.AddSingleton(messageSenderMock.Object);
-                    services.AddSingleton(messageRepositoryMock.Object);
-                });
-            }).CreateClient(new WebApplicationFactoryClientOptions());
-
-            var domain = fixture.Create<string>();
-            var message = new Message
-            {
-                Title = fixture.Create<string>(),
-                Body = fixture.Create<string>(),
-                OnClickLink = fixture.Create<string>()
-            };
-
-            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
-            {
-                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(message)
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-
-            // Assert
-            pushContactServiceMock
-                .Verify(x => x.DeleteByDeviceTokenAsync(
-                    It.Is<IEnumerable<string>>(y => y.All(z => sendMessageResult.SendMessageTargetResult.Any(w => w.TargetDeviceToken == z && !w.IsValidTargetDeviceToken)))), Times.Once());
-        }
-
-        [Fact]
         public async Task
             Message_should_does_not_call_AddHistoryEventsAsync_when_message_sender_returned_a_empty_target_result_collection()
         {
@@ -1558,58 +1505,6 @@ namespace Doppler.PushContact.Test.Controllers
             // Assert
             pushContactServiceMock
                 .Verify(x => x.AddHistoryEventsAsync(It.IsAny<IEnumerable<PushContactHistoryEvent>>()), Times.Never());
-        }
-
-        [Fact]
-        public async Task Message_should_call_AddHistoryEventsAsync_with_all_target_device_tokens_returned_by_message_sender()
-        {
-            // Arrange
-            var fixture = new Fixture();
-
-            var pushContactServiceMock = new Mock<IPushContactService>();
-            var messageRepositoryMock = new Mock<IMessageRepository>();
-
-            var sendMessageResult = new SendMessageResult
-            {
-                SendMessageTargetResult = fixture.CreateMany<SendMessageTargetResult>(10)
-            };
-
-            var messageSenderMock = new Mock<IMessageSender>();
-            messageSenderMock
-                .Setup(x => x.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(sendMessageResult);
-
-            var client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.AddSingleton(pushContactServiceMock.Object);
-                    services.AddSingleton(messageSenderMock.Object);
-                    services.AddSingleton(messageRepositoryMock.Object);
-                });
-            }).CreateClient(new WebApplicationFactoryClientOptions());
-
-            var domain = fixture.Create<string>();
-            var message = new Message
-            {
-                Title = fixture.Create<string>(),
-                Body = fixture.Create<string>(),
-                OnClickLink = fixture.Create<string>()
-            };
-
-            var request = new HttpRequestMessage(HttpMethod.Post, $"push-contacts/{domain}/message")
-            {
-                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
-                Content = JsonContent.Create(message)
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-
-            // Assert
-            pushContactServiceMock
-                .Verify(x => x.AddHistoryEventsAsync(
-                It.Is<IEnumerable<PushContactHistoryEvent>>(x => sendMessageResult.SendMessageTargetResult.All(y => x.Any(z => z.DeviceToken == y.TargetDeviceToken)))), Times.Once());
         }
 
         [Fact]
