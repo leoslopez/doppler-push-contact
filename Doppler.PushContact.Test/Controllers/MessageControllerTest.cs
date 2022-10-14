@@ -337,10 +337,13 @@ namespace Doppler.PushContact.Test.Controllers
 
             var message = new MessageBody
             {
-                Title = fixture.Create<string>(),
-                Body = fixture.Create<string>(),
-                OnClickLink = fixture.Create<string>(),
-                ImageUrl = fixture.Create<string>(),
+                Message = new Message()
+                {
+                    Title = fixture.Create<string>(),
+                    Body = fixture.Create<string>(),
+                    OnClickLink = fixture.Create<string>(),
+                    ImageUrl = fixture.Create<string>()
+                },
                 Domain = fixture.Create<string>()
             };
 
@@ -394,8 +397,11 @@ namespace Doppler.PushContact.Test.Controllers
 
             var message = new MessageBody
             {
-                Title = fixture.Create<string>(),
-                Body = fixture.Create<string>(),
+                Message = new Message()
+                {
+                    Title = fixture.Create<string>(),
+                    Body = fixture.Create<string>()
+                },
                 Domain = fixture.Create<string>()
             };
 
@@ -446,9 +452,51 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var message = new MessageBody
             {
-                Title = title,
-                Body = body,
+                Message = new Message()
+                {
+                    Title = title,
+                    Body = body
+                },
                 Domain = domain
+            };
+
+            var pushContactService = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactService.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"message")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+                Content = JsonContent.Create(message)
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateMessage_should_return_BadRequest_error_when_message_field_is_missing()
+        {
+            var fixture = new Fixture();
+
+            // Arrange
+            var message = new MessageBody
+            {
+                Domain = fixture.Create<string>()
             };
 
             var pushContactService = new Mock<IPushContactService>();

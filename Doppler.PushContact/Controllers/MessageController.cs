@@ -52,12 +52,12 @@ namespace Doppler.PushContact.Controllers
 
         [HttpPost]
         [Route("message")]
-        public async Task<IActionResult> CreateMessage([FromBody] MessageBody message)
+        public async Task<IActionResult> CreateMessage([FromBody] MessageBody messageBody)
         {
             try
             {
                 // TODO: analyze remotion of validation for the title and body, it's being doing during model binding with annotations.
-                _messageSender.ValidateMessage(message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+                _messageSender.ValidateMessage(messageBody.Message.Title, messageBody.Message.Body, messageBody.Message.OnClickLink, messageBody.Message.ImageUrl);
             }
             catch (ArgumentException argExc)
             {
@@ -66,7 +66,16 @@ namespace Doppler.PushContact.Controllers
 
             var messageId = Guid.NewGuid();
 
-            await _messageRepository.AddAsync(messageId, message.Domain, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
+            await _messageRepository.AddAsync(
+                messageId, messageBody.Domain,
+                messageBody.Message.Title,
+                messageBody.Message.Body,
+                messageBody.Message.OnClickLink,
+                0,
+                0,
+                0,
+                messageBody.Message.ImageUrl
+            );
 
             return Ok(new MessageResult
             {
