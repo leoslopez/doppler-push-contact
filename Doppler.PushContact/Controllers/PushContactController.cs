@@ -195,7 +195,7 @@ namespace Doppler.PushContact.Controllers
 
             var visitorGuidsList = await _pushContactService.GetAllVisitorGuidByDomain(domain, page, per_page);
 
-            return Ok(new { items = visitorGuidsList });
+            return Ok(visitorGuidsList);
         }
 
         [HttpGet]
