@@ -127,7 +127,7 @@ namespace Doppler.PushContact.Services.Messages
                     Sent = message.GetValue(MessageDocumentProps.SentPropName).AsInt32,
                     Delivered = message.GetValue(MessageDocumentProps.DeliveredPropName).AsInt32,
                     NotDelivered = message.GetValue(MessageDocumentProps.NotDeliveredPropName).AsInt32,
-                    ImageUrl = message.GetValue(MessageDocumentProps.OnClickLinkPropName) == BsonNull.Value ? null : message.GetValue(MessageDocumentProps.ImageUrlPropName).AsString
+                    ImageUrl = message.GetValue(MessageDocumentProps.ImageUrlPropName) == BsonNull.Value ? null : message.GetValue(MessageDocumentProps.ImageUrlPropName).AsString
                 };
             }
             catch (Exception ex)
