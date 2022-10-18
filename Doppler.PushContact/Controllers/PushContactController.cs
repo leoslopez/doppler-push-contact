@@ -108,6 +108,7 @@ namespace Doppler.PushContact.Controllers
             });
         }
 
+        // TODO: move this endpoint to the MessageController
         [HttpPost]
         [Route("push-contacts/{domain}/{visitorGuid}/message")]
         public async Task<IActionResult> MessageByVisitorGuid([FromRoute] string domain, [FromRoute] string visitorGuid, [FromBody] Message message)
@@ -163,15 +164,15 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{domain}/messages/{messageId}/details")]
         public async Task<IActionResult> GetMessageDetails([FromRoute] string domain, [FromRoute] Guid messageId)
         {
-            var messageDetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId);
+            var messageResult = await _pushContactService.GetDeliveredMessageSummarizationAsync(domain, messageId);
 
             return Ok(new
             {
-                messageDetails.Domain,
-                messageDetails.MessageId,
-                messageDetails.Sent,
-                messageDetails.Delivered,
-                messageDetails.NotDelivered
+                messageResult.Domain,
+                MessageId = messageId,
+                Sent = messageResult.SentQuantity,
+                messageResult.Delivered,
+                messageResult.NotDelivered
             });
         }
 
