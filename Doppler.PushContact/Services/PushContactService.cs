@@ -218,7 +218,9 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
                     var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, x.DeviceToken);
 
-                    var update = Builders<BsonDocument>.Update.Push(PushContactDocumentProps.HistoryEventsPropName, historyEvent);
+                    var update = Builders<BsonDocument>.Update
+                    .Push(PushContactDocumentProps.HistoryEventsPropName, historyEvent)
+                    .Set(PushContactDocumentProps.ModifiedPropName, DateTime.UtcNow);
 
                     return new UpdateOneModel<BsonDocument>(filter, update);
                 });
