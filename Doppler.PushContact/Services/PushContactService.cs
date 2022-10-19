@@ -417,18 +417,23 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
         public async Task<MessageDeliveryResult> GetHistoryEventResultByMessageIdAsync(string domain, Guid messageId)
         {
+            var historyEventsMessageIdFieldName = $"{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_MessageIdPropName}";
+            var historyEventsSentSuccessFieldName = $"{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_SentSuccessPropName}";
+
+            BsonBinaryData messageIdFormatted = messageIdFormatted = new BsonBinaryData(messageId, GuidRepresentation.Standard);
+
             try
             {
                 var historyEventsResultFiltered = await PushContacts.Aggregate()
                     .Match(new BsonDocument
                     {
-                        { $"{PushContactDocumentProps.DomainPropName}" , domain },
-                        { $"'{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_MessageIdPropName}'" , new BsonBinaryData(messageId, GuidRepresentation.Standard) }
+                        { $"{PushContactDocumentProps.DomainPropName}", domain },
+                        { historyEventsMessageIdFieldName, messageIdFormatted }
                     })
-                    .Unwind($"'${PushContactDocumentProps.HistoryEventsPropName}'")
+                    .Unwind($"{PushContactDocumentProps.HistoryEventsPropName}")
                     .Match(new BsonDocument
                     {
-                        { $"'{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_MessageIdPropName}'" , new BsonBinaryData(messageId, GuidRepresentation.Standard) }
+                        { historyEventsMessageIdFieldName, messageIdFormatted }
                     })
                     .Project(new BsonDocument
                     {
@@ -440,7 +445,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                                         new BsonDocument("$eq",
                                             new BsonArray
                                             {
-                                                $"'${PushContactDocumentProps.HistoryEventsPropName}.${PushContactDocumentProps.HistoryEvents_SentSuccessPropName}'",
+                                                "$" + historyEventsSentSuccessFieldName,
                                                 true
                                             }),
                                             1,
@@ -453,7 +458,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                                         new BsonDocument("$ne",
                                             new BsonArray
                                             {
-                                                $"'${PushContactDocumentProps.HistoryEventsPropName}.${PushContactDocumentProps.HistoryEvents_SentSuccessPropName}'",
+                                                "$" + historyEventsSentSuccessFieldName,
                                                 true
                                             }),
                                             1,
@@ -462,7 +467,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     })
                     .Group(new BsonDocument
                     {
-                        { $"{PushContactDocumentProps.IdPropName}", 0 },
+                        { $"{PushContactDocumentProps.IdPropName}", BsonNull.Value },
                         { "delivered", new BsonDocument
                             {
                                 { "$sum", "$Pos" } ,
@@ -480,11 +485,11 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 var notDelivered = historyEventsResultFiltered.FirstOrDefault().GetValue("notDelivered", 0).AsInt32;
                 var sent = delivered + notDelivered;
 
-                return new MessageDeliveryResult { Domain = domain, Delivered = delivered, NotDelivered = notDelivered, SentQuantity = sent};
+                return new MessageDeliveryResult { Domain = domain, Delivered = delivered, NotDelivered = notDelivered, SentQuantity = sent };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting {nameof(PushContactHistoryEvent)}s by {nameof(messageId)} {messageId}");
+                _logger.LogError(ex, $"Error summarizing messages from {nameof(PushContactHistoryEvent)}s by {nameof(messageId)} {messageId}");
 
                 throw;
             }

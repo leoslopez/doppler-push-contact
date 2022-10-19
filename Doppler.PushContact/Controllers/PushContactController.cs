@@ -165,15 +165,13 @@ namespace Doppler.PushContact.Controllers
         {
             var messageResult = await _pushContactService.GetHistoryEventResultByMessageIdAsync(domain, messageId);
 
-            var messageDetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId, messageResult.SentQuantity, messageResult.Delivered, messageResult.NotDelivered);
-
             return Ok(new
             {
-                messageDetails.Domain,
-                messageDetails.MessageId,
-                messageDetails.Sent,
-                messageDetails.Delivered,
-                messageDetails.NotDelivered
+                messageResult.Domain,
+                MessageId = messageId,
+                Sent = messageResult.SentQuantity,
+                messageResult.Delivered,
+                messageResult.NotDelivered
             });
         }
 
