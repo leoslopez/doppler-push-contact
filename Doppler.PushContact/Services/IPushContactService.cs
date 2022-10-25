@@ -27,7 +27,7 @@ namespace Doppler.PushContact.Services
 
         Task<ApiPage<DomainInfo>> GetDomains(int page, int per_page);
 
-        Task<MessageDeliveryResult> GetDeliveredMessageSummarizationAsync(string domain, Guid messageId);
+        Task<MessageDeliveryResult> GetDeliveredMessageSummarizationAsync(string domain, Guid messageId, DateTimeOffset from, DateTimeOffset to);
 
         Task UpdatePushContactVisitorGuid(string deviceToken, string visitorGuid);
 
