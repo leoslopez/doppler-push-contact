@@ -412,10 +412,11 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             }
         }
 
-        public async Task<MessageDeliveryResult> GetDeliveredMessageSummarizationAsync(string domain, Guid messageId)
+        public async Task<MessageDeliveryResult> GetDeliveredMessageSummarizationAsync(string domain, Guid messageId, DateTimeOffset from, DateTimeOffset to)
         {
             var historyEventsMessageIdFieldName = $"{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_MessageIdPropName}";
             var historyEventsSentSuccessFieldName = $"{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_SentSuccessPropName}";
+            var historyEventsInsertedDateFieldName = $"{PushContactDocumentProps.HistoryEventsPropName}.{PushContactDocumentProps.HistoryEvents_InsertedDatePropName}";
 
             BsonBinaryData messageIdFormatted = messageIdFormatted = new BsonBinaryData(messageId, GuidRepresentation.Standard);
 
@@ -425,7 +426,12 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     .Match(new BsonDocument
                     {
                         { $"{PushContactDocumentProps.DomainPropName}", domain },
-                        { historyEventsMessageIdFieldName, messageIdFormatted }
+                        { historyEventsMessageIdFieldName, messageIdFormatted },
+                        { historyEventsInsertedDateFieldName, new BsonDocument
+                        {
+                            { "$gte", new BsonDateTime(from.ToUnixTimeMilliseconds()) },
+                            { "$lt", new BsonDateTime(to.ToUnixTimeMilliseconds()) },
+                        }}
                     })
                     .Unwind($"{PushContactDocumentProps.HistoryEventsPropName}")
                     .Match(new BsonDocument
