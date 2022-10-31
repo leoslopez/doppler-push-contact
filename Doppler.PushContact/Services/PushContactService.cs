@@ -484,9 +484,22 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     })
                     .ToListAsync();
 
-                var delivered = historyEventsResultFiltered.FirstOrDefault().GetValue("delivered", 0).AsInt32;
-                var notDelivered = historyEventsResultFiltered.FirstOrDefault().GetValue("notDelivered", 0).AsInt32;
-                var sent = delivered + notDelivered;
+                int delivered;
+                int notDelivered;
+                int sent;
+
+                if (historyEventsResultFiltered.Any())
+                {
+                    delivered = historyEventsResultFiltered.FirstOrDefault().GetValue("delivered", 0).AsInt32;
+                    notDelivered = historyEventsResultFiltered.FirstOrDefault().GetValue("notDelivered", 0).AsInt32;
+                    sent = delivered + notDelivered;
+                }
+                else
+                {
+                    delivered = 0;
+                    notDelivered = 0;
+                    sent = 0;
+                }
 
                 return new MessageDeliveryResult { Domain = domain, Delivered = delivered, NotDelivered = notDelivered, SentQuantity = sent };
             }
