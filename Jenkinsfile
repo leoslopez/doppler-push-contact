@@ -34,7 +34,7 @@ pipeline {
         stage('Publish in dopplerdock') {
             environment {
                 DOCKER_CREDENTIALS_ID = "dockerhub_dopplerdock"
-                DOCKER_IMAGE_NAME = "dopplerdock/doppler-push-contact${PACKAGE_SUFFIX}"
+                DOCKER_IMAGE_NAME = "dopplerdock/doppler-push-contact"
             }
             stages {
                 stage('Publish pre-release images from pull request') {
