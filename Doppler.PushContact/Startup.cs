@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
+using Doppler.PushContact.Services.Queue;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,8 @@ namespace Doppler.PushContact
             services.AddPushServices(Configuration);
             services.AddMessageSender(Configuration);
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
+            services.AddHostedService<QueueBackgroundService>();
             services.AddControllers();
             services.AddCors();
             services.AddSwaggerGen(c =>
