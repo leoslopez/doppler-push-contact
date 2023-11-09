@@ -1562,7 +1562,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             var messageResult = await response.Content.ReadFromJsonAsync<MessageResult>();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
         }
 
         [Fact]
