@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.Services.Queue;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -95,11 +96,13 @@ namespace Doppler.PushContact.Controllers
 
             await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
 
+            string pushApiToken = await HttpContext.GetTokenAsync("Bearer", "access_token");
+
             _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
             {
                 var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-                var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl);
+                var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl, pushApiToken);
 
                 await _pushContactService.UpdatePushContactsAsync(messageId, sendMessageResult);
 
