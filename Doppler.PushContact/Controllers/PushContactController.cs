@@ -6,10 +6,11 @@ using Doppler.PushContact.DopplerSecurity;
 using System;
 using Doppler.PushContact.Services;
 using System.Linq;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.ApiModels;
+using Doppler.PushContact.Services.Queue;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -20,12 +21,17 @@ namespace Doppler.PushContact.Controllers
         private readonly IPushContactService _pushContactService;
         private readonly IMessageSender _messageSender;
         private readonly IMessageRepository _messageRepository;
+        private readonly IBackgroundQueue _backgroundQueue;
 
-        public PushContactController(IPushContactService pushContactService, IMessageSender messageSender, IMessageRepository messageRepository)
+        public PushContactController(IPushContactService pushContactService,
+            IMessageSender messageSender,
+            IMessageRepository messageRepository,
+            IBackgroundQueue backgroundQueue)
         {
             _pushContactService = pushContactService;
             _messageSender = messageSender;
             _messageRepository = messageRepository;
+            _backgroundQueue = backgroundQueue;
         }
 
         [AllowAnonymous]
@@ -86,23 +92,28 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{domain}/message")]
         public async Task<IActionResult> Message([FromRoute] string domain, [FromBody] Message message)
         {
-            var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
-
-            var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl);
-
             var messageId = Guid.NewGuid();
 
-            await _pushContactService.UpdatePushContactsAsync(messageId, sendMessageResult);
+            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, 0, 0, 0, message.ImageUrl);
 
-            var sent = sendMessageResult.SendMessageTargetResult.Count();
-            var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
-            var notDelivered = sent - delivered;
-            await _messageRepository.AddAsync(messageId, domain, message.Title, message.Body, message.OnClickLink, sent, delivered, notDelivered, message.ImageUrl);
+            string pushApiToken = await HttpContext.GetTokenAsync("Bearer", "access_token");
 
-            // TODO: run all steps asynchronous
-            // and response an 202-accepted with the message id instead
+            _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
+            {
+                var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-            return Ok(new MessageResult
+                var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl, pushApiToken);
+
+                await _pushContactService.UpdatePushContactsAsync(messageId, sendMessageResult);
+
+                var sent = sendMessageResult.SendMessageTargetResult.Count();
+                var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+                var notDelivered = sent - delivered;
+
+                await _messageRepository.UpdateDeliveriesAsync(messageId, sent, delivered, notDelivered);
+            });
+
+            return Accepted(new MessageResult()
             {
                 MessageId = messageId
             });

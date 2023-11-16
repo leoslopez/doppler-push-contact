@@ -13,5 +13,7 @@ namespace Doppler.PushContact.Services.Messages
         Task<MessageDetails> GetMessageDetailsByMessageIdAsync(Guid messageId);
 
         Task<ApiPage<MessageDeliveryResult>> GetMessages(int page, int per_page, DateTimeOffset from, DateTimeOffset to);
+
+        Task UpdateDeliveriesAsync(Guid messageId, int sent, int delivered, int notDelivered);
     }
 }

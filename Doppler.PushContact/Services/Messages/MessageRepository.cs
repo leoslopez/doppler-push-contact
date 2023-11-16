@@ -74,6 +74,28 @@ namespace Doppler.PushContact.Services.Messages
             }
         }
 
+        public async Task UpdateDeliveriesAsync(Guid messageId, int sent, int delivered, int notDelivered)
+        {
+            var filterDefinition = Builders<BsonDocument>.Filter
+                .Eq(MessageDocumentProps.MessageIdPropName, new BsonBinaryData(messageId, GuidRepresentation.Standard));
+
+            var updateDefinition = Builders<BsonDocument>.Update
+                .Set(MessageDocumentProps.SentPropName, sent)
+                .Set(MessageDocumentProps.DeliveredPropName, delivered)
+                .Set(MessageDocumentProps.NotDeliveredPropName, notDelivered);
+
+            try
+            {
+                await Messages.UpdateOneAsync(filterDefinition, updateDefinition);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, @$"Error updating message with {nameof(messageId)} {messageId}");
+
+                throw;
+            }
+        }
+
         public async Task<MessageDetails> GetMessageDetailsAsync(string domain, Guid messageId)
         {
             var filterBuilder = Builders<BsonDocument>.Filter;

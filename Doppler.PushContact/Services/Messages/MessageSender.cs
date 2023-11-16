@@ -20,7 +20,7 @@ namespace Doppler.PushContact.Services.Messages
             _pushApiTokenGetter = pushApiTokenGetter;
         }
 
-        public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null)
+        public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null, string pushApiToken = null)
         {
             ValidateMessage(title, body, onClickLink, imageUrl);
 
@@ -32,7 +32,10 @@ namespace Doppler.PushContact.Services.Messages
             // TODO: use adhock token here.
             // It is recovering our client API request to be resusen to request to Push API,
             // but maybe it will not be acceptable in all scenarios.
-            var pushApiToken = await _pushApiTokenGetter.GetTokenAsync();
+            if (string.IsNullOrEmpty(pushApiToken))
+            {
+                pushApiToken = await _pushApiTokenGetter.GetTokenAsync();
+            }
 
             SendMessageResponse responseBody = new();
             responseBody.Responses = new();
