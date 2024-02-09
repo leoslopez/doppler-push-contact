@@ -108,6 +108,11 @@ namespace Doppler.PushContact.Services.Messages
             {
                 BsonDocument message = await (await Messages.FindAsync<BsonDocument>(filter)).SingleOrDefaultAsync();
 
+                if (message == null)
+                {
+                    return null;
+                }
+
                 var messageDetails = new MessageDetails
                 {
                     MessageId = message.GetValue(MessageDocumentProps.MessageIdPropName).AsGuid,
