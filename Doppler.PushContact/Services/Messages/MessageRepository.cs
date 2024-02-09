@@ -108,18 +108,28 @@ namespace Doppler.PushContact.Services.Messages
             {
                 BsonDocument message = await (await Messages.FindAsync<BsonDocument>(filter)).SingleOrDefaultAsync();
 
-                return new MessageDetails
+                var messageDetails = new MessageDetails
                 {
                     MessageId = message.GetValue(MessageDocumentProps.MessageIdPropName).AsGuid,
                     Domain = message.GetValue(MessageDocumentProps.DomainPropName).AsString,
                     Title = message.GetValue(MessageDocumentProps.TitlePropName).AsString,
                     Body = message.GetValue(MessageDocumentProps.BodyPropName).AsString,
-                    OnClickLinkPropName = message.GetValue(MessageDocumentProps.OnClickLinkPropName) == BsonNull.Value ? null : message.GetValue(MessageDocumentProps.OnClickLinkPropName).AsString,
                     Sent = message.GetValue(MessageDocumentProps.SentPropName).AsInt32,
                     Delivered = message.GetValue(MessageDocumentProps.DeliveredPropName).AsInt32,
                     NotDelivered = message.GetValue(MessageDocumentProps.NotDeliveredPropName).AsInt32,
-                    ImageUrl = message.GetValue(MessageDocumentProps.OnClickLinkPropName) == BsonNull.Value ? null : message.GetValue(MessageDocumentProps.ImageUrlPropName).AsString
                 };
+
+                if (message.TryGetValue(MessageDocumentProps.OnClickLinkPropName, out BsonValue onClickLinkValue))
+                {
+                    messageDetails.OnClickLinkPropName = onClickLinkValue == BsonNull.Value ? null : onClickLinkValue.AsString;
+                }
+
+                if (message.TryGetValue(MessageDocumentProps.ImageUrlPropName, out BsonValue imageUrlValue))
+                {
+                    messageDetails.ImageUrl = imageUrlValue == BsonNull.Value ? null : imageUrlValue.AsString;
+                }
+
+                return messageDetails;
             }
             catch (Exception ex)
             {
