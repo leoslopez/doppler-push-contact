@@ -2188,9 +2188,7 @@ namespace Doppler.PushContact.Test.Controllers
             var response = await client.SendAsync(request);
 
             // Assert
-            pushContactServiceMock
-                .Verify(x => x.AddHistoryEventsAsync(
-                It.Is<IEnumerable<PushContactHistoryEvent>>(x => sendMessageResult.SendMessageTargetResult.All(y => x.Any(z => z.DeviceToken == y.TargetDeviceToken)))), Times.Once());
+            pushContactServiceMock.Verify(x => x.AddHistoryEventsAsync(It.IsAny<Guid>(), sendMessageResult), Times.Once());
         }
 
         [Fact]
