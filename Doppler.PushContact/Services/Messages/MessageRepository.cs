@@ -210,6 +210,28 @@ namespace Doppler.PushContact.Services.Messages
             }
         }
 
+        public async Task IncrementMessageStats(Guid messageId, int sent, int delivered, int notDelivered)
+        {
+            var filter = Builders<BsonDocument>
+                .Filter
+                .Eq(MessageDocumentProps.MessageIdPropName, new BsonBinaryData(messageId, GuidRepresentation.Standard));
+
+            var update = Builders<BsonDocument>.Update
+                .Inc(MessageDocumentProps.SentPropName, sent)
+                .Inc(MessageDocumentProps.DeliveredPropName, delivered)
+                .Inc(MessageDocumentProps.NotDeliveredPropName, notDelivered);
+
+            try
+            {
+                var result = await Messages.UpdateOneAsync(filter, update);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, @$"Error incrementing message stats for {nameof(messageId)} {messageId}");
+                throw;
+            }
+        }
+
         private IMongoCollection<BsonDocument> Messages
         {
             get

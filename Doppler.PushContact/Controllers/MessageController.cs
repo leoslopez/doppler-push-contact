@@ -44,6 +44,10 @@ namespace Doppler.PushContact.Controllers
 
             await _pushContactService.UpdatePushContactsAsync(messageId, sendMessageResult);
 
+            var sent = sendMessageResult.SendMessageTargetResult.Count();
+            var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+            await _messageRepository.IncrementMessageStats(messageId, sent, delivered, sent - delivered);
+
             return Ok(new MessageResult
             {
                 MessageId = messageId
