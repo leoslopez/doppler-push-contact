@@ -104,7 +104,7 @@ namespace Doppler.PushContact.Controllers
 
                 var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl, pushApiToken);
 
-                await _pushContactService.UpdatePushContactsAsync(messageId, sendMessageResult);
+                await _pushContactService.AddHistoryEventsAsync(messageId, sendMessageResult);
 
                 var sent = sendMessageResult.SendMessageTargetResult.Count();
                 var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
@@ -128,37 +128,8 @@ namespace Doppler.PushContact.Controllers
 
             var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl);
 
-            var notValidTargetDeviceToken = sendMessageResult
-                .SendMessageTargetResult?
-                .Where(x => !x.IsValidTargetDeviceToken)
-                .Select(x => x.TargetDeviceToken);
-
-            if (notValidTargetDeviceToken != null && notValidTargetDeviceToken.Any())
-            {
-                await _pushContactService.DeleteByDeviceTokenAsync(notValidTargetDeviceToken);
-            }
-
-            var now = DateTime.UtcNow;
             var messageId = Guid.NewGuid();
-
-            var pushContactHistoryEvents = sendMessageResult
-                .SendMessageTargetResult?
-                    .Select(x =>
-                    {
-                        return new PushContactHistoryEvent
-                        {
-                            DeviceToken = x.TargetDeviceToken,
-                            SentSuccess = x.IsSuccess,
-                            EventDate = now,
-                            Details = x.NotSuccessErrorDetails,
-                            MessageId = messageId
-                        };
-                    });
-
-            if (pushContactHistoryEvents != null && pushContactHistoryEvents.Any())
-            {
-                await _pushContactService.AddHistoryEventsAsync(pushContactHistoryEvents);
-            }
+            await _pushContactService.AddHistoryEventsAsync(messageId, sendMessageResult);
 
             var sent = sendMessageResult.SendMessageTargetResult.Count();
             var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);

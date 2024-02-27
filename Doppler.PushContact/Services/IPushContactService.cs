@@ -19,7 +19,7 @@ namespace Doppler.PushContact.Services
 
         Task AddHistoryEventsAsync(IEnumerable<PushContactHistoryEvent> pushContactHistoryEvents);
 
-        Task UpdatePushContactsAsync(Guid messageId, SendMessageResult sendMessageResult);
+        Task AddHistoryEventsAsync(Guid messageId, SendMessageResult sendMessageResult);
 
         Task<IEnumerable<string>> GetAllDeviceTokensByDomainAsync(string domain);
 

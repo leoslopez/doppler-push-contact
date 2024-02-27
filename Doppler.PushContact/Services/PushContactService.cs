@@ -236,7 +236,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             }
         }
 
-        public async Task UpdatePushContactsAsync(Guid messageId, SendMessageResult sendMessageResult)
+        public async Task AddHistoryEventsAsync(Guid messageId, SendMessageResult sendMessageResult)
         {
             //TO DO: implement abstraction
             if (sendMessageResult == null)
