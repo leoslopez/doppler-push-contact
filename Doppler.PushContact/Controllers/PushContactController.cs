@@ -100,17 +100,29 @@ namespace Doppler.PushContact.Controllers
 
             _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
             {
-                var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
+                try
+                {
+                    var deviceTokens = await _pushContactService.GetAllDeviceTokensByDomainAsync(domain);
 
-                var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl, pushApiToken);
+                    if (!deviceTokens.Any())
+                    {
+                        return;
+                    }
 
-                await _pushContactService.AddHistoryEventsAsync(messageId, sendMessageResult);
+                    var sendMessageResult = await _messageSender.SendAsync(message.Title, message.Body, deviceTokens, message.OnClickLink, message.ImageUrl, pushApiToken);
 
-                var sent = sendMessageResult.SendMessageTargetResult.Count();
-                var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
-                var notDelivered = sent - delivered;
+                    await _pushContactService.AddHistoryEventsAsync(messageId, sendMessageResult);
 
-                await _messageRepository.UpdateDeliveriesAsync(messageId, sent, delivered, notDelivered);
+                    var sent = sendMessageResult.SendMessageTargetResult.Count();
+                    var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+                    var notDelivered = sent - delivered;
+
+                    await _messageRepository.UpdateDeliveriesAsync(messageId, sent, delivered, notDelivered);
+                }
+                catch (Exception)
+                {
+                    // TODO: add error treatment
+                }
             });
 
             return Accepted(new MessageResult()
