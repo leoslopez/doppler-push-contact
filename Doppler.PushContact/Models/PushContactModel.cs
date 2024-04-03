@@ -9,5 +9,7 @@ namespace Doppler.PushContact.Models
         public string Email { get; set; }
 
         public string VisitorGuid { get; set; }
+
+        public SubscriptionModel Subscription { get; set; }
     }
 }

@@ -31,6 +31,27 @@ namespace Doppler.PushContact.Services
             _logger = logger;
         }
 
+        private BsonDocument GetSubscriptionInfo(PushContactModel pushContactModel)
+        {
+            BsonDocument subscription = null;
+
+            if (pushContactModel.Subscription != null
+                && !string.IsNullOrEmpty(pushContactModel.Subscription.EndPoint)
+                && pushContactModel.Subscription.Keys != null
+                && !string.IsNullOrEmpty(pushContactModel.Subscription.Keys.P256DH)
+                && !string.IsNullOrEmpty(pushContactModel.Subscription.Keys.Auth)
+            )
+            {
+                subscription = new BsonDocument {
+                    { PushContactDocumentProps.Subscription_EndPoint_PropName, pushContactModel.Subscription.EndPoint },
+                    { PushContactDocumentProps.Subscription_P256DH_PropName, pushContactModel.Subscription.Keys.P256DH },
+                    { PushContactDocumentProps.Subscription_Auth_PropName, pushContactModel.Subscription.Keys.Auth },
+                };
+            }
+
+            return subscription;
+        }
+
         public async Task AddAsync(PushContactModel pushContactModel)
         {
             if (pushContactModel == null)
@@ -38,6 +59,7 @@ namespace Doppler.PushContact.Services
                 throw new ArgumentNullException(nameof(pushContactModel));
             }
 
+            // TODO: DeviceToken will be deprecated, remove this validation (should be added a similar validation to the subscription info?)
             if (!await _deviceTokenValidator.IsValidAsync(pushContactModel.DeviceToken))
             {
                 throw new ArgumentException($"{nameof(pushContactModel.DeviceToken)} is not valid");
@@ -46,6 +68,8 @@ namespace Doppler.PushContact.Services
             var now = DateTime.UtcNow;
             var key = ObjectId.GenerateNewId(now).ToString();
 
+            BsonDocument subscription = GetSubscriptionInfo(pushContactModel);
+
             var pushContactDocument = new BsonDocument {
                 { PushContactDocumentProps.IdPropName, key },
                 { PushContactDocumentProps.DomainPropName, pushContactModel.Domain },
@@ -53,7 +77,8 @@ namespace Doppler.PushContact.Services
                 { PushContactDocumentProps.EmailPropName, string.IsNullOrEmpty(pushContactModel.Email) ? BsonNull.Value : pushContactModel.Email },
                 { PushContactDocumentProps.VisitorGuidPropName, string.IsNullOrEmpty(pushContactModel.VisitorGuid) ? BsonNull.Value : pushContactModel.VisitorGuid},
                 { PushContactDocumentProps.DeletedPropName, false },
-                { PushContactDocumentProps.ModifiedPropName, now }
+                { PushContactDocumentProps.ModifiedPropName, now },
+                { PushContactDocumentProps.Subscription_PropName, subscription == null ? BsonNull.Value : subscription },
             };
 
             try
