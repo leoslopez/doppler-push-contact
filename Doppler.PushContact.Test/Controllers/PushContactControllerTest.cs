@@ -2846,5 +2846,185 @@ namespace Doppler.PushContact.Test.Controllers
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
+
+        [Fact]
+        public async Task UpdateSubscription_should_return_bad_request_when_service_throw_argument_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel
+            {
+                EndPoint = fixture.Create<string>(),
+                Keys = new SubscriptionKeys()
+                {
+                    Auth = fixture.Create<string>(),
+                    P256DH = fixture.Create<string>(),
+                }
+            };
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .ThrowsAsync(new ArgumentException());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/subscription")
+            {
+                Content = JsonContent.Create(subscription),
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateSubscription_should_return_internal_server_error_when_service_throw_an_exception()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel
+            {
+                EndPoint = fixture.Create<string>(),
+                Keys = new SubscriptionKeys()
+                {
+                    Auth = fixture.Create<string>(),
+                    P256DH = fixture.Create<string>(),
+                }
+            };
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .ThrowsAsync(new Exception());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/subscription")
+            {
+                Content = JsonContent.Create(subscription),
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateSubscription_should_return_not_found_when_service_return_false()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel
+            {
+                EndPoint = fixture.Create<string>(),
+                Keys = new SubscriptionKeys()
+                {
+                    Auth = fixture.Create<string>(),
+                    P256DH = fixture.Create<string>(),
+                }
+            };
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .ReturnsAsync(false);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/subscription")
+            {
+                Content = JsonContent.Create(subscription),
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateSubscription_should_return_OK_when_service_return_true()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel
+            {
+                EndPoint = fixture.Create<string>(),
+                Keys = new SubscriptionKeys()
+                {
+                    Auth = fixture.Create<string>(),
+                    P256DH = fixture.Create<string>(),
+                }
+            };
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+
+            pushContactServiceMock
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .ReturnsAsync(true);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Put, $"push-contacts/{deviceToken}/subscription")
+            {
+                Content = JsonContent.Create(subscription),
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
