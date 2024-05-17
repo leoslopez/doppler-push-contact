@@ -49,14 +49,25 @@ namespace Doppler.PushContact.Controllers
         [Route("/push-contacts/{deviceToken}/subscription")]
         public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionModel subscription)
         {
-            var contactWasUpdated = await _pushContactService.UpdateSubscriptionAsync(deviceToken, subscription);
-            if (contactWasUpdated)
+            try
             {
-                return Ok();
+                var contactWasUpdated = await _pushContactService.UpdateSubscriptionAsync(deviceToken, subscription);
+                if (contactWasUpdated)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound("Unexistent 'deviceToken'");
+                }
             }
-            else
+            catch (ArgumentException argEx)
             {
-                return NotFound("Unexistent 'deviceToken'");
+                return BadRequest(argEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
             }
         }
 

@@ -96,7 +96,47 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
         public async Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription)
         {
-            return true;
+            if (string.IsNullOrEmpty(deviceToken) || string.IsNullOrWhiteSpace(deviceToken))
+            {
+                throw new ArgumentException($"'{nameof(deviceToken)}' cannot be null, empty or whitespace.");
+            }
+
+            if (string.IsNullOrEmpty(subscription.EndPoint) || string.IsNullOrEmpty(subscription.Keys.P256DH) || string.IsNullOrEmpty(subscription.Keys.Auth))
+            {
+                throw new ArgumentException($"'{nameof(subscription)}' fields cannot be null, empty or whitespace.");
+            }
+
+            if (!Uri.IsWellFormedUriString(subscription.EndPoint, UriKind.Absolute))
+            {
+                throw new ArgumentException($"'{nameof(subscription)}' pass a subscription with at least a valid endpoint.");
+            }
+
+            BsonDocument subscriptionDocument = new BsonDocument {
+                { PushContactDocumentProps.Subscription_EndPoint_PropName, subscription.EndPoint },
+                { PushContactDocumentProps.Subscription_P256DH_PropName, subscription.Keys.P256DH },
+                { PushContactDocumentProps.Subscription_Auth_PropName, subscription.Keys.Auth },
+            };
+
+            var updateFilter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeviceTokenPropName, deviceToken)
+                & Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.DeletedPropName, false);
+
+            var updateDefinition = Builders<BsonDocument>.Update
+                .Set(PushContactDocumentProps.Subscription_PropName, subscriptionDocument)
+                .Set(PushContactDocumentProps.ModifiedPropName, DateTime.UtcNow);
+
+            try
+            {
+                var result = await PushContacts.UpdateOneAsync(updateFilter, updateDefinition);
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = @$"Error updating {nameof(PushContactModel)} with {nameof(deviceToken)} {deviceToken}.
+                    {PushContactDocumentProps.Subscription_PropName} can not be updated with following value: {subscriptionDocument}";
+                _logger.LogError(ex, errorMessage);
+
+                throw;
+            }
         }
 
         public async Task UpdateEmailAsync(string deviceToken, string email)
