@@ -101,6 +101,11 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 throw new ArgumentException($"'{nameof(deviceToken)}' cannot be null, empty or whitespace.");
             }
 
+            if (subscription == null)
+            {
+                throw new ArgumentException($"'{nameof(subscription)}' cannot be null.");
+            }
+
             if (string.IsNullOrEmpty(subscription.EndPoint) || string.IsNullOrEmpty(subscription.Keys.P256DH) || string.IsNullOrEmpty(subscription.Keys.Auth))
             {
                 throw new ArgumentException($"'{nameof(subscription)}' fields cannot be null, empty or whitespace.");
@@ -131,8 +136,8 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             }
             catch (Exception ex)
             {
-                var errorMessage = @$"Error updating {nameof(PushContactModel)} with {nameof(deviceToken)} {deviceToken}.
-                    {PushContactDocumentProps.Subscription_PropName} can not be updated with following value: {subscriptionDocument}";
+                var errorMessage = $@"Error updating {nameof(PushContactModel)} with {nameof(deviceToken)} {deviceToken}." +
+                    $" The {PushContactDocumentProps.Subscription_PropName} can not be updated with following value: {subscriptionDocument}";
                 _logger.LogError(ex, errorMessage);
 
                 throw;
