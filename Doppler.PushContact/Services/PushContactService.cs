@@ -94,6 +94,11 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             }
         }
 
+        public async Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription)
+        {
+            return true;
+        }
+
         public async Task UpdateEmailAsync(string deviceToken, string email)
         {
             if (deviceToken == null)

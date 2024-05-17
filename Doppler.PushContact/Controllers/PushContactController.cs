@@ -44,6 +44,22 @@ namespace Doppler.PushContact.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
+        [HttpPut]
+        [Route("/push-contacts/{deviceToken}/subscription")]
+        public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionModel subscription)
+        {
+            var contactWasUpdated = await _pushContactService.UpdateSubscriptionAsync(deviceToken, subscription);
+            if (contactWasUpdated)
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound("Unexistent 'deviceToken'");
+            }
+        }
+
         [HttpGet]
         [Route("push-contacts")]
         public async Task<IActionResult> GetBy([FromQuery, Required] string domain, [FromQuery] string email, [FromQuery] DateTime? modifiedFrom, [FromQuery] DateTime? modifiedTo)

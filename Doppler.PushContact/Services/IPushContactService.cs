@@ -11,6 +11,8 @@ namespace Doppler.PushContact.Services
     {
         Task AddAsync(PushContactModel pushContactModel);
 
+        Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription);
+
         Task UpdateEmailAsync(string deviceToken, string email);
 
         Task<IEnumerable<PushContactModel>> GetAsync(PushContactFilter pushContactFilter);
