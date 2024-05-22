@@ -1287,6 +1287,210 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             Assert.IsType<bool>(result);
         }
 
+        [Fact]
+        public async Task UpdateSubscriptionAsync_should_throw_ArgumentException_when_device_token_is_null()
+        {
+            // Arrange
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(null, new SubscriptionModel()));
+        }
+
+        [Fact]
+        public async Task UpdateSubscriptionAsync_should_throw_ArgumentException_when_subscription_is_null()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+
+            var sut = CreateSut();
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(deviceToken, null));
+        }
+
+        [Theory]
+        [InlineData(null, null, null)]
+        [InlineData("aEndpoint", null, null)]
+        [InlineData("aEndpoint", "aP256DH", null)]
+        [InlineData("aEndpoint", null, "aAuth")]
+        [InlineData(null, null, "aAuth")]
+        public async Task UpdateSubscriptionAsync_should_throw_ArgumentException_when_subscription_fields_are_null_or_empty(
+            string endpoint,
+            string p256dh,
+            string auth
+        )
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+
+            var sut = CreateSut();
+
+            var subscription = new SubscriptionModel()
+            {
+                EndPoint = endpoint,
+                Keys = new SubscriptionKeys()
+                {
+                    P256DH = p256dh,
+                    Auth = auth,
+                },
+            };
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(deviceToken, subscription));
+        }
+
+        [Theory]
+        [InlineData("www.missing-protocol.com")]
+        [InlineData("http:/www.missing-slash-in-protocol.com")]
+        [InlineData("http//www.missing-colon-in-protocol.com")]
+        [InlineData("https://www .white-space-in-domain.com")]
+        [InlineData("https://www.whit-spaces-in-path.com/path with spaces")]
+        public async Task UpdateSubscriptionAsync_should_throw_ArgumentException_when_subscription_endpoint_is_bad_formed(string endpoint)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var deviceToken = fixture.Create<string>();
+
+            var sut = CreateSut();
+
+            var subscription = new SubscriptionModel()
+            {
+                EndPoint = endpoint,
+                Keys = new SubscriptionKeys()
+                {
+                    P256DH = fixture.Create<string>(),
+                    Auth = fixture.Create<string>(),
+                },
+            };
+
+            // Act
+            // Assert
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(deviceToken, subscription));
+        }
+
+        [Fact]
+        public async Task UpdateSubscriptionAsync_should_throw_exception_and_log_error_when_push_contact_model_cannot_be_updated()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel()
+            {
+                EndPoint = "https://www.test-endpoint.com",
+                Keys = new SubscriptionKeys()
+                {
+                    P256DH = fixture.Create<string>(),
+                    Auth = fixture.Create<string>(),
+                },
+            };
+
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.UpdateOneAsync(
+                        It.IsAny<FilterDefinition<BsonDocument>>(),
+                        It.IsAny<UpdateDefinition<BsonDocument>>(),
+                        default,
+                        default
+                    )
+                )
+                .ThrowsAsync(new Exception());
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushMongoContextSettings),
+                logger: loggerMock.Object);
+
+            var errorMsgExpected = $@"Error updating {nameof(PushContactModel)} with {nameof(deviceToken)} {deviceToken}." +
+                    $" The {PushContactDocumentProps.Subscription_PropName} can not be updated with following value:";
+
+            // Act
+            // Assert
+            await Assert.ThrowsAsync<Exception>(() => sut.UpdateSubscriptionAsync(deviceToken, subscription));
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Error),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains(errorMsgExpected)),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateSubscriptionAsync_should_return_ok_when_push_contact_model_can_be_updated()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var deviceToken = fixture.Create<string>();
+            var subscription = new SubscriptionModel()
+            {
+                EndPoint = "https://www.test-endpoint.com",
+                Keys = new SubscriptionKeys()
+                {
+                    P256DH = fixture.Create<string>(),
+                    Auth = fixture.Create<string>(),
+                },
+            };
+
+            var updateResultMock = new Mock<UpdateResult>();
+            updateResultMock.SetupGet(r => r.ModifiedCount).Returns(1);
+
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
+
+            var pushContactsCollection = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollection
+                .Setup(x => x.UpdateOneAsync(
+                        It.IsAny<FilterDefinition<BsonDocument>>(),
+                        It.IsAny<UpdateDefinition<BsonDocument>>(),
+                        default,
+                        default
+                    )
+                )
+                .ReturnsAsync(updateResultMock.Object);
+
+            var mongoDatabase = new Mock<IMongoDatabase>();
+            mongoDatabase
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollection.Object);
+
+            var mongoClient = new Mock<IMongoClient>();
+            mongoClient
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabase.Object);
+
+            var sut = CreateSut(
+                mongoClient.Object,
+                Options.Create(pushMongoContextSettings));
+
+            // Act
+            var result = await sut.UpdateSubscriptionAsync(deviceToken, subscription);
+
+            // Assert
+            Assert.True(result);
+        }
+
         private static List<BsonDocument> FakePushContactDocuments(int count)
         {
             var fixture = new Fixture();
