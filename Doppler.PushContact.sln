@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doppler.PushContact", "Doppler.PushContact\Doppler.PushContact.csproj", "{F7ECF2EB-1BA6-4C7A-9AB4-E0DCCF73FC51}"
 EndProject
@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc Files", "Misc Files", 
 		docs\send-push-notification-from-doppler-by-domain.png = docs\send-push-notification-from-doppler-by-domain.png
 		verify-w-docker.sh = verify-w-docker.sh
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doppler.PushContact.QueuingService", "Doppler.PushContact.QueuingService\Doppler.PushContact.QueuingService.csproj", "{D7EB0F28-2D96-4F82-B22D-297828BBA830}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +62,18 @@ Global
 		{BF93AC59-A63E-4CA7-AE6C-DC68C78AF452}.Release|x64.Build.0 = Release|Any CPU
 		{BF93AC59-A63E-4CA7-AE6C-DC68C78AF452}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF93AC59-A63E-4CA7-AE6C-DC68C78AF452}.Release|x86.Build.0 = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|x64.Build.0 = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Debug|x86.Build.0 = Debug|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|x64.ActiveCfg = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|x64.Build.0 = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7EB0F28-2D96-4F82-B22D-297828BBA830}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
