@@ -1,4 +1,5 @@
 using AutoFixture;
+using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Messages.ExternalContracts;
@@ -369,6 +370,142 @@ namespace Doppler.PushContact.Test.Services.Messages
             // Assert
             Assert.IsType<Guid>(result);
             Assert.NotEqual(Guid.Empty, result);
+        }
+
+        public static IEnumerable<object[]> InvalidTargetDeviceTokens()
+        {
+            yield return new object[] { null };
+            yield return new object[] { new List<string>() };
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidTargetDeviceTokens))]
+        public async Task SendFirebaseWebPushAsync_should_finish_without_call_to_services_when_devicetokens_is_empty_or_null(List<string> deviceTokens)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var mockPushApiTokenGetter = new Mock<IPushApiTokenGetter>();
+            var mockMessageRepository = new Mock<IMessageRepository>();
+            var mockPushContactService = new Mock<IPushContactService>();
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut(
+                pushApiTokenGetter: mockPushApiTokenGetter.Object,
+                messageRepository: mockMessageRepository.Object,
+                pushContactService: mockPushContactService.Object
+            );
+
+            // Act
+            await sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null);
+
+            // Assert
+            // verify that none the involved services were called
+            mockPushApiTokenGetter.Verify(x => x.GetTokenAsync(), Times.Never);
+            mockMessageRepository.Verify(x => x.UpdateDeliveriesAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockPushContactService.Verify(x => x.AddHistoryEventsAsync(It.IsAny<Guid>(), It.IsAny<SendMessageResult>()), Times.Never);
+            httpTest.ShouldNotHaveMadeACall();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task SendFirebaseWebPushAsync_should_throw_argument_exception_when_title_is_null_or_empty(string title)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = title,
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null));
+
+            // Assert
+            httpTest.ShouldNotHaveMadeACall();
+            Assert.Contains($"'title' cannot be null or empty.", exception.Message);
+            Assert.Equal("title", exception.ParamName);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task SendFirebaseWebPushAsync_should_throw_argument_exception_when_body_is_null_or_empty(string body)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = body,
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null));
+
+            // Assert
+            httpTest.ShouldNotHaveMadeACall();
+            Assert.Contains($"'body' cannot be null or empty.", exception.Message);
+            Assert.Equal("body", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task SendFirebaseWebPushAsync_should_call_to_the_services_related_to_RegisterStatistics_once_SendAsync_finished_ok()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+            var authenticationApiToken = fixture.Create<string>();
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            var sendMessageResponse = fixture.Create<SendMessageResponse>();
+
+            var mockMessageRepository = new Mock<IMessageRepository>();
+            var mockPushContactService = new Mock<IPushContactService>();
+
+            using var httpTest = new HttpTest();
+            httpTest.RespondWithJson(sendMessageResponse, 200);
+
+            var sut = CreateSut(
+                messageRepository: mockMessageRepository.Object,
+                pushContactService: mockPushContactService.Object
+            );
+
+            // Act
+            await sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, authenticationApiToken);
+
+            // Assert
+            httpTest.ShouldHaveCalled($"{messageSenderSettingsDefault.PushApiUrl}/message")
+                .WithVerb(HttpMethod.Post)
+                .Times(1);
+            mockPushContactService.Verify(x => x.AddHistoryEventsAsync(webPushDTO.MessageId, It.IsAny<SendMessageResult>()), Times.Once);
+            mockMessageRepository.Verify(x => x.UpdateDeliveriesAsync(webPushDTO.MessageId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
         }
     }
 }

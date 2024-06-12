@@ -123,7 +123,7 @@ namespace Doppler.PushContact.Services.Messages
 
         public async Task SendFirebaseWebPushAsync(WebPushDTO webPushDTO, List<string> deviceTokens, string authenticationApiToken)
         {
-            if (!deviceTokens.Any())
+            if (deviceTokens == null || !deviceTokens.Any())
             {
                 return;
             }
