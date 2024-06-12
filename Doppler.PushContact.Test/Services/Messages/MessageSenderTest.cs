@@ -1,4 +1,5 @@
 using AutoFixture;
+using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Messages.ExternalContracts;
 using Flurl.Http;
@@ -27,13 +28,15 @@ namespace Doppler.PushContact.Test.Services.Messages
         private static MessageSender CreateSut(
             IPushApiTokenGetter pushApiTokenGetter = null,
             IOptions<MessageSenderSettings> messageSenderSettings = null,
-            MessageRepository messageRepository = null
+            IMessageRepository messageRepository = null,
+            IPushContactService pushContactService = null
         )
         {
             return new MessageSender(
                 messageSenderSettings ?? Options.Create(messageSenderSettingsDefault),
                 pushApiTokenGetter ?? Mock.Of<IPushApiTokenGetter>(),
-                messageRepository ?? Mock.Of<IMessageRepository>()
+                messageRepository ?? Mock.Of<IMessageRepository>(),
+                pushContactService ?? Mock.Of<IPushContactService>()
             );
         }
 
