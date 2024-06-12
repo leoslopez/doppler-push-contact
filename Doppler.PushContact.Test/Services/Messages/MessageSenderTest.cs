@@ -26,11 +26,15 @@ namespace Doppler.PushContact.Test.Services.Messages
 
         private static MessageSender CreateSut(
             IPushApiTokenGetter pushApiTokenGetter = null,
-            IOptions<MessageSenderSettings> messageSenderSettings = null)
+            IOptions<MessageSenderSettings> messageSenderSettings = null,
+            MessageRepository messageRepository = null
+        )
         {
             return new MessageSender(
                 messageSenderSettings ?? Options.Create(messageSenderSettingsDefault),
-                pushApiTokenGetter ?? Mock.Of<IPushApiTokenGetter>());
+                pushApiTokenGetter ?? Mock.Of<IPushApiTokenGetter>(),
+                messageRepository ?? Mock.Of<IMessageRepository>()
+            );
         }
 
         [Theory]

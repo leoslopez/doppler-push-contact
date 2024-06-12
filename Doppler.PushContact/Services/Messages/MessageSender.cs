@@ -13,11 +13,16 @@ namespace Doppler.PushContact.Services.Messages
     {
         private readonly MessageSenderSettings _messageSenderSettings;
         private readonly IPushApiTokenGetter _pushApiTokenGetter;
+        private readonly IMessageRepository _messageRepository;
 
-        public MessageSender(IOptions<MessageSenderSettings> messageSenderSettings, IPushApiTokenGetter pushApiTokenGetter)
+        public MessageSender(
+            IOptions<MessageSenderSettings> messageSenderSettings,
+            IPushApiTokenGetter pushApiTokenGetter,
+            IMessageRepository messageRepository)
         {
             _messageSenderSettings = messageSenderSettings.Value;
             _pushApiTokenGetter = pushApiTokenGetter;
+            _messageRepository = messageRepository;
         }
 
         public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null, string pushApiToken = null)
@@ -74,6 +79,16 @@ namespace Doppler.PushContact.Services.Messages
                     NotSuccessErrorDetails = !x.IsSuccess ? $"{nameof(x.Exception.MessagingErrorCode)} {x.Exception.MessagingErrorCode} - {nameof(x.Exception.Message)} {x.Exception.Message}" : null
                 })
             };
+        }
+
+        public async Task<Guid> AddMessageAsync(string domain, string title, string body, string onClickLink, string imageUrl)
+        {
+            ValidateMessage(title, body, onClickLink, imageUrl);
+
+            var messageId = Guid.NewGuid();
+            await _messageRepository.AddAsync(messageId, domain, title, body, onClickLink, 0, 0, 0, imageUrl);
+
+            return messageId;
         }
 
         public void ValidateMessage(string title, string body, string onClickLink, string imageUrl)
