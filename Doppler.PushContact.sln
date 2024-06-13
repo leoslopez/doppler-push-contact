@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc Files", "Misc Files", 
 		.prettierignore = .prettierignore
 		docs\add-new-push-contact-sd.png = docs\add-new-push-contact-sd.png
 		api-contracts.http = api-contracts.http
+		backing-services-stack.yml = backing-services-stack.yml
 		build-n-publish.sh = build-n-publish.sh
 		demo.http = demo.http
 		Dockerfile = Dockerfile

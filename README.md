@@ -114,3 +114,24 @@ Doppler->>+DopplerUser: Automation report
 # MongoDB ER diagram
 
 ![diagrama ER mongodb push notifications](https://user-images.githubusercontent.com/57307782/176199725-dc81a9aa-4ff6-4a14-beb1-dac2ebe9aa17.png)
+
+# To run the backend services
+
+1. **Run the `backing-services-stack.yml` file**:
+   To start up the services defined in `backing-services-stack.yml` file, use the following command:
+
+   ```sh
+   docker-compose -f backing-services-stack.yml up
+   ```
+
+   If you want them to run in the background (detached mode), add the `-d` option:
+
+   ```sh
+   docker-compose -f backing-services-stack.yml up -d
+   ```
+
+2. **Stop the services**:
+   To stop and remove the services use the following command:
+   ```sh
+   docker-compose -f backing-services-stack.yml down
+   ```
