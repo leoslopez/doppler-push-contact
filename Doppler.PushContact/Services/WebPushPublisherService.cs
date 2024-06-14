@@ -19,15 +19,18 @@ namespace Doppler.PushContact.Services
         private readonly IPushContactService _pushContactService;
         private readonly IBackgroundQueue _backgroundQueue;
         private readonly IMessageSender _messageSender;
-        private readonly ILogger<MessageController> _logger;
+        private readonly ILogger<WebPushPublisherService> _logger;
         private readonly IMessageQueuePublisher _messageQueuePublisher;
         private readonly Dictionary<string, List<string>> _pushEndpointMappings;
+
+        private const string QUEUE_NAME_SUFIX = "webpush.queue";
+        private const string DEFAULT_QUEUE_NAME = $"default.{QUEUE_NAME_SUFIX}";
 
         public WebPushPublisherService(
             IPushContactService pushContactService,
             IBackgroundQueue backgroundQueue,
             IMessageSender messageSender,
-            ILogger<MessageController> logger,
+            ILogger<WebPushPublisherService> logger,
             IMessageQueuePublisher messageQueuePublisher,
             IOptions<WebPushQueueSettings> webPushQueueSettings
         )
@@ -115,12 +118,12 @@ namespace Doppler.PushContact.Services
                 {
                     if (endpoint.StartsWith(url, StringComparison.OrdinalIgnoreCase))
                     {
-                        return $"{mapping.Key}.webpush.queue";
+                        return $"{mapping.Key}.{QUEUE_NAME_SUFIX}";
                     }
                 }
             }
 
-            return "default.webpush.queue";
+            return DEFAULT_QUEUE_NAME;
         }
     }
 }
