@@ -5,6 +5,7 @@ using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -20,13 +21,15 @@ namespace Doppler.PushContact.Services
         private readonly IMessageSender _messageSender;
         private readonly ILogger<MessageController> _logger;
         private readonly IMessageQueuePublisher _messageQueuePublisher;
+        private readonly Dictionary<string, List<string>> _pushEndpointMappings;
 
         public WebPushPublisherService(
             IPushContactService pushContactService,
             IBackgroundQueue backgroundQueue,
             IMessageSender messageSender,
             ILogger<MessageController> logger,
-            IMessageQueuePublisher messageQueuePublisher
+            IMessageQueuePublisher messageQueuePublisher,
+            IOptions<WebPushQueueSettings> webPushQueueSettings
         )
         {
             _pushContactService = pushContactService;
@@ -34,6 +37,7 @@ namespace Doppler.PushContact.Services
             _messageSender = messageSender;
             _logger = logger;
             _messageQueuePublisher = messageQueuePublisher;
+            _pushEndpointMappings = webPushQueueSettings.Value.PushEndpointMappings;
         }
 
         public void ProcessWebPush(string domain, WebPushDTO messageDTO, string authenticationApiToken = null)
@@ -103,31 +107,20 @@ namespace Doppler.PushContact.Services
                 );
             }
         }
-
-        // TODO: obtains queue names and endpoints for each service from config
-        private string GetQueueName(string endpoint)
+        public string GetQueueName(string endpoint)
         {
-            if (endpoint.StartsWith("https://fcm.googleapis.com", StringComparison.OrdinalIgnoreCase))
+            foreach (var mapping in _pushEndpointMappings)
             {
-                return "google.notification.queue";
+                foreach (var url in mapping.Value)
+                {
+                    if (endpoint.StartsWith(url, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return $"{mapping.Key}.webpush.queue";
+                    }
+                }
             }
 
-            if (endpoint.StartsWith("https://updates.push.services.mozilla.com", StringComparison.OrdinalIgnoreCase))
-            {
-                return "mozilla.notification.queue";
-            }
-
-            if (endpoint.StartsWith("https://wns.windows.com", StringComparison.OrdinalIgnoreCase))
-            {
-                return "microsoft.notification.queue";
-            }
-
-            if (endpoint.StartsWith("https://api.push.apple.com", StringComparison.OrdinalIgnoreCase))
-            {
-                return "apple.notification.queue";
-            }
-
-            return "default.notification.queue";
+            return "default.webpush.queue";
         }
     }
 }

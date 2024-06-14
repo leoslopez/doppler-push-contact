@@ -1,3 +1,4 @@
+using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,8 @@ namespace Doppler.PushContact.Services
             services.AddScoped<IPushContactService, PushContactService>();
 
             services.AddScoped<IDomainService, DomainService>();
+
+            services.Configure<WebPushQueueSettings>(configuration.GetSection(nameof(WebPushQueueSettings)));
 
             return services;
         }
