@@ -1,3 +1,4 @@
+using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Services.Messages.ExternalContracts;
 using Flurl;
 using Flurl.Http;
@@ -13,11 +14,20 @@ namespace Doppler.PushContact.Services.Messages
     {
         private readonly MessageSenderSettings _messageSenderSettings;
         private readonly IPushApiTokenGetter _pushApiTokenGetter;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IPushContactService _pushContactService;
 
-        public MessageSender(IOptions<MessageSenderSettings> messageSenderSettings, IPushApiTokenGetter pushApiTokenGetter)
+        public MessageSender(
+            IOptions<MessageSenderSettings> messageSenderSettings,
+            IPushApiTokenGetter pushApiTokenGetter,
+            IMessageRepository messageRepository,
+            IPushContactService pushContactService
+        )
         {
             _messageSenderSettings = messageSenderSettings.Value;
             _pushApiTokenGetter = pushApiTokenGetter;
+            _messageRepository = messageRepository;
+            _pushContactService = pushContactService;
         }
 
         public async Task<SendMessageResult> SendAsync(string title, string body, IEnumerable<string> targetDeviceTokens, string onClickLink = null, string imageUrl = null, string pushApiToken = null)
@@ -76,6 +86,16 @@ namespace Doppler.PushContact.Services.Messages
             };
         }
 
+        public async Task<Guid> AddMessageAsync(string domain, string title, string body, string onClickLink, string imageUrl)
+        {
+            ValidateMessage(title, body, onClickLink, imageUrl);
+
+            var messageId = Guid.NewGuid();
+            await _messageRepository.AddAsync(messageId, domain, title, body, onClickLink, 0, 0, 0, imageUrl);
+
+            return messageId;
+        }
+
         public void ValidateMessage(string title, string body, string onClickLink, string imageUrl)
         {
             if (string.IsNullOrEmpty(title))
@@ -99,6 +119,36 @@ namespace Doppler.PushContact.Services.Messages
             {
                 throw new ArgumentException($"'{nameof(imageUrl)}' must be an absolute URL with HTTPS scheme.", nameof(imageUrl));
             }
+        }
+
+        public async Task SendFirebaseWebPushAsync(WebPushDTO webPushDTO, List<string> deviceTokens, string authenticationApiToken)
+        {
+            if (deviceTokens == null || !deviceTokens.Any())
+            {
+                return;
+            }
+
+            var sendMessageResult = await SendAsync(
+                webPushDTO.Title,
+                webPushDTO.Body,
+                deviceTokens,
+                webPushDTO.OnClickLink,
+                webPushDTO.ImageUrl,
+                authenticationApiToken
+            );
+
+            await RegisterStatisticsAsync(webPushDTO.MessageId, sendMessageResult);
+        }
+
+        private async Task RegisterStatisticsAsync(Guid messageId, SendMessageResult sendMessageResult)
+        {
+            await _pushContactService.AddHistoryEventsAsync(messageId, sendMessageResult);
+
+            var sent = sendMessageResult.SendMessageTargetResult.Count();
+            var delivered = sendMessageResult.SendMessageTargetResult.Count(x => x.IsSuccess);
+            var notDelivered = sent - delivered;
+
+            await _messageRepository.UpdateDeliveriesAsync(messageId, sent, delivered, notDelivered);
         }
     }
 }

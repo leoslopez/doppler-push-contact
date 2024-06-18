@@ -1,4 +1,6 @@
 using AutoFixture;
+using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Messages.ExternalContracts;
 using Flurl.Http;
@@ -26,11 +28,17 @@ namespace Doppler.PushContact.Test.Services.Messages
 
         private static MessageSender CreateSut(
             IPushApiTokenGetter pushApiTokenGetter = null,
-            IOptions<MessageSenderSettings> messageSenderSettings = null)
+            IOptions<MessageSenderSettings> messageSenderSettings = null,
+            IMessageRepository messageRepository = null,
+            IPushContactService pushContactService = null
+        )
         {
             return new MessageSender(
                 messageSenderSettings ?? Options.Create(messageSenderSettingsDefault),
-                pushApiTokenGetter ?? Mock.Of<IPushApiTokenGetter>());
+                pushApiTokenGetter ?? Mock.Of<IPushApiTokenGetter>(),
+                messageRepository ?? Mock.Of<IMessageRepository>(),
+                pushContactService ?? Mock.Of<IPushContactService>()
+            );
         }
 
         [Theory]
@@ -249,6 +257,255 @@ namespace Doppler.PushContact.Test.Services.Messages
             httpTest.ShouldHaveCalled($"{messageSenderSettingsDefault.PushApiUrl}/message")
                 .WithVerb(HttpMethod.Post)
                 .Times(1);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task AddMessageAsync_should_throw_argument_exception_when_title_is_null_or_empty(string title)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var body = fixture.Create<string>();
+
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddMessageAsync(domain, title, body, null, null));
+
+            // Assert
+            Assert.Contains($"'title' cannot be null or empty.", exception.Message);
+            Assert.Equal("title", exception.ParamName);
+
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task AddMessageAsync_should_throw_argument_exception_when_body_is_null_or_empty(string body)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddMessageAsync(domain, title, body, null, null));
+
+            // Assert
+            Assert.Contains($"'body' cannot be null or empty.", exception.Message);
+            Assert.Equal("body", exception.ParamName);
+
+        }
+
+        [Theory]
+        [InlineData("http://urlwithhttpschema.com")]
+        [InlineData("urlwithoutschema.com")]
+        [InlineData("//not/absolute/url")]
+        [InlineData("https:invalidurl.com")]
+        [InlineData("https://invalidurl.com<>")]
+        public async Task AddMessageAsync_should_throw_argument_exception_when_onClickLink_isnt_valid_url(string onClickLink)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var imageUrl = "https://www.mydomain.com/myImage.jpg";
+
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddMessageAsync(domain, title, body, onClickLink, imageUrl));
+
+            // Assert
+            Assert.Contains($"'onClickLink' must be an absolute URL with HTTPS scheme.", exception.Message);
+            Assert.Equal("onClickLink", exception.ParamName);
+        }
+
+        [Theory]
+        [InlineData("http://urlwithhttpschema.com/random-resource.img")]
+        [InlineData("urlwithoutschema.com/random-resource.img")]
+        [InlineData("//not/absolute/url/random-resource.img")]
+        [InlineData("https:invalidurl.com/random-resource.img")]
+        [InlineData("https://invalidurl.com<>/random-resource.img")]
+        public async Task AddMessageAsync_should_throw_argument_exception_when_imageUrl_isnt_valid_url(string imageUrl)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var onClickLink = "https://www.mydomain.com";
+
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.AddMessageAsync(domain, title, body, onClickLink, imageUrl));
+
+            // Assert
+            Assert.Contains($"'imageUrl' must be an absolute URL with HTTPS scheme.", exception.Message);
+            Assert.Equal("imageUrl", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task AddMessageAsync_should_return_a_valid_guid()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var onClickLink = "https://www.mydomain.com";
+            var imageUrl = "https://www.mydomain.com/myImage.jpg";
+
+            var sut = CreateSut();
+
+            // Act
+            var result = await sut.AddMessageAsync(domain, title, body, onClickLink, imageUrl);
+
+            // Assert
+            Assert.IsType<Guid>(result);
+            Assert.NotEqual(Guid.Empty, result);
+        }
+
+        public static IEnumerable<object[]> InvalidTargetDeviceTokens()
+        {
+            yield return new object[] { null };
+            yield return new object[] { new List<string>() };
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidTargetDeviceTokens))]
+        public async Task SendFirebaseWebPushAsync_should_finish_without_call_to_services_when_devicetokens_is_empty_or_null(List<string> deviceTokens)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var mockPushApiTokenGetter = new Mock<IPushApiTokenGetter>();
+            var mockMessageRepository = new Mock<IMessageRepository>();
+            var mockPushContactService = new Mock<IPushContactService>();
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut(
+                pushApiTokenGetter: mockPushApiTokenGetter.Object,
+                messageRepository: mockMessageRepository.Object,
+                pushContactService: mockPushContactService.Object
+            );
+
+            // Act
+            await sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null);
+
+            // Assert
+            // verify that none the involved services were called
+            mockPushApiTokenGetter.Verify(x => x.GetTokenAsync(), Times.Never);
+            mockMessageRepository.Verify(x => x.UpdateDeliveriesAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockPushContactService.Verify(x => x.AddHistoryEventsAsync(It.IsAny<Guid>(), It.IsAny<SendMessageResult>()), Times.Never);
+            httpTest.ShouldNotHaveMadeACall();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task SendFirebaseWebPushAsync_should_throw_argument_exception_when_title_is_null_or_empty(string title)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = title,
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null));
+
+            // Assert
+            httpTest.ShouldNotHaveMadeACall();
+            Assert.Contains($"'title' cannot be null or empty.", exception.Message);
+            Assert.Equal("title", exception.ParamName);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task SendFirebaseWebPushAsync_should_throw_argument_exception_when_body_is_null_or_empty(string body)
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = body,
+                MessageId = fixture.Create<Guid>(),
+            };
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            using var httpTest = new HttpTest();
+            var sut = CreateSut();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, null));
+
+            // Assert
+            httpTest.ShouldNotHaveMadeACall();
+            Assert.Contains($"'body' cannot be null or empty.", exception.Message);
+            Assert.Equal("body", exception.ParamName);
+        }
+
+        [Fact]
+        public async Task SendFirebaseWebPushAsync_should_call_to_the_services_related_to_RegisterStatistics_once_SendAsync_finished_ok()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = fixture.Create<string>(),
+                Body = fixture.Create<string>(),
+                MessageId = fixture.Create<Guid>(),
+            };
+            var authenticationApiToken = fixture.Create<string>();
+
+            var deviceTokens = new List<string> { fixture.Create<string>() };
+
+            var sendMessageResponse = fixture.Create<SendMessageResponse>();
+
+            var mockMessageRepository = new Mock<IMessageRepository>();
+            var mockPushContactService = new Mock<IPushContactService>();
+
+            using var httpTest = new HttpTest();
+            httpTest.RespondWithJson(sendMessageResponse, 200);
+
+            var sut = CreateSut(
+                messageRepository: mockMessageRepository.Object,
+                pushContactService: mockPushContactService.Object
+            );
+
+            // Act
+            await sut.SendFirebaseWebPushAsync(webPushDTO, deviceTokens, authenticationApiToken);
+
+            // Assert
+            httpTest.ShouldHaveCalled($"{messageSenderSettingsDefault.PushApiUrl}/message")
+                .WithVerb(HttpMethod.Post)
+                .Times(1);
+            mockPushContactService.Verify(x => x.AddHistoryEventsAsync(webPushDTO.MessageId, It.IsAny<SendMessageResult>()), Times.Once);
+            mockMessageRepository.Verify(x => x.UpdateDeliveriesAsync(webPushDTO.MessageId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
         }
     }
 }

@@ -7,6 +7,10 @@ using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.DTOs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -17,12 +21,22 @@ namespace Doppler.PushContact.Controllers
         private readonly IMessageSender _messageSender;
         private readonly IMessageRepository _messageRepository;
         private readonly IPushContactService _pushContactService;
+        private readonly IWebPushPublisherService _webPushPublisherService;
+        private readonly ILogger<MessageController> _logger;
 
-        public MessageController(IPushContactService pushContactService, IMessageRepository messageRepository, IMessageSender messageSender)
+        public MessageController(
+            IPushContactService pushContactService,
+            IMessageRepository messageRepository,
+            IMessageSender messageSender,
+            IWebPushPublisherService webPushPublisherService,
+            ILogger<MessageController> logger
+        )
         {
             _pushContactService = pushContactService;
             _messageRepository = messageRepository;
             _messageSender = messageSender;
+            _webPushPublisherService = webPushPublisherService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -82,6 +96,52 @@ namespace Doppler.PushContact.Controllers
             );
 
             return Ok(new MessageResult
+            {
+                MessageId = messageId
+            });
+        }
+
+        [HttpPost]
+        [Route("message/domains/{domain}")]
+        public async Task<IActionResult> EnqueueWebPush([FromRoute] string domain, [FromBody] Message message)
+        {
+            Guid messageId;
+            try
+            {
+                messageId = await _messageSender.AddMessageAsync(domain, message.Title, message.Body, message.OnClickLink, message.ImageUrl);
+            }
+            catch (ArgumentException argEx)
+            {
+                return BadRequest(new { error = argEx.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "An unexpected error occurred adding a message for domain: {domain}.",
+                    domain
+                );
+
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new { error = $"An unexpected error occurred: {ex.Message}" }
+                );
+            }
+
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = message.Title,
+                Body = message.Body,
+                OnClickLink = message.OnClickLink,
+                ImageUrl = message.ImageUrl,
+                MessageId = messageId,
+            };
+
+            var authenticationApiToken = await HttpContext.GetTokenAsync("Bearer", "access_token");
+
+            _webPushPublisherService.ProcessWebPush(domain, webPushDTO, authenticationApiToken);
+
+            return Accepted(new MessageResult()
             {
                 MessageId = messageId
             });
