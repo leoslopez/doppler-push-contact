@@ -1,4 +1,3 @@
-using Doppler.PushContact.Controllers;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
