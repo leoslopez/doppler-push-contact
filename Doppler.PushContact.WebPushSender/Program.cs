@@ -1,6 +1,8 @@
+using Doppler.PushContact.WebPushSender.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace Doppler.PushContact.WebPushSender
 {
@@ -14,6 +16,10 @@ namespace Doppler.PushContact.WebPushSender
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog((hostContext, loggerConfiguration) =>
+                {
+                    loggerConfiguration.SetupSeriLog(hostContext.Configuration, hostContext.HostingEnvironment);
+                })
                 .ConfigureAppConfiguration((hostContext, configurationBuilder) =>
                 {
                     // It is if you want to override the configuration in your
