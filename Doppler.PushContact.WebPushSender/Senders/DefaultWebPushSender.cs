@@ -1,15 +1,19 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
 namespace Doppler.PushContact.WebPushSender.Senders
 {
     public class DefaultWebPushSender : WebPushSenderBase
     {
-        // TODO: obtain queueName from config file
-        public DefaultWebPushSender(IMessageQueueSubscriber messageQueueConsumer, ILogger<DefaultWebPushSender> logger)
-            : base("default.webpush.queue", messageQueueConsumer, logger)
+        public DefaultWebPushSender(
+            IOptions<WebPushSenderSettings> webPushSenderSettings,
+            IMessageQueueSubscriber messageQueueConsumer,
+            ILogger<DefaultWebPushSender> logger
+        )
+            : base(webPushSenderSettings, messageQueueConsumer, logger)
         {
         }
 
@@ -17,9 +21,11 @@ namespace Doppler.PushContact.WebPushSender.Senders
         {
             // TODO: consider specific implementation
             _logger.LogInformation(
-                "Process message in 'Default' queue:\n\tEndpoint: {EndPoint}\n\tMessageId: {MessageId}",
+                "Process message in \"{queueName}\":\n\tEndpoint: {EndPoint}\n\tMessageId: {MessageId}",
+                _queueName,
                 message.Subscription.EndPoint,
-                message.MessageId);
+                message.MessageId
+                );
             await Task.Delay(2000);
         }
     }

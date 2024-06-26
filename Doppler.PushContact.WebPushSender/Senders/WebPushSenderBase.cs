@@ -1,6 +1,7 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,14 +12,18 @@ namespace Doppler.PushContact.WebPushSender.Senders
     {
         private readonly IMessageQueueSubscriber _messageQueueSubscriber;
         protected readonly ILogger _logger;
-        private readonly string _queueName;
+        protected readonly string _queueName;
         private IDisposable _queueSubscription;
 
-        protected WebPushSenderBase(string queueName, IMessageQueueSubscriber messageQueueConsumer, ILogger logger)
+        protected WebPushSenderBase(
+            IOptions<WebPushSenderSettings> webPushSenderSettings,
+            IMessageQueueSubscriber messageQueueConsumer,
+            ILogger logger
+        )
         {
             _messageQueueSubscriber = messageQueueConsumer;
             _logger = logger;
-            _queueName = queueName;
+            _queueName = webPushSenderSettings.Value.QueueName;
         }
 
         public async Task StartListeningAsync(CancellationToken cancellationToken)

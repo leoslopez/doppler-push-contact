@@ -39,6 +39,8 @@ namespace Doppler.PushContact.WebPushSender
                     var configuration = hostContext.Configuration;
                     services.AddMessageQueueBroker(configuration);
 
+                    services.Configure<WebPushSenderSettings>(configuration.GetSection(nameof(WebPushSenderSettings)));
+
                     // Register IWebPushSender's
                     services.AddSingleton<IWebPushSender, DefaultWebPushSender>();
 
