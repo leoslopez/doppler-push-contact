@@ -15,4 +15,8 @@
     <PackageReference Include="Serilog.Sinks.Loggly" Version="5.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Doppler.PushContact.QueuingService\Doppler.PushContact.QueuingService.csproj" />
+  </ItemGroup>
+
 </Project>
