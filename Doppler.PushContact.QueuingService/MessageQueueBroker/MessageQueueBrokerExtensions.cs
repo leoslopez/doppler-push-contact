@@ -10,6 +10,7 @@ namespace Doppler.PushContact.QueuingService.MessageQueueBroker
             services.Configure<MessageQueueBrokerSettings>(configuration.GetSection(nameof(MessageQueueBrokerSettings)));
 
             services.AddSingleton<IMessageQueuePublisher, RabbitMessageQueuePublisher>();
+            services.AddSingleton<IMessageQueueSubscriber, RabbitMessageQueueSubscriber>();
 
             return services;
         }

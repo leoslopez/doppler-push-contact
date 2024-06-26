@@ -1,4 +1,7 @@
+using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,18 +9,44 @@ namespace Doppler.PushContact.WebPushSender
 {
     public class SenderExecutor : BackgroundService
     {
-        public SenderExecutor()
+        private readonly IWebPushSender _webPushSender;
+        private readonly ILogger<SenderExecutor> _logger;
+
+        public SenderExecutor(IWebPushSender webPushSender, ILogger<SenderExecutor> logger)
         {
+            _webPushSender = webPushSender;
+            _logger = logger;
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            // TODO: initialize queues
+            try
+            {
+                await _webPushSender.StartListeningAsync(cancellationToken);
+                _logger.LogInformation($"Started listening for {_webPushSender.GetType().Name}.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error starting {_webPushSender.GetType().Name}.");
+                // TODO: decide what to do in case of an error when starting the sender
+            }
+
             await base.StartAsync(cancellationToken);
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
+            try
+            {
+                _webPushSender.StopListeningAsync();
+                _logger.LogInformation($"Stopped listening for {_webPushSender.GetType().Name}.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error stopping {_webPushSender.GetType().Name}.");
+                // TODO: decide what to do in case of an error when stopping the sender
+            }
+
             await base.StopAsync(cancellationToken);
         }
 
@@ -25,8 +54,8 @@ namespace Doppler.PushContact.WebPushSender
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                // TODO: define the delay time in the appsettings file
-                await Task.Delay(1000);
+                // Wait indefinitely until cancellation is requested.
+                await Task.Delay(Timeout.Infinite, stoppingToken);
             }
         }
     }

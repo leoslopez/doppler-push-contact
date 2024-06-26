@@ -1,4 +1,6 @@
+using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.Logging;
+using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +36,12 @@ namespace Doppler.PushContact.WebPushSender
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var configuration = hostContext.Configuration;
+                    services.AddMessageQueueBroker(configuration);
+
+                    // Register IWebPushSender's
+                    services.AddSingleton<IWebPushSender, DefaultWebPushSender>();
+
                     services.AddHostedService<SenderExecutor>();
                 });
     }
