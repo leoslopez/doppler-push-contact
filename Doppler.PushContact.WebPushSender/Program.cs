@@ -48,6 +48,8 @@ namespace Doppler.PushContact.WebPushSender
                                 configuration.GetSection(nameof(WebPushSenderSettings)).GetSection("Type").Value, true)
                             );
 
+                    services.AddSingleton<IWebPushSenderFactory, WebPushSenderFactory>();
+
                     // Register IWebPushSender's
                     services.AddSingleton<IWebPushSender, DefaultWebPushSender>();
 

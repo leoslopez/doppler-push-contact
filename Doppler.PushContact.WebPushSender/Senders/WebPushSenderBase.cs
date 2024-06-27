@@ -17,11 +17,11 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         protected WebPushSenderBase(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
-            IMessageQueueSubscriber messageQueueConsumer,
+            IMessageQueueSubscriber messageQueueSubscriber,
             ILogger logger
         )
         {
-            _messageQueueSubscriber = messageQueueConsumer;
+            _messageQueueSubscriber = messageQueueSubscriber;
             _logger = logger;
             _queueName = webPushSenderSettings.Value.QueueName;
         }

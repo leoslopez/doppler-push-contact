@@ -1,6 +1,7 @@
 using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,9 +13,13 @@ namespace Doppler.PushContact.WebPushSender
         private readonly IWebPushSender _webPushSender;
         private readonly ILogger<SenderExecutor> _logger;
 
-        public SenderExecutor(IWebPushSender webPushSender, ILogger<SenderExecutor> logger)
+        public SenderExecutor(
+            IWebPushSenderFactory webPushSenderFactory,
+            IOptions<WebPushSenderSettings> webPushSenderSettings,
+            ILogger<SenderExecutor> logger
+        )
         {
-            _webPushSender = webPushSender;
+            _webPushSender = webPushSenderFactory.CreateSender(webPushSenderSettings);
             _logger = logger;
         }
 

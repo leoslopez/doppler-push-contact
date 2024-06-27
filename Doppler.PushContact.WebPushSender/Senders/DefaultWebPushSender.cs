@@ -10,10 +10,10 @@ namespace Doppler.PushContact.WebPushSender.Senders
     {
         public DefaultWebPushSender(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
-            IMessageQueueSubscriber messageQueueConsumer,
+            IMessageQueueSubscriber messageQueueSubscriber,
             ILogger<DefaultWebPushSender> logger
         )
-            : base(webPushSenderSettings, messageQueueConsumer, logger)
+            : base(webPushSenderSettings, messageQueueSubscriber, logger)
         {
         }
 
