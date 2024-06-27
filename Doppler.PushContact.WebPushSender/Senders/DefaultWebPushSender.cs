@@ -19,14 +19,13 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         public override async Task HandleMessageAsync(DopplerWebPushDTO message)
         {
-            // TODO: consider specific implementation
-            _logger.LogInformation(
-                "Process message in \"{queueName}\":\n\tEndpoint: {EndPoint}\n\tMessageId: {MessageId}",
+            _logger.LogDebug(
+                "Processing message in \"{QueueName}\":\n\tEndpoint: {EndPoint}",
                 _queueName,
-                message.Subscription.EndPoint,
-                message.MessageId
+                message.Subscription.EndPoint
                 );
-            await Task.Delay(2000);
+
+            await SendWebPush(message);
         }
     }
 }

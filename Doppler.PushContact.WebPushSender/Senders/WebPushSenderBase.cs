@@ -1,5 +1,8 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
+using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
+using Flurl;
+using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -44,5 +47,41 @@ namespace Doppler.PushContact.WebPushSender.Senders
         }
 
         public abstract Task HandleMessageAsync(DopplerWebPushDTO message);
+
+        protected async Task SendWebPush(DopplerWebPushDTO message)
+        {
+            // TODO: add value in appsettings file
+            var pushApiUrl = "https://apisint.fromdoppler.net/doppler-push";
+
+            SendMessageResponse sendMessageResponse = null;
+            try
+            {
+                sendMessageResponse = await pushApiUrl
+                .AppendPathSegment("webpush")
+                // TODO: analyze options to handle (or remove) push api token
+                //.WithOAuthBearerToken(pushApiToken)
+                .PostJsonAsync(new
+                {
+                    subscriptions = new[]
+                    {
+                        new
+                        {
+                            endpoint = message.Subscription.EndPoint,
+                            p256DH = message.Subscription.Keys.P256DH,
+                            auth = message.Subscription.Keys.Auth,
+                        }
+                    },
+                    notificationTitle = message.Title,
+                    notificationBody = message.Body,
+                    notificationOnClickLink = message.OnClickLink,
+                    imageUrl = message.ImageUrl,
+                })
+                .ReceiveJson<SendMessageResponse>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error happened sending web push notification: {ex}");
+            }
+        }
     }
 }
