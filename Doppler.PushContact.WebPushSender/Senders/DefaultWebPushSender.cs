@@ -2,6 +2,7 @@ using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 namespace Doppler.PushContact.WebPushSender.Senders
@@ -23,9 +24,17 @@ namespace Doppler.PushContact.WebPushSender.Senders
                 "Processing message in \"{QueueName}\":\n\tEndpoint: {EndPoint}",
                 _queueName,
                 message.Subscription.EndPoint
-                );
+            );
 
-            await SendWebPush(message);
+            WebPushProcessingResult processingResult = await SendWebPush(message);
+
+            _logger.LogDebug(
+                "Message processed:\n\tEndpoint: {EndPoint}\n\tResult: {WebPushProcessingResult}",
+                message.Subscription.EndPoint,
+                JsonConvert.SerializeObject(processingResult)
+            );
+
+            // TODO: analyze processingResult and take proper actions (register in db, retry, etc)
         }
     }
 }

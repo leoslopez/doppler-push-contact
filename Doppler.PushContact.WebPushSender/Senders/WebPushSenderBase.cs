@@ -5,7 +5,10 @@ using Flurl;
 using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,7 +51,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         public abstract Task HandleMessageAsync(DopplerWebPushDTO message);
 
-        protected async Task SendWebPush(DopplerWebPushDTO message)
+        protected async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
         {
             // TODO: add value in appsettings file
             var pushApiUrl = "https://apisint.fromdoppler.net/doppler-push";
@@ -81,7 +84,62 @@ namespace Doppler.PushContact.WebPushSender.Senders
             catch (Exception ex)
             {
                 _logger.LogError($"An error happened sending web push notification: {ex}");
+
+                return new WebPushProcessingResult()
+                {
+                    FailedProcessing = true,
+                };
             }
+
+            return ProcessWebPushResponse(sendMessageResponse);
+        }
+
+        private WebPushProcessingResult ProcessWebPushResponse(SendMessageResponse sendMessageResponse)
+        {
+            if (sendMessageResponse == null)
+            {
+                return new WebPushProcessingResult { FailedProcessing = false };
+            }
+
+            WebPushProcessingResult processingResult = new WebPushProcessingResult();
+
+            // it has just one response
+            var response = sendMessageResponse.Responses?.FirstOrDefault();
+            processingResult.SuccessfullyDelivered = response != null && response.IsSuccess == true;
+
+            if (response != null && response.IsSuccess == false && response.Exception != null)
+            {
+                switch (response.Exception.MessagingErrorCode)
+                {
+                    case 429:
+                        // TODO: log information to be analyzed and take proper actions
+                        _logger.LogWarning
+                        (
+                            "(Error {WebPushResponseStatusCode}) Too many requests:\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
+                            response.Exception.MessagingErrorCode,
+                            JsonConvert.SerializeObject(response.Subscription),
+                            JsonConvert.SerializeObject(response.Exception)
+                        );
+
+                        processingResult.LimitsExceeded = true;
+                        break;
+
+                    case (int)HttpStatusCode.NotFound:
+                    case (int)HttpStatusCode.Gone:
+                        _logger.LogDebug
+                        (
+                            "(Error {WebPushResponseStatusCode}):\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
+                            response.Exception.MessagingErrorCode,
+                            JsonConvert.SerializeObject(response.Subscription),
+                            JsonConvert.SerializeObject(response.Exception)
+                        );
+
+                        processingResult.InvalidSubscription = true;
+                        break;
+                }
+            }
+
+            return processingResult;
         }
     }
 }
