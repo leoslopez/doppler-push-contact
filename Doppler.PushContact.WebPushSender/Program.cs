@@ -4,7 +4,9 @@ using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
+using System;
 
 namespace Doppler.PushContact.WebPushSender
 {
@@ -39,7 +41,12 @@ namespace Doppler.PushContact.WebPushSender
                     var configuration = hostContext.Configuration;
                     services.AddMessageQueueBroker(configuration);
 
-                    services.Configure<WebPushSenderSettings>(configuration.GetSection(nameof(WebPushSenderSettings)));
+                    services
+                        .Configure<WebPushSenderSettings>(configuration.GetSection(nameof(WebPushSenderSettings)))
+                        .Configure<IOptions<WebPushSenderSettings>>(
+                            options => options.Value.Type = Enum.Parse<WebPushSenderTypes>(
+                                configuration.GetSection(nameof(WebPushSenderSettings)).GetSection("Type").Value, true)
+                            );
 
                     // Register IWebPushSender's
                     services.AddSingleton<IWebPushSender, DefaultWebPushSender>();
