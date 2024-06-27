@@ -16,10 +16,13 @@ namespace Doppler.PushContact.WebPushSender.Senders
 {
     public abstract class WebPushSenderBase : IWebPushSender
     {
+        private const string PUSHAPI_SENDWEBPUSH_PATH = "webpush";
+
         private readonly IMessageQueueSubscriber _messageQueueSubscriber;
         protected readonly ILogger _logger;
         protected readonly string _queueName;
         private IDisposable _queueSubscription;
+        private readonly string _pushApiUrl;
 
         protected WebPushSenderBase(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
@@ -30,6 +33,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
             _messageQueueSubscriber = messageQueueSubscriber;
             _logger = logger;
             _queueName = webPushSenderSettings.Value.QueueName;
+            _pushApiUrl = webPushSenderSettings.Value.PushApiUrl;
         }
 
         public async Task StartListeningAsync(CancellationToken cancellationToken)
@@ -53,14 +57,11 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         protected async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
         {
-            // TODO: add value in appsettings file
-            var pushApiUrl = "https://apisint.fromdoppler.net/doppler-push";
-
             SendMessageResponse sendMessageResponse = null;
             try
             {
-                sendMessageResponse = await pushApiUrl
-                .AppendPathSegment("webpush")
+                sendMessageResponse = await _pushApiUrl
+                .AppendPathSegment(PUSHAPI_SENDWEBPUSH_PATH)
                 // TODO: analyze options to handle (or remove) push api token
                 //.WithOAuthBearerToken(pushApiToken)
                 .PostJsonAsync(new
