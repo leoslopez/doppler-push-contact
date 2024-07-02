@@ -1,0 +1,22 @@
+name: FromDoppler
+
+on:
+  push:
+    branches: ["main", "INT"]
+    tags:
+      - v*.*.*
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  dotnet:
+    name: .NET
+    uses: FromDoppler/.github/.github/workflows/dotnet.yml@main
+  docker-event:
+    if: ${{ github.event_name == 'push' }}
+    name: Continuous Delivery / Event
+    uses: FromDoppler/.github/.github/workflows/continuous-delivery-dockerfile.yml@main
+    secrets: inherit
+    with:
+      dockerfile-path: "Doppler.PushContact.WebPushSender/Dockerfile"
+      docker-image-name: "doppler-push-contact-webpushsender-executor"
