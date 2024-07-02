@@ -29,7 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc Files", "Misc Files", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doppler.PushContact.QueuingService", "Doppler.PushContact.QueuingService\Doppler.PushContact.QueuingService.csproj", "{D7EB0F28-2D96-4F82-B22D-297828BBA830}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doppler.PushContact.WebPushSender", "Doppler.PushContact.WebPushSender\Doppler.PushContact.WebPushSender.csproj", "{DE7A0903-F180-442C-A456-4595BF87A6DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doppler.PushContact.WebPushSender", "Doppler.PushContact.WebPushSender\Doppler.PushContact.WebPushSender.csproj", "{DE7A0903-F180-442C-A456-4595BF87A6DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doppler.PushContact.WebPushSender.Test", "Doppler.PushContact.WebPushSender.Test\Doppler.PushContact.WebPushSender.Test.csproj", "{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +91,18 @@ Global
 		{DE7A0903-F180-442C-A456-4595BF87A6DE}.Release|x64.Build.0 = Release|Any CPU
 		{DE7A0903-F180-442C-A456-4595BF87A6DE}.Release|x86.ActiveCfg = Release|Any CPU
 		{DE7A0903-F180-442C-A456-4595BF87A6DE}.Release|x86.Build.0 = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|x64.Build.0 = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Debug|x86.Build.0 = Debug|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|x64.ActiveCfg = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|x64.Build.0 = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|x86.ActiveCfg = Release|Any CPU
+		{15B9F4C3-CC46-4B93-94DE-32FD7B0A1D7C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
