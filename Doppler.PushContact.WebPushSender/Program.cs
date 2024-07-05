@@ -1,5 +1,6 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.Logging;
+using Doppler.PushContact.WebPushSender.Repositories.Setup;
 using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +53,8 @@ namespace Doppler.PushContact.WebPushSender
 
                     // Register IWebPushSender's
                     services.AddSingleton<IWebPushSender, DefaultWebPushSender>();
+
+                    services.AddMongoDBRepositoryService(configuration);
 
                     services.AddHostedService<SenderExecutor>();
                 });
