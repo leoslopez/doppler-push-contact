@@ -10,5 +10,11 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Models
 
         [BsonElement("date")]
         public DateTime Date { get; set; }
+
+        [BsonElement("message_id")]
+        public Guid MessageId { get; set; }
+
+        [BsonElement("push_contact_id")]
+        public string PushContactId { get; set; }
     }
 }
