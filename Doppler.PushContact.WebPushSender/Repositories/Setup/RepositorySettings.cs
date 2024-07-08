@@ -20,5 +20,7 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
         /// Secret password to use when is not specified in ConnectionUrl
         /// </summary>
         public string SecretPassword { get; set; }
+
+        public string WebPushEventCollectionName { get; set; }
     }
 }
