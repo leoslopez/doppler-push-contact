@@ -4,6 +4,7 @@ using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Senders;
+using Doppler.PushContact.WebPushSender.Test.Senders.Dummies;
 using Flurl.Http.Testing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
-namespace Doppler.PushContact.WebPushSender.Test.Senders
+namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
 {
     // Define delegate
     public delegate Task<WebPushProcessingResult> SendWebPushDelegate(DopplerWebPushDTO message);

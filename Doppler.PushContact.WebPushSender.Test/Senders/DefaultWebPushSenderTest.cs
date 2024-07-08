@@ -12,6 +12,7 @@ using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.Repositories.Models;
 using System.Threading;
 using AutoFixture;
+using Doppler.PushContact.WebPushSender.Test.Senders.Dummies;
 
 namespace Doppler.PushContact.WebPushSender.Test.Senders
 {

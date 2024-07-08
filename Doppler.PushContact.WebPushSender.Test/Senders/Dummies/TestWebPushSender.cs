@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
-namespace Doppler.PushContact.WebPushSender.Test.Senders
+namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
 {
     public class TestWebPushSender : WebPushSenderBase
     {
