@@ -6,8 +6,8 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Models
 {
     public class WebPushEvent
     {
-        [BsonElement("status")]
-        public int Status { get; set; }
+        [BsonElement("type")]
+        public int Type { get; set; }
 
         [BsonElement("date")]
         public DateTime Date { get; set; }

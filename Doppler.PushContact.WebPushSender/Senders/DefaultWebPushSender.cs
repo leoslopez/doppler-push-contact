@@ -48,21 +48,21 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
             if (processingResult.FailedProcessing)
             {
-                webPushEvent.Status = (int)WebPushEventStatus.ProcessingFailed;
+                webPushEvent.Type = (int)WebPushEventType.ProcessingFailed;
                 // TODO: it must to retry
             }
             else if (processingResult.SuccessfullyDelivered)
             {
-                webPushEvent.Status = (int)WebPushEventStatus.Delivered;
+                webPushEvent.Type = (int)WebPushEventType.Delivered;
             }
             else if (processingResult.InvalidSubscription)
             {
-                webPushEvent.Status = (int)WebPushEventStatus.DeliveryFailed;
+                webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
                 // TODO: it must to mark subscription/push-contact as "deleted"
             }
             else if (processingResult.LimitsExceeded)
             {
-                webPushEvent.Status = (int)WebPushEventStatus.DeliveryFailedButRetry;
+                webPushEvent.Type = (int)WebPushEventType.DeliveryFailedButRetry;
                 // TODO: it must to retry
             }
 

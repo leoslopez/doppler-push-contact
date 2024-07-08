@@ -1,6 +1,6 @@
 namespace Doppler.PushContact.WebPushSender.Repositories
 {
-    public enum WebPushEventStatus
+    public enum WebPushEventType
     {
         Delivered = 0,
         Received = 1,
