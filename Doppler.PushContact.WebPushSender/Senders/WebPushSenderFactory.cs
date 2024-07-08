@@ -1,4 +1,5 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,18 +20,21 @@ namespace Doppler.PushContact.WebPushSender.Senders
         {
             var messageQueueSubscriber = _serviceProvider.GetRequiredService<IMessageQueueSubscriber>();
             var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+            var webPushEventRepository = _serviceProvider.GetRequiredService<IWebPushEventRepository>();
 
             return webPushSenderSettings.Value.Type switch
             {
                 WebPushSenderTypes.Default => new DefaultWebPushSender(
                     webPushSenderSettings,
                     messageQueueSubscriber,
-                    loggerFactory.CreateLogger<DefaultWebPushSender>()
+                    loggerFactory.CreateLogger<DefaultWebPushSender>(),
+                    webPushEventRepository
                 ),
                 _ => new DefaultWebPushSender(
                     webPushSenderSettings,
                     messageQueueSubscriber,
-                    loggerFactory.CreateLogger<DefaultWebPushSender>()
+                    loggerFactory.CreateLogger<DefaultWebPushSender>(),
+                    webPushEventRepository
                 ),
             };
         }

@@ -1,8 +1,12 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
+using Doppler.PushContact.WebPushSender.Repositories;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
+using Doppler.PushContact.WebPushSender.Repositories.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System;
 using System.Threading.Tasks;
 
 namespace Doppler.PushContact.WebPushSender.Senders
@@ -12,9 +16,10 @@ namespace Doppler.PushContact.WebPushSender.Senders
         public DefaultWebPushSender(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
             IMessageQueueSubscriber messageQueueSubscriber,
-            ILogger<DefaultWebPushSender> logger
+            ILogger<DefaultWebPushSender> logger,
+            IWebPushEventRepository weshPushEventRepository
         )
-            : base(webPushSenderSettings, messageQueueSubscriber, logger)
+            : base(webPushSenderSettings, messageQueueSubscriber, logger, weshPushEventRepository)
         {
         }
 
@@ -34,7 +39,34 @@ namespace Doppler.PushContact.WebPushSender.Senders
                 JsonConvert.SerializeObject(processingResult)
             );
 
-            // TODO: analyze processingResult and take proper actions (register in db, retry, etc)
+            WebPushEvent webPushEvent = new WebPushEvent()
+            {
+                Date = DateTime.UtcNow,
+                MessageId = message.MessageId,
+                // TODO: add PushContactId in the message stored in the queue and register here
+            };
+
+            if (processingResult.FailedProcessing)
+            {
+                webPushEvent.Status = (int)WebPushEventStatus.ProcessingFailed;
+                // TODO: it must to retry
+            }
+            else if (processingResult.SuccessfullyDelivered)
+            {
+                webPushEvent.Status = (int)WebPushEventStatus.Delivered;
+            }
+            else if (processingResult.InvalidSubscription)
+            {
+                webPushEvent.Status = (int)WebPushEventStatus.DeliveryFailed;
+                // TODO: it must to mark subscription/push-contact as "deleted"
+            }
+            else if (processingResult.LimitsExceeded)
+            {
+                webPushEvent.Status = (int)WebPushEventStatus.DeliveryFailedButRetry;
+                // TODO: it must to retry
+            }
+
+            await _weshPushEventRepository.InsertAsync(webPushEvent);
         }
     }
 }

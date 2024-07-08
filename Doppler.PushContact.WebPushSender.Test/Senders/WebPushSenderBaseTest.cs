@@ -2,8 +2,8 @@ using AutoFixture;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Senders;
-using EasyNetQ.Internals;
 using Flurl.Http.Testing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
-using static System.Net.WebRequestMethods;
 
 namespace Doppler.PushContact.WebPushSender.Test.Senders
 {
@@ -29,12 +28,15 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
         private static TestWebPushSender CreateSUT(
             IOptions<WebPushSenderSettings> webPushSenderSettings = null,
             IMessageQueueSubscriber messageQueueSubscriber = null,
-            ILogger<TestWebPushSender> logger = null)
+            ILogger<TestWebPushSender> logger = null,
+            IWebPushEventRepository webPushEventRepository = null)
         {
             return new TestWebPushSender(
                 webPushSenderSettings ?? Options.Create(webPushSenderSettingsDefault),
                 messageQueueSubscriber ?? Mock.Of<IMessageQueueSubscriber>(),
-                logger ?? Mock.Of<ILogger<TestWebPushSender>>());
+                logger ?? Mock.Of<ILogger<TestWebPushSender>>(),
+                webPushEventRepository ?? Mock.Of<IWebPushEventRepository>()
+            );
         }
 
         private DopplerWebPushDTO GetMessage(string title, string body, string endpoint, string auth, string p256dh)
