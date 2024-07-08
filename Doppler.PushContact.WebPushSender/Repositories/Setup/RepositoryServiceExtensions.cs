@@ -17,7 +17,7 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
             repositorySettingsSection.Bind(repositorySettings);
 
             var mongoUrlBuilder = new MongoUrlBuilder(repositorySettings.ConnectionUrl);
-            mongoUrlBuilder.DatabaseName ??= repositorySettings.DefaultDatabaseName;
+            mongoUrlBuilder.DatabaseName ??= repositorySettings.DatabaseName;
             mongoUrlBuilder.Password ??= repositorySettings.SecretPassword;
 
             var mongoUrl = mongoUrlBuilder.ToMongoUrl();
