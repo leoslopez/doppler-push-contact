@@ -26,16 +26,18 @@ namespace Doppler.PushContact.WebPushSender.Senders
         public override async Task HandleMessageAsync(DopplerWebPushDTO message)
         {
             _logger.LogDebug(
-                "Processing message in \"{QueueName}\":\n\tEndpoint: {EndPoint}",
+                "Processing message in \"{QueueName}\":\n\tMessageId: {MessageId}\n\tPushContactId: {PushContactId}",
                 _queueName,
-                message.Subscription.EndPoint
+                message.MessageId,
+                message.PushContactId
             );
 
             WebPushProcessingResult processingResult = await SendWebPush(message);
 
             _logger.LogDebug(
-                "Message processed:\n\tEndpoint: {EndPoint}\n\tResult: {WebPushProcessingResult}",
-                message.Subscription.EndPoint,
+                "Message processed:\n\tMessageId: {MessageId}\n\tPushContactId: {PushContactId}\n\tResult: {WebPushProcessingResult}",
+                message.MessageId,
+                message.PushContactId,
                 JsonConvert.SerializeObject(processingResult)
             );
 
