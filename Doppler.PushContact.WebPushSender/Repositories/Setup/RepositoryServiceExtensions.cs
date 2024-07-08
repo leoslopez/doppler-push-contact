@@ -36,19 +36,21 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
 
         private static void ConfigureIndexes(IMongoDatabase database, RepositorySettings repositorySettings)
         {
-            var collection = database.GetCollection<BsonDocument>(repositorySettings.WebPushEventCollectionName);
+            var webPushEventCollection = database.GetCollection<BsonDocument>(repositorySettings.WebPushEventCollectionName);
 
             var indexKeysDefinitionBuilder = Builders<BsonDocument>.IndexKeys;
 
             var indexModelPushContactId = new CreateIndexModel<BsonDocument>(
-                indexKeysDefinitionBuilder.Ascending("push_contact_id")
+                indexKeysDefinitionBuilder.Ascending(WebPushEventDocumentProps.PushContactId_PropName)
             );
 
             var indexModelMessageIdAndType = new CreateIndexModel<BsonDocument>(
-                indexKeysDefinitionBuilder.Ascending("message_id").Ascending("type")
+                indexKeysDefinitionBuilder
+                    .Ascending(WebPushEventDocumentProps.MessageId_PropName)
+                    .Ascending(WebPushEventDocumentProps.Type_PropName)
             );
 
-            collection.Indexes.CreateMany([
+            webPushEventCollection.Indexes.CreateMany([
                 indexModelPushContactId,
                 indexModelMessageIdAndType,
             ]);
