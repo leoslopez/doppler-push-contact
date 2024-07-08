@@ -59,7 +59,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         public abstract Task HandleMessageAsync(DopplerWebPushDTO message);
 
-        protected async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
+        protected virtual async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
         {
             SendMessageResponse sendMessageResponse = null;
             try
