@@ -43,7 +43,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
             {
                 Date = DateTime.UtcNow,
                 MessageId = message.MessageId,
-                // TODO: add PushContactId in the message stored in the queue and register here
+                PushContactId = message.PushContactId,
             };
 
             if (processingResult.FailedProcessing)
