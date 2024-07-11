@@ -1,6 +1,7 @@
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Doppler.PushContact.WebPushSender.Repositories.Setup
@@ -16,12 +17,14 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
             repositorySettingsSection.Bind(repositorySettings);
 
             var mongoUrlBuilder = new MongoUrlBuilder(repositorySettings.ConnectionUrl);
-            mongoUrlBuilder.DatabaseName ??= repositorySettings.DefaultDatabaseName;
+            mongoUrlBuilder.DatabaseName ??= repositorySettings.DatabaseName;
             mongoUrlBuilder.Password ??= repositorySettings.SecretPassword;
 
             var mongoUrl = mongoUrlBuilder.ToMongoUrl();
             var mongoClient = new MongoClient(mongoUrl);
             var mongoDatabase = mongoClient.GetDatabase(mongoUrl.DatabaseName);
+
+            ConfigureIndexes(mongoDatabase, repositorySettings);
 
             services.AddSingleton<IMongoClient>(mongoClient);
             services.AddScoped(x => mongoClient.GetDatabase(mongoUrl.DatabaseName));
@@ -29,6 +32,28 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
             services.AddScoped<IWebPushEventRepository, WebPushEventRepository>();
 
             return services;
+        }
+
+        private static void ConfigureIndexes(IMongoDatabase database, RepositorySettings repositorySettings)
+        {
+            var webPushEventCollection = database.GetCollection<BsonDocument>(repositorySettings.WebPushEventCollectionName);
+
+            var indexKeysDefinitionBuilder = Builders<BsonDocument>.IndexKeys;
+
+            var indexModelPushContactId = new CreateIndexModel<BsonDocument>(
+                indexKeysDefinitionBuilder.Ascending(WebPushEventDocumentProps.PushContactId_PropName)
+            );
+
+            var indexModelMessageIdAndType = new CreateIndexModel<BsonDocument>(
+                indexKeysDefinitionBuilder
+                    .Ascending(WebPushEventDocumentProps.MessageId_PropName)
+                    .Ascending(WebPushEventDocumentProps.Type_PropName)
+            );
+
+            webPushEventCollection.Indexes.CreateMany([
+                indexModelPushContactId,
+                indexModelMessageIdAndType,
+            ]);
         }
     }
 }

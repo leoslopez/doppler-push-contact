@@ -1,6 +1,7 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Flurl;
 using Flurl.Http;
 using Microsoft.Extensions.Logging;
@@ -23,17 +24,20 @@ namespace Doppler.PushContact.WebPushSender.Senders
         protected readonly string _queueName;
         private IDisposable _queueSubscription;
         private readonly string _pushApiUrl;
+        protected readonly IWebPushEventRepository _weshPushEventRepository;
 
         protected WebPushSenderBase(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
             IMessageQueueSubscriber messageQueueSubscriber,
-            ILogger logger
+            ILogger logger,
+            IWebPushEventRepository weshPushEventRepository
         )
         {
             _messageQueueSubscriber = messageQueueSubscriber;
             _logger = logger;
             _queueName = webPushSenderSettings.Value.QueueName;
             _pushApiUrl = webPushSenderSettings.Value.PushApiUrl;
+            _weshPushEventRepository = weshPushEventRepository;
         }
 
         public async Task StartListeningAsync(CancellationToken cancellationToken)
@@ -55,7 +59,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         public abstract Task HandleMessageAsync(DopplerWebPushDTO message);
 
-        protected async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
+        protected virtual async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
         {
             SendMessageResponse sendMessageResponse = null;
             try

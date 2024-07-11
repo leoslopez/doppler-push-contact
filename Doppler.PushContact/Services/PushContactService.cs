@@ -67,6 +67,7 @@ namespace Doppler.PushContact.Services
             }
 
             var now = DateTime.UtcNow;
+            // TODO: generation and conversion could be omitted and left to mongodb to handle the _id
             var key = ObjectId.GenerateNewId(now).ToString();
 
             BsonDocument subscription = GetSubscriptionInfo(pushContactModel);
@@ -392,10 +393,13 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 var ENDPOINT_PROP_NAME = PushContactDocumentProps.Subscription_EndPoint_PropName;
                 var AUTH_PROP_NAME = PushContactDocumentProps.Subscription_Auth_PropName;
                 var P256DH_PROP_NAME = PushContactDocumentProps.Subscription_P256DH_PropName;
+                var _ID_PROP_NAME = PushContactDocumentProps.IdPropName;
 
                 var deviceToken = x.Contains(DEVTOKEN_PROP_NAME) && !x[DEVTOKEN_PROP_NAME].IsBsonNull
                     ? x[DEVTOKEN_PROP_NAME].AsString
                     : null;
+
+                var _id = x[_ID_PROP_NAME].AsString;
 
                 if (x.Contains(SUBSCRIPTION_PROP_NAME) && !x[SUBSCRIPTION_PROP_NAME].IsBsonNull)
                 {
@@ -426,7 +430,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     return new SubscriptionInfoDTO
                     {
                         DeviceToken = deviceToken,
-                        Subscription = subscriptionModel
+                        Subscription = subscriptionModel,
+                        PushContactId = _id,
                     };
                 }
                 else
@@ -434,7 +439,8 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     return new SubscriptionInfoDTO
                     {
                         DeviceToken = deviceToken,
-                        Subscription = null
+                        Subscription = null,
+                        PushContactId = _id,
                     };
                 }
             }).ToList();
@@ -457,7 +463,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 Projection = Builders<BsonDocument>.Projection
                 .Include(PushContactDocumentProps.DeviceTokenPropName)
                 .Include(PushContactDocumentProps.Subscription_PropName)
-                .Exclude(PushContactDocumentProps.IdPropName)
+                .Include(PushContactDocumentProps.IdPropName)
             };
 
             try

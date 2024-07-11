@@ -1,5 +1,7 @@
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Repositories.Models;
+using Doppler.PushContact.WebPushSender.Repositories.Setup;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Threading;
@@ -11,10 +13,9 @@ namespace Doppler.PushContact.WebPushSender.Repositories
     {
         private readonly IMongoCollection<BsonDocument> _eventsCollection;
 
-        public WebPushEventRepository(IMongoDatabase database)
+        public WebPushEventRepository(IMongoDatabase database, IOptions<RepositorySettings> repositorySettings)
         {
-            // TODO: move collection name into config file
-            _eventsCollection = database.GetCollection<BsonDocument>("webPushEvent");
+            _eventsCollection = database.GetCollection<BsonDocument>(repositorySettings.Value.WebPushEventCollectionName);
         }
 
         public async Task<bool> InsertAsync(WebPushEvent webPushEvent, CancellationToken cancellationToken)

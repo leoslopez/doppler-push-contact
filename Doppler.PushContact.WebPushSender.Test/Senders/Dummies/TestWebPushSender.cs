@@ -1,20 +1,22 @@
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Senders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
-namespace Doppler.PushContact.WebPushSender.Test.Senders
+namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
 {
     public class TestWebPushSender : WebPushSenderBase
     {
         public TestWebPushSender(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
             IMessageQueueSubscriber messageQueueSubscriber,
-            ILogger<TestWebPushSender> logger
-        ) : base(webPushSenderSettings, messageQueueSubscriber, logger)
+            ILogger<TestWebPushSender> logger,
+            IWebPushEventRepository webPushEventRepository
+        ) : base(webPushSenderSettings, messageQueueSubscriber, logger, webPushEventRepository)
         {
         }
 

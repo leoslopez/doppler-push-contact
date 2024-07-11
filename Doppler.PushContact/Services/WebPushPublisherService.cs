@@ -59,7 +59,7 @@ namespace Doppler.PushContact.Services
                             !string.IsNullOrEmpty(subscription.Subscription.Keys.P256DH)
                         )
                         {
-                            await EnqueueWebPushAsync(messageDTO, subscription.Subscription, cancellationToken);
+                            await EnqueueWebPushAsync(messageDTO, subscription.Subscription, subscription.PushContactId, cancellationToken);
                         }
                         else if (!string.IsNullOrEmpty(subscription.DeviceToken))
                         {
@@ -81,7 +81,12 @@ namespace Doppler.PushContact.Services
             });
         }
 
-        private async Task EnqueueWebPushAsync(WebPushDTO messageDTO, SubscriptionModel subscription, CancellationToken cancellationToken)
+        private async Task EnqueueWebPushAsync(
+            WebPushDTO messageDTO,
+            SubscriptionModel subscription,
+            string pushContactId,
+            CancellationToken cancellationToken
+        )
         {
             var webPushMessage = new DopplerWebPushDTO()
             {
@@ -91,6 +96,7 @@ namespace Doppler.PushContact.Services
                 ImageUrl = messageDTO.ImageUrl,
                 Subscription = subscription,
                 MessageId = messageDTO.MessageId,
+                PushContactId = pushContactId,
             };
 
             string queueName = GetQueueName(subscription.EndPoint);
