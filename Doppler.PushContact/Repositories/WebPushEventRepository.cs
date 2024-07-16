@@ -91,8 +91,7 @@ namespace Doppler.PushContact.Repositories
             get
             {
                 var database = _mongoClient.GetDatabase(_pushMongoContextSettings.Value.DatabaseName);
-                // TODO: add collection name into appsettings file
-                return database.GetCollection<BsonDocument>("webPushEvent");
+                return database.GetCollection<BsonDocument>(_pushMongoContextSettings.Value.WebPushEventCollectionName);
             }
         }
     }

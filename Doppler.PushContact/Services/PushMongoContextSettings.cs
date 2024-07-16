@@ -13,5 +13,6 @@ namespace Doppler.PushContact.Services
         public string DomainsCollectionName { get; set; }
 
         public string MessagesCollectionName { get; set; }
+        public string WebPushEventCollectionName { get; set; }
     }
 }
