@@ -1,16 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
-using Doppler.PushContact.Models;
-using Doppler.PushContact.DopplerSecurity;
-using System;
-using Doppler.PushContact.Services;
-using System.Linq;
-using System.ComponentModel.DataAnnotations;
-using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.ApiModels;
+using Doppler.PushContact.DopplerSecurity;
+using Doppler.PushContact.Models;
+using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Doppler.PushContact.Controllers
 {
@@ -22,16 +22,19 @@ namespace Doppler.PushContact.Controllers
         private readonly IMessageSender _messageSender;
         private readonly IMessageRepository _messageRepository;
         private readonly IBackgroundQueue _backgroundQueue;
+        private readonly IWebPushEventService _webPushEventService;
 
         public PushContactController(IPushContactService pushContactService,
             IMessageSender messageSender,
             IMessageRepository messageRepository,
-            IBackgroundQueue backgroundQueue)
+            IBackgroundQueue backgroundQueue,
+            IWebPushEventService webPushEventRepository)
         {
             _pushContactService = pushContactService;
             _messageSender = messageSender;
             _messageRepository = messageRepository;
             _backgroundQueue = backgroundQueue;
+            _webPushEventService = webPushEventRepository;
         }
 
         [AllowAnonymous]
@@ -185,6 +188,9 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{domain}/messages/{messageId}/details")]
         public async Task<IActionResult> GetMessageDetails([FromRoute] string domain, [FromRoute] Guid messageId, [FromQuery][Required] DateTimeOffset from, [FromQuery][Required] DateTimeOffset to)
         {
+            // obtain web push events summarization
+            var webPushEventsSummarization = await _webPushEventService.GetWebPushEventSummarizationAsync(messageId);
+
             // obtain summarized result directly from message
             var messagedetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId);
             if (messagedetails != null && messagedetails.Sent > 0)
@@ -193,9 +199,9 @@ namespace Doppler.PushContact.Controllers
                 {
                     messagedetails.Domain,
                     MessageId = messageId,
-                    messagedetails.Sent,
-                    messagedetails.Delivered,
-                    messagedetails.NotDelivered
+                    Sent = messagedetails.Sent + webPushEventsSummarization.SentQuantity,
+                    Delivered = messagedetails.Delivered + webPushEventsSummarization.Delivered,
+                    NotDelivered =messagedetails.NotDelivered + webPushEventsSummarization.NotDelivered,
                 });
             }
 
@@ -205,9 +211,9 @@ namespace Doppler.PushContact.Controllers
             {
                 messageResult.Domain,
                 MessageId = messageId,
-                Sent = messageResult.SentQuantity,
-                messageResult.Delivered,
-                messageResult.NotDelivered
+                Sent = messageResult.SentQuantity + webPushEventsSummarization.SentQuantity,
+                Delivered = messageResult.Delivered + webPushEventsSummarization.Delivered,
+                NotDelivered = messageResult.NotDelivered + webPushEventsSummarization.NotDelivered,
             });
         }
 

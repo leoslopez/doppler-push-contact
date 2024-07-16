@@ -1,5 +1,7 @@
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
+using Doppler.PushContact.Repositories;
+using Doppler.PushContact.Repositories.Interfaces;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
@@ -34,6 +36,8 @@ namespace Doppler.PushContact
             services.AddMessageQueueBroker(Configuration);
             services.AddScoped<IWebPushPublisherService, WebPushPublisherService>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IWebPushEventRepository, WebPushEventRepository>();
+            services.AddScoped<IWebPushEventService, WebPushEventService>();
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddHostedService<QueueBackgroundService>();
             services.AddControllers();
