@@ -40,6 +40,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -47,6 +48,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -79,6 +81,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -86,6 +89,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -194,6 +198,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.AddAsync(It.IsAny<PushContactModel>()))
@@ -205,6 +210,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -234,6 +240,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -241,6 +248,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -276,6 +284,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -283,6 +292,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -417,6 +427,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -428,6 +439,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -600,6 +612,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -611,6 +624,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -680,6 +694,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -691,6 +706,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -810,6 +826,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
@@ -821,6 +838,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -867,6 +885,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
@@ -878,6 +897,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -908,6 +928,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.GetAsync(It.IsAny<PushContactFilter>()))
@@ -919,6 +940,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -945,6 +967,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -952,6 +975,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -1225,6 +1249,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -1232,6 +1257,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -1532,6 +1558,7 @@ namespace Doppler.PushContact.Test.Controllers
                 .ReturnsAsync(fixture.Create<SendMessageResult>());
 
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -1540,6 +1567,7 @@ namespace Doppler.PushContact.Test.Controllers
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageSenderMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -1800,6 +1828,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -1807,6 +1836,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2094,6 +2124,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var sendMessageResult = new SendMessageResult
             {
@@ -2112,6 +2143,7 @@ namespace Doppler.PushContact.Test.Controllers
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageSenderMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -2162,6 +2194,7 @@ namespace Doppler.PushContact.Test.Controllers
                 .ReturnsAsync(fixture.Create<SendMessageResult>());
 
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2170,6 +2203,7 @@ namespace Doppler.PushContact.Test.Controllers
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageSenderMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -2413,6 +2447,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2420,6 +2455,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2446,6 +2482,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2453,6 +2490,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2478,6 +2516,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2485,6 +2524,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2588,6 +2628,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2595,6 +2636,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2620,6 +2662,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2627,6 +2670,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2731,6 +2775,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2738,6 +2783,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2763,6 +2809,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2770,6 +2817,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2795,6 +2843,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2802,6 +2851,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2826,6 +2876,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
@@ -2833,6 +2884,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
 
             }).CreateClient(new WebApplicationFactoryClientOptions());
@@ -2865,6 +2917,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
@@ -2876,6 +2929,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -2910,6 +2964,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
@@ -2921,6 +2976,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -2955,6 +3011,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
@@ -2966,6 +3023,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -3000,6 +3058,7 @@ namespace Doppler.PushContact.Test.Controllers
 
             var pushContactServiceMock = new Mock<IPushContactService>();
             var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
                 .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
@@ -3011,6 +3070,7 @@ namespace Doppler.PushContact.Test.Controllers
                 {
                     services.AddSingleton(pushContactServiceMock.Object);
                     services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
