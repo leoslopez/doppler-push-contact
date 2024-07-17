@@ -1,5 +1,6 @@
 using AutoFixture;
 using Doppler.PushContact.ApiModels;
+using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -3085,6 +3086,164 @@ namespace Doppler.PushContact.Test.Controllers
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetMessageDetails_should_return_ok_summarizing_webpushevents_and_message_stats_when_message_has_stats()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<string>();
+            var messageId = fixture.Create<Guid>();
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            var webPushEventsSummarization = new WebPushEventSummarizationDTO()
+            {
+                MessageId = messageId,
+                SentQuantity = 10,
+                Delivered = 1,
+                NotDelivered = 9,
+            };
+
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
+            webPushEventServiceMock
+                .Setup(wpes => wpes.GetWebPushEventSummarizationAsync(messageId))
+                .ReturnsAsync(webPushEventsSummarization);
+
+            var messageDetailsWithStats = new MessageDetails()
+            {
+                MessageId = messageId,
+                Domain = domain,
+                Sent = 10,
+                Delivered = 9,
+                NotDelivered = 1,
+            };
+
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+            messageRepositoryMock
+                .Setup(mr => mr.GetMessageDetailsAsync(domain, messageId))
+                .ReturnsAsync(messageDetailsWithStats);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var from = DateTime.UtcNow.AddDays(-1);
+            var to = DateTime.UtcNow;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/messages/{messageId}/details?from={from}&to={to}")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            response.EnsureSuccessStatusCode(); // Check if the status code is 2xx
+
+            var result = await response.Content.ReadFromJsonAsync<MessageDetailsResponse>();
+
+            Assert.Equal(domain, result.Domain);
+            Assert.Equal(messageId, result.MessageId);
+            Assert.Equal(messageDetailsWithStats.Sent + webPushEventsSummarization.SentQuantity, result.Sent);
+            Assert.Equal(messageDetailsWithStats.Delivered + webPushEventsSummarization.Delivered, result.Delivered);
+            Assert.Equal(messageDetailsWithStats.NotDelivered + webPushEventsSummarization.NotDelivered, result.NotDelivered);
+        }
+
+        [Fact]
+        public async Task GetMessageDetails_should_return_ok_summarizing_webpushevents_and_historyevents_when_message_has_not_stats()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<string>();
+            var messageId = fixture.Create<Guid>();
+
+            var from = DateTime.UtcNow.AddDays(-1);
+            var to = DateTime.UtcNow;
+
+            var messageSenderMock = new Mock<IMessageSender>();
+
+            var webPushEventsSummarization = new WebPushEventSummarizationDTO()
+            {
+                MessageId = messageId,
+                SentQuantity = 10,
+                Delivered = 1,
+                NotDelivered = 9,
+            };
+
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
+            webPushEventServiceMock
+                .Setup(wpes => wpes.GetWebPushEventSummarizationAsync(messageId))
+                .ReturnsAsync(webPushEventsSummarization);
+
+            var messageDetailsWithStats = new MessageDetails()
+            {
+                MessageId = messageId,
+                Domain = domain,
+                Sent = 0,
+                Delivered = 0,
+                NotDelivered = 0,
+            };
+
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+            messageRepositoryMock
+                .Setup(mr => mr.GetMessageDetailsAsync(domain, messageId))
+                .ReturnsAsync(messageDetailsWithStats);
+
+            var messageDeliveryResults = new MessageDeliveryResult()
+            {
+                Domain = domain,
+                SentQuantity = 10,
+                Delivered = 9,
+                NotDelivered = 1,
+            };
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            pushContactServiceMock
+                .Setup(pcs => pcs.GetDeliveredMessageSummarizationAsync(domain, messageId, It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>()))
+                .ReturnsAsync(messageDeliveryResults);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageSenderMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"push-contacts/{domain}/messages/{messageId}/details?from={from}&to={to}")
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            response.EnsureSuccessStatusCode(); // Check if the status code is 2xx
+
+            var result = await response.Content.ReadFromJsonAsync<MessageDetailsResponse>();
+
+            Assert.Equal(domain, result.Domain);
+            Assert.Equal(messageId, result.MessageId);
+            Assert.Equal(messageDeliveryResults.SentQuantity + webPushEventsSummarization.SentQuantity, result.Sent);
+            Assert.Equal(messageDeliveryResults.Delivered + webPushEventsSummarization.Delivered, result.Delivered);
+            Assert.Equal(messageDeliveryResults.NotDelivered + webPushEventsSummarization.NotDelivered, result.NotDelivered);
         }
     }
 }
