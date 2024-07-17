@@ -41,15 +41,10 @@ namespace Doppler.PushContact.Repositories
                 .Group(new BsonDocument
                 {
                     { "_id", "$" + WebPushEventDocumentProps.MessageId_PropName },
-                    { "SentQuantity", new BsonDocument("$sum", new BsonDocument("$cond", new BsonArray
+                    { "NotDelivered", new BsonDocument("$sum", new BsonDocument("$cond", new BsonArray
                         {
-                            new BsonDocument( "$in", new BsonArray {
-                                "$" + WebPushEventDocumentProps.Type_PropName, new BsonArray {
-                                    (int)WebPushEventType.Delivered,
-                                    (int)WebPushEventType.DeliveryFailed,
-
-                                }
-                            }),
+                            new BsonDocument("$eq", new BsonArray {
+                                "$" + WebPushEventDocumentProps.Type_PropName, (int)WebPushEventType.DeliveryFailed }),
                             1,
                             0
                         })
@@ -80,9 +75,9 @@ namespace Doppler.PushContact.Repositories
             return new WebPushEventSummarizationDTO
             {
                 MessageId = messageId,
-                SentQuantity = result["SentQuantity"].AsInt32,
+                SentQuantity = result["NotDelivered"].AsInt32 + result["Delivered"].AsInt32,
                 Delivered = result["Delivered"].AsInt32,
-                NotDelivered = result["SentQuantity"].AsInt32 - result["Delivered"].AsInt32,
+                NotDelivered = result["NotDelivered"].AsInt32,
             };
         }
 
