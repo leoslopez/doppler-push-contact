@@ -201,7 +201,7 @@ namespace Doppler.PushContact.Controllers
                     MessageId = messageId,
                     Sent = messagedetails.Sent + webPushEventsSummarization.SentQuantity,
                     Delivered = messagedetails.Delivered + webPushEventsSummarization.Delivered,
-                    NotDelivered =messagedetails.NotDelivered + webPushEventsSummarization.NotDelivered,
+                    NotDelivered = messagedetails.NotDelivered + webPushEventsSummarization.NotDelivered,
                 });
             }
 
