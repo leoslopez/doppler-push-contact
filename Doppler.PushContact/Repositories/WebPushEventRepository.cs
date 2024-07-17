@@ -1,7 +1,6 @@
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Repositories.Interfaces;
 using Doppler.PushContact.Services;
-using Doppler.PushContact.Services.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -15,12 +14,12 @@ namespace Doppler.PushContact.Repositories
     {
         private readonly IMongoClient _mongoClient;
         private readonly IOptions<PushMongoContextSettings> _pushMongoContextSettings;
-        private readonly ILogger<MessageRepository> _logger;
+        private readonly ILogger<WebPushEventRepository> _logger;
 
         public WebPushEventRepository(
             IMongoClient mongoClient,
             IOptions<PushMongoContextSettings> pushMongoContextSettings,
-            ILogger<MessageRepository> logger)
+            ILogger<WebPushEventRepository> logger)
         {
 
             _mongoClient = mongoClient;
