@@ -1,3 +1,5 @@
+using System;
+
 namespace Doppler.PushContact.Models.PushContactApiResponses
 {
     public class MessageDetailsResponse

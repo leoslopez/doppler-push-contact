@@ -1,3 +1,5 @@
+using System;
+
 namespace Doppler.PushContact.Models.DTOs
 {
     public class WebPushDTO
