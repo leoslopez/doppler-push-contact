@@ -25,7 +25,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
             throw new NotImplementedException();
         }
 
-        public async Task<WebPushProcessingResult> TestSendWebPush(DopplerWebPushDTO message)
+        public async Task<WebPushProcessingResultDTO> TestSendWebPush(DopplerWebPushDTO message)
         {
             return await SendWebPush(message);
         }

@@ -32,7 +32,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
                 message.PushContactId
             );
 
-            WebPushProcessingResult processingResult = await SendWebPush(message);
+            WebPushProcessingResultDTO processingResult = await SendWebPush(message);
 
             _logger.LogDebug(
                 "Message processed:\n\tMessageId: {MessageId}\n\tPushContactId: {PushContactId}\n\tResult: {WebPushProcessingResult}",

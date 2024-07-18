@@ -61,7 +61,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
             var messageId = fixture.Create<Guid>();
             var pushContactId = fixture.Create<string>();
 
-            var processingResult = new WebPushProcessingResult
+            var processingResult = new WebPushProcessingResultDTO
             {
                 FailedProcessing = failedProcessing,
                 SuccessfullyDelivered = successfullyDelivered,

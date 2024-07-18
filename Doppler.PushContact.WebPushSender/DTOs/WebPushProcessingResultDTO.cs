@@ -1,6 +1,6 @@
 namespace Doppler.PushContact.WebPushSender.DTOs
 {
-    public class WebPushProcessingResult
+    public class WebPushProcessingResultDTO
     {
         public bool SuccessfullyDelivered { get; set; }
         public bool LimitsExceeded { get; set; }
