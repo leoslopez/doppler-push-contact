@@ -1,4 +1,4 @@
-using Doppler.PushContact.WebPushSender.Repositories.Models;
+using Doppler.PushContact.Models.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 

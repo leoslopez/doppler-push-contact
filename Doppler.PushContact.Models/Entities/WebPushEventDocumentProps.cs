@@ -1,4 +1,4 @@
-namespace Doppler.PushContact.Repositories
+namespace Doppler.PushContact.Models.Entities
 {
     public static class WebPushEventDocumentProps
     {

@@ -1,4 +1,5 @@
 using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.Repositories.Interfaces;
 using Doppler.PushContact.Services;

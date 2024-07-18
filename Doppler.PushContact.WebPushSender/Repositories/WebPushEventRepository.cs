@@ -1,5 +1,5 @@
+using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
-using Doppler.PushContact.WebPushSender.Repositories.Models;
 using Doppler.PushContact.WebPushSender.Repositories.Setup;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
