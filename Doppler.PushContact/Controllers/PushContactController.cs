@@ -1,6 +1,7 @@
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
@@ -195,9 +196,9 @@ namespace Doppler.PushContact.Controllers
             var messagedetails = await _messageRepository.GetMessageDetailsAsync(domain, messageId);
             if (messagedetails != null && messagedetails.Sent > 0)
             {
-                return Ok(new
+                return Ok(new MessageDetailsResponse
                 {
-                    messagedetails.Domain,
+                    Domain = messagedetails.Domain,
                     MessageId = messageId,
                     Sent = messagedetails.Sent + webPushEventsSummarization.SentQuantity,
                     Delivered = messagedetails.Delivered + webPushEventsSummarization.Delivered,
@@ -207,9 +208,9 @@ namespace Doppler.PushContact.Controllers
 
             // summarize result from history_events
             var messageResult = await _pushContactService.GetDeliveredMessageSummarizationAsync(domain, messageId, from, to);
-            return Ok(new
+            return Ok(new MessageDetailsResponse
             {
-                messageResult.Domain,
+                Domain = messageResult.Domain,
                 MessageId = messageId,
                 Sent = messageResult.SentQuantity + webPushEventsSummarization.SentQuantity,
                 Delivered = messageResult.Delivered + webPushEventsSummarization.Delivered,
