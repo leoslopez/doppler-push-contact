@@ -1,4 +1,5 @@
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 
 namespace Doppler.PushContact.DTOs
 {

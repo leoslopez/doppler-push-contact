@@ -1,4 +1,4 @@
-using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -1,16 +1,16 @@
+using Doppler.PushContact.DopplerSecurity;
+using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Doppler.PushContact.DopplerSecurity;
-using Doppler.PushContact.Services;
-using Doppler.PushContact.Services.Messages;
-using Doppler.PushContact.Models;
-using Doppler.PushContact.DTOs;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authentication;
 
 namespace Doppler.PushContact.Controllers
 {
