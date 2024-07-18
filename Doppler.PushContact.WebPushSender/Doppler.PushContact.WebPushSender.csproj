@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Doppler.PushContact.Models\Doppler.PushContact.Models.csproj" />
     <ProjectReference Include="..\Doppler.PushContact.QueuingService\Doppler.PushContact.QueuingService.csproj" />
   </ItemGroup>
 

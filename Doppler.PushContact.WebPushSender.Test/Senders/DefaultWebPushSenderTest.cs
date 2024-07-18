@@ -1,18 +1,18 @@
-using Moq;
-using System;
-using System.Threading.Tasks;
-using Xunit;
+using AutoFixture;
+using Doppler.PushContact.Models.Enums;
+using Doppler.PushContact.QueuingService.MessageQueueBroker;
+using Doppler.PushContact.WebPushSender.DTOs;
+using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
+using Doppler.PushContact.WebPushSender.Repositories.Models;
+using Doppler.PushContact.WebPushSender.Senders;
+using Doppler.PushContact.WebPushSender.Test.Senders.Dummies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Doppler.PushContact.WebPushSender.Repositories;
-using Doppler.PushContact.WebPushSender.Senders;
-using Doppler.PushContact.QueuingService.MessageQueueBroker;
-using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
-using Doppler.PushContact.WebPushSender.DTOs;
-using Doppler.PushContact.WebPushSender.Repositories.Models;
+using Moq;
+using System;
 using System.Threading;
-using AutoFixture;
-using Doppler.PushContact.WebPushSender.Test.Senders.Dummies;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Doppler.PushContact.WebPushSender.Test.Senders
 {
