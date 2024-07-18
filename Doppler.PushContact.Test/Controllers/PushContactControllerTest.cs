@@ -2,6 +2,7 @@ using AutoFixture;
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Test.Controllers.Utils;
