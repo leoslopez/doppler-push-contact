@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;

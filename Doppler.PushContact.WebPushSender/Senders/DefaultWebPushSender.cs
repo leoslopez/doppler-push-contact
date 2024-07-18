@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;

@@ -1,4 +1,4 @@
-namespace Doppler.PushContact.WebPushSender.DTOs
+namespace Doppler.PushContact.Models.DTOs
 {
     public class WebPushProcessingResultDTO
     {
