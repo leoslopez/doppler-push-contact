@@ -1,4 +1,4 @@
-using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Services.Messages.ExternalContracts;
 using Flurl;
 using Flurl.Http;

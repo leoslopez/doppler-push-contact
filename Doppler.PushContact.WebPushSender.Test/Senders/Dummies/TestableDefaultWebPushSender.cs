@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
 {
     // Define delegate
-    public delegate Task<WebPushProcessingResult> SendWebPushDelegate(DopplerWebPushDTO message);
+    public delegate Task<WebPushProcessingResultDTO> SendWebPushDelegate(DopplerWebPushDTO message);
 
     public class TestableDefaultWebPushSender : DefaultWebPushSender
     {
@@ -26,7 +27,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
             _sendWebPushDelegate = sendWebPushDelegate;
         }
 
-        protected override Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
+        protected override Task<WebPushProcessingResultDTO> SendWebPush(DopplerWebPushDTO message)
         {
             return _sendWebPushDelegate(message);
         }

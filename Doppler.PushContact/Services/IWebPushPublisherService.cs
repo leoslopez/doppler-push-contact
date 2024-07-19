@@ -1,4 +1,5 @@
-using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.DTOs;
+
 namespace Doppler.PushContact.Services
 {
     public interface IWebPushPublisherService

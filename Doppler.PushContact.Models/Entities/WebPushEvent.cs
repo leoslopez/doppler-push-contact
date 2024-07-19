@@ -2,7 +2,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 
-namespace Doppler.PushContact.WebPushSender.Repositories.Models
+namespace Doppler.PushContact.Models.Entities
 {
     public class WebPushEvent
     {

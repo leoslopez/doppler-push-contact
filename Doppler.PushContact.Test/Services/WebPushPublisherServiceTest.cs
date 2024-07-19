@@ -1,7 +1,7 @@
 using AutoFixture;
-using Doppler.PushContact.Controllers;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;

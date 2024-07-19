@@ -1,5 +1,5 @@
 using AutoFixture;
-using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Messages.ExternalContracts;

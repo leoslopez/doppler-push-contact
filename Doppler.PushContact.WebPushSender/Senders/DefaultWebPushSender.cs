@@ -1,8 +1,9 @@
+using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Models.Entities;
+using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
-using Doppler.PushContact.WebPushSender.Repositories;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
-using Doppler.PushContact.WebPushSender.Repositories.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -32,7 +33,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
                 message.PushContactId
             );
 
-            WebPushProcessingResult processingResult = await SendWebPush(message);
+            WebPushProcessingResultDTO processingResult = await SendWebPush(message);
 
             _logger.LogDebug(
                 "Message processed:\n\tMessageId: {MessageId}\n\tPushContactId: {PushContactId}\n\tResult: {WebPushProcessingResult}",

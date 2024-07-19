@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
@@ -59,7 +60,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
         public abstract Task HandleMessageAsync(DopplerWebPushDTO message);
 
-        protected virtual async Task<WebPushProcessingResult> SendWebPush(DopplerWebPushDTO message)
+        protected virtual async Task<WebPushProcessingResultDTO> SendWebPush(DopplerWebPushDTO message)
         {
             SendMessageResponse sendMessageResponse = null;
             try
@@ -90,7 +91,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
             {
                 _logger.LogError($"An error happened sending web push notification: {ex}");
 
-                return new WebPushProcessingResult()
+                return new WebPushProcessingResultDTO()
                 {
                     FailedProcessing = true,
                 };
@@ -99,14 +100,14 @@ namespace Doppler.PushContact.WebPushSender.Senders
             return ProcessWebPushResponse(sendMessageResponse);
         }
 
-        private WebPushProcessingResult ProcessWebPushResponse(SendMessageResponse sendMessageResponse)
+        private WebPushProcessingResultDTO ProcessWebPushResponse(SendMessageResponse sendMessageResponse)
         {
             if (sendMessageResponse == null)
             {
-                return new WebPushProcessingResult { FailedProcessing = false };
+                return new WebPushProcessingResultDTO { FailedProcessing = false };
             }
 
-            WebPushProcessingResult processingResult = new WebPushProcessingResult();
+            WebPushProcessingResultDTO processingResult = new WebPushProcessingResultDTO();
 
             // it has just one response
             var response = sendMessageResponse.Responses?.FirstOrDefault();
