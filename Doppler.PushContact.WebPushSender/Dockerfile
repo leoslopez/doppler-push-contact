@@ -7,6 +7,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 ARG FROMDOPPLER_GITHUB_PACKAGES_TOKEN
 COPY ["nuget.config", "."]
+COPY ["Doppler.PushContact.Models/Doppler.PushContact.Models.csproj", "Doppler.PushContact.Models/"]
 COPY ["Doppler.PushContact.WebPushSender/Doppler.PushContact.WebPushSender.csproj", "Doppler.PushContact.WebPushSender/"]
 COPY ["Doppler.PushContact.QueuingService/Doppler.PushContact.QueuingService.csproj", "Doppler.PushContact.QueuingService/"]
 RUN dotnet restore "Doppler.PushContact.WebPushSender/Doppler.PushContact.WebPushSender.csproj"
