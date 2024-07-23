@@ -1,6 +1,7 @@
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;

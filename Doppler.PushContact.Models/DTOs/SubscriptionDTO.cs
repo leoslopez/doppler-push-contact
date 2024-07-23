@@ -1,4 +1,4 @@
-namespace Doppler.PushContact.Models
+namespace Doppler.PushContact.Models.DTOs
 {
     public class SubscriptionKeys
     {

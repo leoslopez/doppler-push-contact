@@ -11,6 +11,7 @@ using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models.Entities;
+using Doppler.PushContact.Models.DTOs;
 
 namespace Doppler.PushContact.Services
 {
