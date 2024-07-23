@@ -7,7 +7,7 @@ namespace Doppler.PushContact.Models
         public string Auth { get; set; }
     }
 
-    public class SubscriptionModel
+    public class SubscriptionDTO
     {
         public string EndPoint { get; set; }
 

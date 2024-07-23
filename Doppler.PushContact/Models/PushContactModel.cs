@@ -10,6 +10,6 @@ namespace Doppler.PushContact.Models
 
         public string VisitorGuid { get; set; }
 
-        public SubscriptionModel Subscription { get; set; }
+        public SubscriptionDTO Subscription { get; set; }
     }
 }

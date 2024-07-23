@@ -51,7 +51,7 @@ namespace Doppler.PushContact.Controllers
         [AllowAnonymous]
         [HttpPut]
         [Route("/push-contacts/{deviceToken}/subscription")]
-        public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionModel subscription)
+        public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionDTO subscription)
         {
             try
             {

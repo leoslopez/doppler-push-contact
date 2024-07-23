@@ -97,7 +97,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             }
         }
 
-        public async Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription)
+        public async Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionDTO subscription)
         {
             if (string.IsNullOrEmpty(deviceToken) || string.IsNullOrWhiteSpace(deviceToken))
             {
@@ -418,7 +418,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                         ? subscriptionDoc[P256DH_PROP_NAME].AsString
                         : null;
 
-                    var subscriptionModel = new SubscriptionModel
+                    var subscriptionModel = new SubscriptionDTO
                     {
                         EndPoint = endPoint,
                         Keys = new SubscriptionKeys

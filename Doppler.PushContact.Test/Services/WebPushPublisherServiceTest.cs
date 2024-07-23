@@ -104,7 +104,7 @@ namespace Doppler.PushContact.Test.Services
             {
                 new SubscriptionInfoDTO
                 {
-                    Subscription = new SubscriptionModel
+                    Subscription = new SubscriptionDTO
                     {
                         EndPoint = endpoint,
                         Keys = new SubscriptionKeys
@@ -197,7 +197,7 @@ namespace Doppler.PushContact.Test.Services
             {
                 new SubscriptionInfoDTO
                 {
-                    Subscription = new SubscriptionModel
+                    Subscription = new SubscriptionDTO
                     {
                         EndPoint = endpoint,
                         Keys = new SubscriptionKeys
@@ -337,7 +337,7 @@ namespace Doppler.PushContact.Test.Services
             {
                 new SubscriptionInfoDTO
                 {
-                    Subscription = new SubscriptionModel
+                    Subscription = new SubscriptionDTO
                     {
                         EndPoint = "endpoint",
                         Keys = new SubscriptionKeys

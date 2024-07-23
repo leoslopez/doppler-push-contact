@@ -12,7 +12,7 @@ namespace Doppler.PushContact.Services
     {
         Task AddAsync(PushContactModel pushContactModel);
 
-        Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription);
+        Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionDTO subscription);
 
         Task UpdateEmailAsync(string deviceToken, string email);
 
