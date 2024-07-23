@@ -15,5 +15,7 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
         public string SecretPassword { get; set; }
 
         public string WebPushEventCollectionName { get; set; }
+
+        public string PushContactsCollectionName { get; set; }
     }
 }
