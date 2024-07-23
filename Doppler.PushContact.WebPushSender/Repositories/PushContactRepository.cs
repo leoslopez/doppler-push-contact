@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Repositories.Setup;
 using Microsoft.Extensions.Options;
@@ -18,9 +19,9 @@ namespace Doppler.PushContact.WebPushSender.Repositories
 
         public async Task<bool> MarkDeletedAsync(string pushContactId)
         {
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", pushContactId);
+            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.IdPropName, pushContactId);
 
-            var update = Builders<BsonDocument>.Update.Set("deleted", true);
+            var update = Builders<BsonDocument>.Update.Set(PushContactDocumentProps.DeletedPropName, true);
 
             var result = await _collection.UpdateOneAsync(filter, update);
 
