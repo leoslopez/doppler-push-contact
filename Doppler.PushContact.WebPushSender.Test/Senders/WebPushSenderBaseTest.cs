@@ -47,7 +47,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Subscription = new SubscriptionDTO
                 {
                     EndPoint = endpoint,
-                    Keys = new SubscriptionKeysDTO
+                    Keys = new SubscriptionKeys
                     {
                         P256DH = p256dh,
                         Auth = auth

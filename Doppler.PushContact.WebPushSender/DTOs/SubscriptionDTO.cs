@@ -1,6 +1,6 @@
 namespace Doppler.PushContact.WebPushSender.DTOs
 {
-    public class SubscriptionKeysDTO
+    public class SubscriptionKeys
     {
         public string P256DH { get; set; }
 
@@ -11,6 +11,6 @@ namespace Doppler.PushContact.WebPushSender.DTOs
     {
         public string EndPoint { get; set; }
 
-        public SubscriptionKeysDTO Keys { get; set; }
+        public SubscriptionKeys Keys { get; set; }
     }
 }
