@@ -1,3 +1,4 @@
+using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.Services.Messages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -10,6 +10,7 @@ using System.Linq;
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.DTOs;
+using Doppler.PushContact.Models.Entities;
 
 namespace Doppler.PushContact.Services
 {

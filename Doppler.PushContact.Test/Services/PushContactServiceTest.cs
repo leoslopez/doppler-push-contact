@@ -1,6 +1,7 @@
 using AutoFixture;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
