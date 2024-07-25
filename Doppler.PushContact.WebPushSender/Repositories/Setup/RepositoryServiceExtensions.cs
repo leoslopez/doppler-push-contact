@@ -31,6 +31,7 @@ namespace Doppler.PushContact.WebPushSender.Repositories.Setup
             services.AddScoped(x => mongoClient.GetDatabase(mongoUrl.DatabaseName));
 
             services.AddScoped<IWebPushEventRepository, WebPushEventRepository>();
+            services.AddScoped<IPushContactRepository, PushContactRepository>();
 
             return services;
         }

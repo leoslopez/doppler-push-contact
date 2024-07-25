@@ -14,14 +14,17 @@ namespace Doppler.PushContact.WebPushSender.Senders
 {
     public class DefaultWebPushSender : WebPushSenderBase
     {
+        IPushContactRepository _pushContactRepository;
         public DefaultWebPushSender(
             IOptions<WebPushSenderSettings> webPushSenderSettings,
             IMessageQueueSubscriber messageQueueSubscriber,
             ILogger<DefaultWebPushSender> logger,
-            IWebPushEventRepository weshPushEventRepository
+            IWebPushEventRepository weshPushEventRepository,
+            IPushContactRepository pushContactRepository
         )
             : base(webPushSenderSettings, messageQueueSubscriber, logger, weshPushEventRepository)
         {
+            _pushContactRepository = pushContactRepository;
         }
 
         public override async Task HandleMessageAsync(DopplerWebPushDTO message)
@@ -61,7 +64,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
             else if (processingResult.InvalidSubscription)
             {
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
-                // TODO: it must to mark subscription/push-contact as "deleted"
+                await _pushContactRepository.MarkDeletedAsync(webPushEvent.PushContactId);
             }
             else if (processingResult.LimitsExceeded)
             {

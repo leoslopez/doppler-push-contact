@@ -21,8 +21,9 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders.Dummies
             IMessageQueueSubscriber messageQueueSubscriber,
             ILogger<DefaultWebPushSender> logger,
             IWebPushEventRepository weshPushEventRepository,
+            IPushContactRepository pushContactRepository,
             SendWebPushDelegate sendWebPushDelegate)
-            : base(webPushSenderSettings, messageQueueSubscriber, logger, weshPushEventRepository)
+            : base(webPushSenderSettings, messageQueueSubscriber, logger, weshPushEventRepository, pushContactRepository)
         {
             _sendWebPushDelegate = sendWebPushDelegate;
         }
