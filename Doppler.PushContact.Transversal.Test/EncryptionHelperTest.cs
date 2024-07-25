@@ -55,5 +55,34 @@ namespace Doppler.PushContact.Transversal.Test
             // Assert
             Assert.Equal(originalText, decryptedText);
         }
+
+        [Fact]
+        public void Decrypt_Base64Url_ShouldReturnOriginalText()
+        {
+            // Arrange
+            string originalText = "Test string with special characters: /+=?&";
+
+            // Act
+            string encryptedText = EncryptionHelper.Encrypt(originalText, useBase64Url: true);
+            string decryptedText = EncryptionHelper.Decrypt(encryptedText, useBase64Url: true);
+
+            // Assert
+            Assert.Equal(originalText, decryptedText);
+        }
+
+        [Fact]
+        public void Encrypt_Base64Url_ShouldNotContainSpecialCharacters()
+        {
+            // Arrange
+            string plainText = "Test string with special characters: /+=?&";
+
+            // Act
+            string encryptedText = EncryptionHelper.Encrypt(plainText, useBase64Url: true);
+
+            // Assert
+            Assert.DoesNotContain("/", encryptedText);
+            Assert.DoesNotContain("+", encryptedText);
+            Assert.DoesNotContain("=", encryptedText);
+        }
     }
 }
