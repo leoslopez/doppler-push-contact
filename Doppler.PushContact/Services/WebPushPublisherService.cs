@@ -84,7 +84,7 @@ namespace Doppler.PushContact.Services
 
         private async Task EnqueueWebPushAsync(
             WebPushDTO messageDTO,
-            SubscriptionModel subscription,
+            SubscriptionDTO subscription,
             string pushContactId,
             CancellationToken cancellationToken
         )

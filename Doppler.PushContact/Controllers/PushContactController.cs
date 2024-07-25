@@ -1,6 +1,7 @@
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -51,7 +52,7 @@ namespace Doppler.PushContact.Controllers
         [AllowAnonymous]
         [HttpPut]
         [Route("/push-contacts/{deviceToken}/subscription")]
-        public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionModel subscription)
+        public async Task<IActionResult> UpdateSubscription([FromRoute] string deviceToken, [FromBody] SubscriptionDTO subscription)
         {
             try
             {

@@ -1,6 +1,7 @@
 using AutoFixture;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Models.Entities;
 using Doppler.PushContact.Services;
 using Microsoft.Extensions.Logging;
@@ -1297,7 +1298,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             // Act
             // Assert
-            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(null, new SubscriptionModel()));
+            var result = await Assert.ThrowsAsync<ArgumentException>(() => sut.UpdateSubscriptionAsync(null, new SubscriptionDTO()));
         }
 
         [Fact]
@@ -1332,7 +1333,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var sut = CreateSut();
 
-            var subscription = new SubscriptionModel()
+            var subscription = new SubscriptionDTO()
             {
                 EndPoint = endpoint,
                 Keys = new SubscriptionKeys()
@@ -1361,7 +1362,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
 
             var sut = CreateSut();
 
-            var subscription = new SubscriptionModel()
+            var subscription = new SubscriptionDTO()
             {
                 EndPoint = endpoint,
                 Keys = new SubscriptionKeys()
@@ -1383,7 +1384,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             var fixture = new Fixture();
 
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel()
+            var subscription = new SubscriptionDTO()
             {
                 EndPoint = "https://www.test-endpoint.com",
                 Keys = new SubscriptionKeys()
@@ -1446,7 +1447,7 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
             var fixture = new Fixture();
 
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel()
+            var subscription = new SubscriptionDTO()
             {
                 EndPoint = "https://www.test-endpoint.com",
                 Keys = new SubscriptionKeys()

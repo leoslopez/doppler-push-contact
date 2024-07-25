@@ -1,6 +1,7 @@
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Services.Messages;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Doppler.PushContact.Services
     {
         Task AddAsync(PushContactModel pushContactModel);
 
-        Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionModel subscription);
+        Task<bool> UpdateSubscriptionAsync(string deviceToken, SubscriptionDTO subscription);
 
         Task UpdateEmailAsync(string deviceToken, string email);
 

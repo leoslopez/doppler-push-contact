@@ -1,6 +1,6 @@
 using AutoFixture;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
-using Doppler.PushContact.WebPushSender.DTOs;
 using Doppler.PushContact.WebPushSender.DTOs.WebPushApi;
 using Doppler.PushContact.WebPushSender.Repositories.Interfaces;
 using Doppler.PushContact.WebPushSender.Senders;
@@ -47,7 +47,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Subscription = new SubscriptionDTO
                 {
                     EndPoint = endpoint,
-                    Keys = new SubscriptionKeysDTO
+                    Keys = new SubscriptionKeys
                     {
                         P256DH = p256dh,
                         Auth = auth

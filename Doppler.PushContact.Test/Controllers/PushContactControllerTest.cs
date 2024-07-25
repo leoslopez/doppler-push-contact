@@ -2,6 +2,7 @@ using AutoFixture;
 using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -2907,7 +2908,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var fixture = new Fixture();
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel
+            var subscription = new SubscriptionDTO
             {
                 EndPoint = fixture.Create<string>(),
                 Keys = new SubscriptionKeys()
@@ -2922,7 +2923,7 @@ namespace Doppler.PushContact.Test.Controllers
             var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
-                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionDTO>()))
                 .ThrowsAsync(new ArgumentException());
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -2954,7 +2955,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var fixture = new Fixture();
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel
+            var subscription = new SubscriptionDTO
             {
                 EndPoint = fixture.Create<string>(),
                 Keys = new SubscriptionKeys()
@@ -2969,7 +2970,7 @@ namespace Doppler.PushContact.Test.Controllers
             var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
-                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionDTO>()))
                 .ThrowsAsync(new Exception());
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -3001,7 +3002,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var fixture = new Fixture();
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel
+            var subscription = new SubscriptionDTO
             {
                 EndPoint = fixture.Create<string>(),
                 Keys = new SubscriptionKeys()
@@ -3016,7 +3017,7 @@ namespace Doppler.PushContact.Test.Controllers
             var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
-                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionDTO>()))
                 .ReturnsAsync(false);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -3048,7 +3049,7 @@ namespace Doppler.PushContact.Test.Controllers
             // Arrange
             var fixture = new Fixture();
             var deviceToken = fixture.Create<string>();
-            var subscription = new SubscriptionModel
+            var subscription = new SubscriptionDTO
             {
                 EndPoint = fixture.Create<string>(),
                 Keys = new SubscriptionKeys()
@@ -3063,7 +3064,7 @@ namespace Doppler.PushContact.Test.Controllers
             var webPushEventServiceMock = new Mock<IWebPushEventService>();
 
             pushContactServiceMock
-                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionModel>()))
+                .Setup(x => x.UpdateSubscriptionAsync(deviceToken, It.IsAny<SubscriptionDTO>()))
                 .ReturnsAsync(true);
 
             var client = _factory.WithWebHostBuilder(builder =>

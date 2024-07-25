@@ -1,6 +1,4 @@
-using Doppler.PushContact.Models.DTOs;
-
-namespace Doppler.PushContact.WebPushSender.DTOs
+namespace Doppler.PushContact.Models.DTOs
 {
     public class DopplerWebPushDTO : WebPushDTO
     {
