@@ -1,9 +1,8 @@
-using Doppler.PushContact.DTOs;
-using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -89,6 +88,13 @@ namespace Doppler.PushContact.Services
             CancellationToken cancellationToken
         )
         {
+            var encryptedContactId = EncryptionHelper.Encrypt(pushContactId, useBase64Url: true);
+            var encryptedMessageId = EncryptionHelper.Encrypt(messageDTO.MessageId.ToString(), useBase64Url: true);
+
+            // TODO: handled endpoints from config file
+            var clickedEventEndpoint = $"http://localhost:10693/push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/clicked";
+            var receivedEventEndpoint = $"http://localhost:10693/push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/received";
+
             var webPushMessage = new DopplerWebPushDTO()
             {
                 Title = messageDTO.Title,
@@ -98,6 +104,8 @@ namespace Doppler.PushContact.Services
                 Subscription = subscription,
                 MessageId = messageDTO.MessageId,
                 PushContactId = pushContactId,
+                ClickedEventEndpoint = clickedEventEndpoint,
+                ReceivedEventEndpoint = receivedEventEndpoint,
             };
 
             string queueName = GetQueueName(subscription.EndPoint);
