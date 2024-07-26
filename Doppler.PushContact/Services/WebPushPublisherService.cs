@@ -150,7 +150,8 @@ namespace Doppler.PushContact.Services
         {
             if (string.IsNullOrEmpty(endpointPath) ||
                 string.IsNullOrEmpty(encryptedContactId) ||
-                string.IsNullOrEmpty(encryptedMessageId)
+                string.IsNullOrEmpty(encryptedMessageId) ||
+                string.IsNullOrEmpty(_pushApiUrl)
             )
             {
                 return null;
