@@ -25,6 +25,10 @@ namespace Doppler.PushContact.Services
         private const string QUEUE_NAME_SUFIX = "webpush.queue";
         private const string DEFAULT_QUEUE_NAME = $"default.{QUEUE_NAME_SUFIX}";
 
+        private readonly string _clickedEventEndpointPath;
+        private readonly string _receivedEventEndpointPath;
+        private readonly string _pushApiUrl;
+
         public WebPushPublisherService(
             IPushContactService pushContactService,
             IBackgroundQueue backgroundQueue,
@@ -40,6 +44,9 @@ namespace Doppler.PushContact.Services
             _logger = logger;
             _messageQueuePublisher = messageQueuePublisher;
             _pushEndpointMappings = webPushQueueSettings.Value.PushEndpointMappings;
+            _pushApiUrl = webPushQueueSettings.Value.PushApiUrl;
+            _clickedEventEndpointPath = webPushQueueSettings.Value.ClickedEventEndpointPath;
+            _receivedEventEndpointPath = webPushQueueSettings.Value.ReceivedEventEndpointPath;
         }
 
         public void ProcessWebPush(string domain, WebPushDTO messageDTO, string authenticationApiToken = null)
@@ -91,9 +98,8 @@ namespace Doppler.PushContact.Services
             var encryptedContactId = EncryptionHelper.Encrypt(pushContactId, useBase64Url: true);
             var encryptedMessageId = EncryptionHelper.Encrypt(messageDTO.MessageId.ToString(), useBase64Url: true);
 
-            // TODO: handled endpoints from config file
-            var clickedEventEndpoint = $"http://localhost:10693/push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/clicked";
-            var receivedEventEndpoint = $"http://localhost:10693/push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/received";
+            var clickedEventEndpoint = SanityzeEndpointToRegisterEvent(_clickedEventEndpointPath, encryptedContactId, encryptedMessageId);
+            var receivedEventEndpoint = SanityzeEndpointToRegisterEvent(_receivedEventEndpointPath, encryptedContactId, encryptedMessageId);
 
             var webPushMessage = new DopplerWebPushDTO()
             {
@@ -138,6 +144,22 @@ namespace Doppler.PushContact.Services
             }
 
             return DEFAULT_QUEUE_NAME;
+        }
+
+        public string SanityzeEndpointToRegisterEvent(string endpointPath, string encryptedContactId, string encryptedMessageId)
+        {
+            if (string.IsNullOrEmpty(endpointPath) ||
+                string.IsNullOrEmpty(encryptedContactId) ||
+                string.IsNullOrEmpty(encryptedMessageId)
+            )
+            {
+                return null;
+            }
+
+            return endpointPath
+                .Replace("[pushApiUrl]", _pushApiUrl)
+                .Replace("[encryptedContactId]", encryptedContactId)
+                .Replace("[encryptedMessageId]", encryptedMessageId);
         }
     }
 }
