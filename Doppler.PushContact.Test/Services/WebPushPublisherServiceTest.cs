@@ -1,11 +1,11 @@
 using AutoFixture;
 using Doppler.PushContact.DTOs;
-using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -33,6 +33,13 @@ namespace Doppler.PushContact.Test.Services
 
     public class WebPushPublisherServiceTest
     {
+        public WebPushPublisherServiceTest()
+        {
+            var TestKey = "5Rz2VJbnjbhPfEKn3Ryd0E+u7jzOT2KCBicmM5wUq5Y=";
+            var TestIV = "7yZ8kT8L7UeO8JpH3Ir6jQ==";
+            EncryptionHelper.Initialize(TestKey, TestIV);
+        }
+
         private static readonly WebPushPublisherSettings webPushQueueSettingsDefault =
             new WebPushPublisherSettings
             {
