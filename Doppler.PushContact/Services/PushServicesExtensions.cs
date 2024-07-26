@@ -16,7 +16,7 @@ namespace Doppler.PushContact.Services
 
             services.AddScoped<IDomainService, DomainService>();
 
-            services.Configure<WebPushQueueSettings>(configuration.GetSection(nameof(WebPushQueueSettings)));
+            services.Configure<WebPushPublisherSettings>(configuration.GetSection(nameof(WebPushPublisherSettings)));
 
             return services;
         }

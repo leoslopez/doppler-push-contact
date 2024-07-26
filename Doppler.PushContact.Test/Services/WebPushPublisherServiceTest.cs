@@ -33,8 +33,8 @@ namespace Doppler.PushContact.Test.Services
 
     public class WebPushPublisherServiceTest
     {
-        private static readonly WebPushQueueSettings webPushQueueSettingsDefault =
-            new WebPushQueueSettings
+        private static readonly WebPushPublisherSettings webPushQueueSettingsDefault =
+            new WebPushPublisherSettings
             {
                 PushEndpointMappings = new Dictionary<string, List<string>>
                 {
@@ -54,7 +54,7 @@ namespace Doppler.PushContact.Test.Services
             IMessageSender messageSender = null,
             ILogger<WebPushPublisherService> logger = null,
             IMessageQueuePublisher messageQueuePublisher = null,
-            IOptions<WebPushQueueSettings> webPushQueueSettings = null
+            IOptions<WebPushPublisherSettings> webPushQueueSettings = null
         )
         {
             return new WebPushPublisherService(

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Doppler.PushContact.Services
 {
-    public class WebPushQueueSettings
+    public class WebPushPublisherSettings
     {
         public Dictionary<string, List<string>> PushEndpointMappings { get; set; }
         public string ClickedEventEndpointPath { get; set; }

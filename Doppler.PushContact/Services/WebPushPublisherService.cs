@@ -35,7 +35,7 @@ namespace Doppler.PushContact.Services
             IMessageSender messageSender,
             ILogger<WebPushPublisherService> logger,
             IMessageQueuePublisher messageQueuePublisher,
-            IOptions<WebPushQueueSettings> webPushQueueSettings
+            IOptions<WebPushPublisherSettings> webPushQueueSettings
         )
         {
             _pushContactService = pushContactService;
