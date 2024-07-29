@@ -2,6 +2,7 @@ using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
@@ -311,30 +312,7 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/clicked")]
         public IActionResult RegisterWebPushClickedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
         {
-            try
-            {
-                string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
-                string contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Invalid encrypted data.");
-            }
-
-            _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
-            {
-                try
-                {
-                    // TODO: add logic to register event
-                    await Task.CompletedTask;
-                }
-                catch (Exception)
-                {
-                    // TODO: add error treatment
-                }
-            });
-
-            return Accepted();
+            return RegisterWebPushEvent(encryptedContactId, encryptedMessageId, WebPushEventType.Clicked);
         }
 
         [HttpPost]
@@ -342,13 +320,23 @@ namespace Doppler.PushContact.Controllers
         [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/received")]
         public IActionResult RegisterWebPushReceivedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
         {
+            return RegisterWebPushEvent(encryptedContactId, encryptedMessageId, WebPushEventType.Received);
+        }
+
+        private IActionResult RegisterWebPushEvent(string encryptedContactId, string encryptedMessageId, WebPushEventType type)
+        {
+            string contactId;
+            Guid messageIdToGuid;
             try
             {
+                contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
+
                 string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
-                string contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
+                messageIdToGuid = Guid.Parse(messageId);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                // add logging
                 return BadRequest("Invalid encrypted data.");
             }
 
@@ -356,13 +344,14 @@ namespace Doppler.PushContact.Controllers
             {
                 try
                 {
-                    // TODO: add logic to register event
-                    await Task.CompletedTask;
+                    var contactDomain = await _webPushEventService.RegisterWebPushEventAsync(
+                        contactId,
+                        messageIdToGuid,
+                        type,
+                        cancellationToken
+                    );
                 }
-                catch (Exception)
-                {
-                    // TODO: add error treatment
-                }
+                catch (Exception) { }
             });
 
             return Accepted();
