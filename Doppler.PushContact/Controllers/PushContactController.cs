@@ -6,6 +6,7 @@ using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -303,6 +304,68 @@ namespace Doppler.PushContact.Controllers
 
             var apiPage = await _pushContactService.GetDomains(page, per_page);
             return Ok(apiPage);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/clicked")]
+        public IActionResult RegisterWebPushClickedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
+        {
+            try
+            {
+                string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
+                string contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Invalid encrypted data.");
+            }
+
+            _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
+            {
+                try
+                {
+                    // TODO: add logic to register event
+                    await Task.CompletedTask;
+                }
+                catch (Exception)
+                {
+                    // TODO: add error treatment
+                }
+            });
+
+            return Accepted();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/received")]
+        public IActionResult RegisterWebPushReceivedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
+        {
+            try
+            {
+                string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
+                string contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Invalid encrypted data.");
+            }
+
+            _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
+            {
+                try
+                {
+                    // TODO: add logic to register event
+                    await Task.CompletedTask;
+                }
+                catch (Exception)
+                {
+                    // TODO: add error treatment
+                }
+            });
+
+            return Accepted();
         }
     }
 }
