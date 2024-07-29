@@ -2,6 +2,7 @@ using AutoFixture;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Repositories.Interfaces;
 using Doppler.PushContact.Services;
+using Doppler.PushContact.Services.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -16,10 +17,14 @@ namespace Doppler.PushContact.Test.Services
     {
         private static WebPushEventService CreateSut(
             IWebPushEventRepository webPushEventRepository = null,
+            IPushContactService pushContactService = null,
+            IMessageRepository messageRepository = null,
             ILogger<WebPushEventService> logger = null)
         {
             return new WebPushEventService(
                 webPushEventRepository ?? Mock.Of<IWebPushEventRepository>(),
+                pushContactService ?? Mock.Of<IPushContactService>(),
+                messageRepository ?? Mock.Of<IMessageRepository>(),
                 logger ?? Mock.Of<ILogger<WebPushEventService>>()
             );
         }
@@ -40,7 +45,7 @@ namespace Doppler.PushContact.Test.Services
                 .Setup(repo => repo.GetWebPushEventSummarization(messageId))
                 .ThrowsAsync(new Exception("Repository exception"));
 
-            var sut = CreateSut(mockRepository.Object, mockLogger.Object);
+            var sut = CreateSut(webPushEventRepository: mockRepository.Object, logger: mockLogger.Object);
 
             // Act
             var result = await sut.GetWebPushEventSummarizationAsync(messageId);
@@ -86,7 +91,7 @@ namespace Doppler.PushContact.Test.Services
                 .Setup(repo => repo.GetWebPushEventSummarization(messageId))
                 .ReturnsAsync(expectedSummarization);
 
-            var sut = CreateSut(mockRepository.Object, mockLogger.Object);
+            var sut = CreateSut(webPushEventRepository: mockRepository.Object, logger: mockLogger.Object);
 
             // Act
             var result = await sut.GetWebPushEventSummarizationAsync(messageId);
