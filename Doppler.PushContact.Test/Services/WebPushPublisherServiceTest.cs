@@ -392,5 +392,206 @@ namespace Doppler.PushContact.Test.Services
                     It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
                 Times.Once);
         }
+
+        [Fact]
+        public async Task ProcessWebPush_should_finish_ok_pushing_a_subscription_with_defined_clicked_n_received_endpoints()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var messageId = fixture.Create<Guid>();
+
+            var subscriptionEndpoint = "https://example.com/endpoint";
+            var queueNamePrefix = "example";
+
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = title,
+                Body = body,
+                MessageId = messageId
+            };
+
+            var backgroundQueueMock = new Mock<IBackgroundQueue>();
+            Func<CancellationToken, Task> capturedFunctionToBeSimulated = null;
+
+            backgroundQueueMock
+                .Setup(q => q.QueueBackgroundQueueItem(It.IsAny<Func<CancellationToken, Task>>()))
+                .Callback<Func<CancellationToken, Task>>(func => capturedFunctionToBeSimulated = func);
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var subscriptions = new List<SubscriptionInfoDTO>
+            {
+                new SubscriptionInfoDTO
+                {
+                    Subscription = new SubscriptionDTO
+                    {
+                        EndPoint = subscriptionEndpoint,
+                        Keys = new SubscriptionKeys
+                        {
+                            Auth = "auth",
+                            P256DH = "p256dh"
+                        }
+                    },
+                    PushContactId = "aContactId",
+                }
+            };
+
+            pushContactServiceMock
+                .Setup(s => s.GetAllSubscriptionInfoByDomainAsync(domain))
+                .ReturnsAsync(subscriptions);
+
+            var webPushQueueSettings = new WebPushPublisherSettings
+            {
+                PushEndpointMappings = new Dictionary<string, List<string>>
+                {
+                    { queueNamePrefix, new List<string> { subscriptionEndpoint } }
+                },
+                PushApiUrl = "https://push.api.test",
+                ClickedEventEndpointPath = "[pushApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/clicked",
+                ReceivedEventEndpointPath = "[pushApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/received"
+            };
+
+            var messageQueuePublisherMock = new Mock<IMessageQueuePublisher>();
+            var messageSenderMock = new Mock<IMessageSender>();
+            var loggerMock = new Mock<ILogger<WebPushPublisherService>>();
+
+            var sut = CreateSut(
+                pushContactService: pushContactServiceMock.Object,
+                backgroundQueue: backgroundQueueMock.Object,
+                messageSender: messageSenderMock.Object,
+                messageQueuePublisher: messageQueuePublisherMock.Object,
+                logger: loggerMock.Object,
+                webPushQueueSettings: Options.Create(webPushQueueSettings)
+            );
+
+            // Act
+            sut.ProcessWebPush(domain, webPushDTO, null);
+
+            // Assert
+            Assert.NotNull(capturedFunctionToBeSimulated);
+
+            // simulate the captured function execution
+            await capturedFunctionToBeSimulated(CancellationToken.None);
+
+            messageQueuePublisherMock.Verify(
+                q => q.PublishAsync(
+                    It.Is<DopplerWebPushDTO>(dto => dto.MessageId == messageId && dto.ClickedEventEndpoint != null && dto.ReceivedEventEndpoint != null),
+                    It.Is<string>(queue => queue == $"{queueNamePrefix}.webpush.queue"),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+        }
+
+        [Theory]
+        [InlineData(null, "[pushApiUrl]/clicked", "[pushApiUrl]/received", "aContactId")]
+        [InlineData("", "[pushApiUrl]/clicked", "[pushApiUrl]/received", "aContactId")]
+        [InlineData("aPushApiUrl", null, "[pushApiUrl]/received", "aContactId")]
+        [InlineData("aPushApiUrl", "", "[pushApiUrl]/received", "aContactId")]
+        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", null, "aContactId")]
+        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "", "aContactId")]
+        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "[pushApiUrl]/received", null)]
+        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "[pushApiUrl]/received", "")]
+        public async Task ProcessWebPush_should_finish_ok_pushing_a_subscription_with_undefined_clicked_n_received_endpoints(
+            string pushApiUrl,
+            string clickedEventEndpoint,
+            string receivedEventEndpoint,
+            string contactId
+        )
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var domain = fixture.Create<string>();
+            var title = fixture.Create<string>();
+            var body = fixture.Create<string>();
+            var messageId = fixture.Create<Guid>();
+
+            var subscriptionEndpoint = "https://example.com/endpoint";
+            var queueNamePrefix = "example";
+
+            var webPushDTO = new WebPushDTO()
+            {
+                Title = title,
+                Body = body,
+                MessageId = messageId
+            };
+
+            var backgroundQueueMock = new Mock<IBackgroundQueue>();
+            Func<CancellationToken, Task> capturedFunctionToBeSimulated = null;
+
+            backgroundQueueMock
+                .Setup(q => q.QueueBackgroundQueueItem(It.IsAny<Func<CancellationToken, Task>>()))
+                .Callback<Func<CancellationToken, Task>>(func => capturedFunctionToBeSimulated = func);
+
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var subscriptions = new List<SubscriptionInfoDTO>
+            {
+                new SubscriptionInfoDTO
+                {
+                    Subscription = new SubscriptionDTO
+                    {
+                        EndPoint = subscriptionEndpoint,
+                        Keys = new SubscriptionKeys
+                        {
+                            Auth = "auth",
+                            P256DH = "p256dh"
+                        }
+                    },
+                    PushContactId = contactId,
+                }
+            };
+
+            pushContactServiceMock
+                .Setup(s => s.GetAllSubscriptionInfoByDomainAsync(domain))
+                .ReturnsAsync(subscriptions);
+
+            var webPushQueueSettings = new WebPushPublisherSettings
+            {
+                PushEndpointMappings = new Dictionary<string, List<string>>
+                {
+                    { queueNamePrefix, new List<string> { subscriptionEndpoint } }
+                },
+                PushApiUrl = pushApiUrl,
+                ClickedEventEndpointPath = clickedEventEndpoint,
+                ReceivedEventEndpointPath = receivedEventEndpoint,
+            };
+
+            var messageQueuePublisherMock = new Mock<IMessageQueuePublisher>();
+            var messageSenderMock = new Mock<IMessageSender>();
+            var loggerMock = new Mock<ILogger<WebPushPublisherService>>();
+
+            var sut = CreateSut(
+                pushContactService: pushContactServiceMock.Object,
+                backgroundQueue: backgroundQueueMock.Object,
+                messageSender: messageSenderMock.Object,
+                messageQueuePublisher: messageQueuePublisherMock.Object,
+                logger: loggerMock.Object,
+                webPushQueueSettings: Options.Create(webPushQueueSettings)
+            );
+
+            // Act
+            sut.ProcessWebPush(domain, webPushDTO, null);
+
+            // Assert
+            Assert.NotNull(capturedFunctionToBeSimulated);
+
+            // simulate the captured function execution
+            await capturedFunctionToBeSimulated(CancellationToken.None);
+
+            messageQueuePublisherMock.Verify(
+                q => q.PublishAsync(
+                    It.Is<DopplerWebPushDTO>(dto => dto.MessageId == messageId &&
+                        (dto.ClickedEventEndpoint == null || dto.ReceivedEventEndpoint == null)
+                    ),
+                    It.Is<string>(queue => queue == $"{queueNamePrefix}.webpush.queue"),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+        }
     }
 }
