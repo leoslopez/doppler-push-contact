@@ -95,11 +95,8 @@ namespace Doppler.PushContact.Services
             CancellationToken cancellationToken
         )
         {
-            var encryptedContactId = EncryptionHelper.Encrypt(pushContactId, useBase64Url: true);
-            var encryptedMessageId = EncryptionHelper.Encrypt(messageDTO.MessageId.ToString(), useBase64Url: true);
-
-            var clickedEventEndpoint = SanityzeEndpointToRegisterEvent(_clickedEventEndpointPath, encryptedContactId, encryptedMessageId);
-            var receivedEventEndpoint = SanityzeEndpointToRegisterEvent(_receivedEventEndpointPath, encryptedContactId, encryptedMessageId);
+            var clickedEventEndpoint = SanityzeEndpointToRegisterEvent(_clickedEventEndpointPath, pushContactId, messageDTO.MessageId.ToString());
+            var receivedEventEndpoint = SanityzeEndpointToRegisterEvent(_receivedEventEndpointPath, pushContactId, messageDTO.MessageId.ToString());
 
             var webPushMessage = new DopplerWebPushDTO()
             {
@@ -146,16 +143,19 @@ namespace Doppler.PushContact.Services
             return DEFAULT_QUEUE_NAME;
         }
 
-        public string SanityzeEndpointToRegisterEvent(string endpointPath, string encryptedContactId, string encryptedMessageId)
+        public string SanityzeEndpointToRegisterEvent(string endpointPath, string pushContactId, string messageId)
         {
             if (string.IsNullOrEmpty(endpointPath) ||
-                string.IsNullOrEmpty(encryptedContactId) ||
-                string.IsNullOrEmpty(encryptedMessageId) ||
+                string.IsNullOrEmpty(pushContactId) ||
+                string.IsNullOrEmpty(messageId) ||
                 string.IsNullOrEmpty(_pushApiUrl)
             )
             {
                 return null;
             }
+
+            var encryptedContactId = EncryptionHelper.Encrypt(pushContactId, useBase64Url: true);
+            var encryptedMessageId = EncryptionHelper.Encrypt(messageId, useBase64Url: true);
 
             return endpointPath
                 .Replace("[pushApiUrl]", _pushApiUrl)
