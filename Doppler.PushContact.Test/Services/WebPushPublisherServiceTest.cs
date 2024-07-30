@@ -449,9 +449,9 @@ namespace Doppler.PushContact.Test.Services
                 {
                     { queueNamePrefix, new List<string> { subscriptionEndpoint } }
                 },
-                PushApiUrl = "https://push.api.test",
-                ClickedEventEndpointPath = "[pushApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/clicked",
-                ReceivedEventEndpointPath = "[pushApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/received"
+                PushContactApiUrl = "https://push.api.test",
+                ClickedEventEndpointPath = "[pushContactApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/clicked",
+                ReceivedEventEndpointPath = "[pushContactApiUrl]/push-contacts/[encryptedContactId]/messages/[encryptedMessageId]/received"
             };
 
             var messageQueuePublisherMock = new Mock<IMessageQueuePublisher>();
@@ -487,16 +487,16 @@ namespace Doppler.PushContact.Test.Services
         }
 
         [Theory]
-        [InlineData(null, "[pushApiUrl]/clicked", "[pushApiUrl]/received", "aContactId")]
-        [InlineData("", "[pushApiUrl]/clicked", "[pushApiUrl]/received", "aContactId")]
-        [InlineData("aPushApiUrl", null, "[pushApiUrl]/received", "aContactId")]
-        [InlineData("aPushApiUrl", "", "[pushApiUrl]/received", "aContactId")]
-        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", null, "aContactId")]
-        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "", "aContactId")]
-        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "[pushApiUrl]/received", null)]
-        [InlineData("aPushApiUrl", "[pushApiUrl]/clicked", "[pushApiUrl]/received", "")]
+        [InlineData(null, "[pushContactApiUrl]/clicked", "[pushContactApiUrl]/received", "aContactId")]
+        [InlineData("", "[pushContactApiUrl]/clicked", "[pushContactApiUrl]/received", "aContactId")]
+        [InlineData("pushContactApiUrl", null, "[pushContactApiUrl]/received", "aContactId")]
+        [InlineData("pushContactApiUrl", "", "[pushContactApiUrl]/received", "aContactId")]
+        [InlineData("pushContactApiUrl", "[pushContactApiUrl]/clicked", null, "aContactId")]
+        [InlineData("pushContactApiUrl", "[pushContactApiUrl]/clicked", "", "aContactId")]
+        [InlineData("pushContactApiUrl", "[pushContactApiUrl]/clicked", "[pushContactApiUrl]/received", null)]
+        [InlineData("pushContactApiUrl", "[pushContactApiUrl]/clicked", "[pushContactApiUrl]/received", "")]
         public async Task ProcessWebPush_should_finish_ok_pushing_a_subscription_with_undefined_clicked_n_received_endpoints(
-            string pushApiUrl,
+            string pushContactApiUrl,
             string clickedEventEndpoint,
             string receivedEventEndpoint,
             string contactId
@@ -555,7 +555,7 @@ namespace Doppler.PushContact.Test.Services
                 {
                     { queueNamePrefix, new List<string> { subscriptionEndpoint } }
                 },
-                PushApiUrl = pushApiUrl,
+                PushContactApiUrl = pushContactApiUrl,
                 ClickedEventEndpointPath = clickedEventEndpoint,
                 ReceivedEventEndpointPath = receivedEventEndpoint,
             };
