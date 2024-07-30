@@ -3,10 +3,12 @@ using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Test.Controllers.Utils;
+using Doppler.PushContact.Transversal;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +20,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -3246,6 +3249,109 @@ namespace Doppler.PushContact.Test.Controllers
             Assert.Equal(messageDeliveryResults.SentQuantity + webPushEventsSummarization.SentQuantity, result.Sent);
             Assert.Equal(messageDeliveryResults.Delivered + webPushEventsSummarization.Delivered, result.Delivered);
             Assert.Equal(messageDeliveryResults.NotDelivered + webPushEventsSummarization.NotDelivered, result.NotDelivered);
+        }
+
+        [Theory]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "swxCTS4gQMVIsaM-WpP_LaWIp2xwGpP-r3Md_pt1Jsk",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "uTOloRjtZHhcyWtDOm0p_v3J6r4Y9Q7o6zSfFDzKZJFFxJ_6PWE_lMZ5-mJ1aJ_B",
+            WebPushEventType.Clicked,
+            HttpStatusCode.Accepted
+        )]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "swxCTS4gQMVIsaM-WpP_LaWIp2xwGpP-r3Md_pt1Jsk",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "uTOloRjtZHhcyWtDOm0p_v3J6r4Y9Q7o6zSfFDzKZJFFxJ_6PWE_lMZ5-mJ1aJ_B",
+            WebPushEventType.Received,
+            HttpStatusCode.Accepted
+        )]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "invalidEncryptedContactId",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "uTOloRjtZHhcyWtDOm0p_v3J6r4Y9Q7o6zSfFDzKZJFFxJ_6PWE_lMZ5-mJ1aJ_B",
+            WebPushEventType.Clicked,
+            HttpStatusCode.BadRequest
+        )]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "swxCTS4gQMVIsaM-WpP_LaWIp2xwGpP-r3Md_pt1Jsk",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "invalidEncryptedMessageId",
+            WebPushEventType.Clicked,
+            HttpStatusCode.BadRequest
+        )]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "invalidEncryptedContactId",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "uTOloRjtZHhcyWtDOm0p_v3J6r4Y9Q7o6zSfFDzKZJFFxJ_6PWE_lMZ5-mJ1aJ_B",
+            WebPushEventType.Received,
+            HttpStatusCode.BadRequest
+        )]
+        [InlineData(
+            "66291accdc3ab636288af4ab",
+            "swxCTS4gQMVIsaM-WpP_LaWIp2xwGpP-r3Md_pt1Jsk",
+            "df555721-5135-4b5d-9c6a-7db3565f22ae",
+            "invalidEncryptedMessageId",
+            WebPushEventType.Received,
+            HttpStatusCode.BadRequest
+        )]
+        public async Task RegisterWebPushEvent_should_return_expected_status_code_and_call_to_service_properly(
+            string contactId,
+            string encryptedContactId,
+            Guid messageId,
+            string encryptedMessageId,
+            WebPushEventType type,
+            HttpStatusCode expectedStatusCode
+        )
+        {
+            // Arrange
+            var pushContactServiceMock = new Mock<IPushContactService>();
+            var messageRepositoryMock = new Mock<IMessageRepository>();
+            var webPushEventServiceMock = new Mock<IWebPushEventService>();
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(pushContactServiceMock.Object);
+                    services.AddSingleton(messageRepositoryMock.Object);
+                    services.AddSingleton(webPushEventServiceMock.Object);
+
+                    var TestKey = "5Rz2VJbnjbhPfEKn3Ryd0E+u7jzOT2KCBicmM5wUq5Y=";
+                    var TestIV = "7yZ8kT8L7UeO8JpH3Ir6jQ==";
+                    EncryptionHelper.Initialize(TestKey, TestIV);
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var requestUri = $"/push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/{type.ToString().ToLower()}";
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            _output.WriteLine(response.GetHeadersAsString());
+
+            // Assert
+            Assert.Equal(expectedStatusCode, response.StatusCode);
+
+            if (expectedStatusCode == HttpStatusCode.Accepted)
+            {
+                webPushEventServiceMock.Verify(
+                    x => x.RegisterWebPushEventAsync(
+                        contactId,
+                        messageId,
+                        type,
+                        It.IsAny<CancellationToken>()),
+                    Times.Once);
+            }
         }
     }
 }
