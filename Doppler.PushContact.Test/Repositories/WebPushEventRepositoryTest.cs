@@ -238,5 +238,38 @@ namespace Doppler.PushContact.Test.Repositories
             // Assert
             Assert.False(result);
         }
+
+        [Fact]
+        public async Task IsWebPushEventRegistered_ShouldLogError_WhenMongoDBThrowsException()
+        {
+            // Arrange
+            var pushContactId = "testPushContactId";
+            var messageId = Guid.NewGuid();
+            var eventType = WebPushEventType.Delivered;
+
+            _mockCollection
+                .Setup(c => c.FindAsync(
+                    It.IsAny<FilterDefinition<BsonDocument>>(),
+                    It.IsAny<FindOptions<BsonDocument>>(),
+                    It.IsAny<CancellationToken>()
+                ))
+                .Throws(new Exception("MongoDB exception"));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() =>
+                _repository.IsWebPushEventRegistered(pushContactId, messageId, eventType)
+            );
+
+            Assert.Equal("MongoDB exception", exception.Message);
+
+            _mockLogger.Verify(
+                logger => logger.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Error checking if WebPushEvent exists for pushContactId:")),
+                    exception,
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
+        }
     }
 }
