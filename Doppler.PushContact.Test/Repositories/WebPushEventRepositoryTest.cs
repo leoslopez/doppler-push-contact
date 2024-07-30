@@ -190,9 +190,13 @@ namespace Doppler.PushContact.Test.Repositories
                 .Returns(Task.FromResult(false));
             mockCursor.Setup(_ => _.Current).Returns(new List<BsonDocument> { document });
 
-            _mockCollection.Setup(c => c.FindAsync(It.IsAny<FilterDefinition<BsonDocument>>(),
-                                                   It.IsAny<FindOptions<BsonDocument>>(),
-                                                   It.IsAny<CancellationToken>()))
+            _mockCollection
+                .Setup(c => c.FindAsync(
+                        It.IsAny<FilterDefinition<BsonDocument>>(),
+                        It.IsAny<FindOptions<BsonDocument>>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
                 .ReturnsAsync(mockCursor.Object);
 
             // Act
@@ -219,9 +223,13 @@ namespace Doppler.PushContact.Test.Repositories
                 .Returns(Task.FromResult(false));
             mockCursor.Setup(_ => _.Current).Returns(new List<BsonDocument>());
 
-            _mockCollection.Setup(c => c.FindAsync(It.IsAny<FilterDefinition<BsonDocument>>(),
-                                                   It.IsAny<FindOptions<BsonDocument>>(),
-                                                   It.IsAny<CancellationToken>()))
+            _mockCollection
+                .Setup(c => c.FindAsync(
+                        It.IsAny<FilterDefinition<BsonDocument>>(),
+                        It.IsAny<FindOptions<BsonDocument>>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
                 .ReturnsAsync(mockCursor.Object);
 
             // Act
