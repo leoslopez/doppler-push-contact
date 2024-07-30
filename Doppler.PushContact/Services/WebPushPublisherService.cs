@@ -1,9 +1,8 @@
-using Doppler.PushContact.DTOs;
-using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
 using Doppler.PushContact.QueuingService.MessageQueueBroker;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -26,13 +25,17 @@ namespace Doppler.PushContact.Services
         private const string QUEUE_NAME_SUFIX = "webpush.queue";
         private const string DEFAULT_QUEUE_NAME = $"default.{QUEUE_NAME_SUFIX}";
 
+        private readonly string _clickedEventEndpointPath;
+        private readonly string _receivedEventEndpointPath;
+        private readonly string _pushApiUrl;
+
         public WebPushPublisherService(
             IPushContactService pushContactService,
             IBackgroundQueue backgroundQueue,
             IMessageSender messageSender,
             ILogger<WebPushPublisherService> logger,
             IMessageQueuePublisher messageQueuePublisher,
-            IOptions<WebPushQueueSettings> webPushQueueSettings
+            IOptions<WebPushPublisherSettings> webPushQueueSettings
         )
         {
             _pushContactService = pushContactService;
@@ -41,6 +44,9 @@ namespace Doppler.PushContact.Services
             _logger = logger;
             _messageQueuePublisher = messageQueuePublisher;
             _pushEndpointMappings = webPushQueueSettings.Value.PushEndpointMappings;
+            _pushApiUrl = webPushQueueSettings.Value.PushApiUrl;
+            _clickedEventEndpointPath = webPushQueueSettings.Value.ClickedEventEndpointPath;
+            _receivedEventEndpointPath = webPushQueueSettings.Value.ReceivedEventEndpointPath;
         }
 
         public void ProcessWebPush(string domain, WebPushDTO messageDTO, string authenticationApiToken = null)
@@ -89,6 +95,9 @@ namespace Doppler.PushContact.Services
             CancellationToken cancellationToken
         )
         {
+            var clickedEventEndpoint = SanityzeEndpointToRegisterEvent(_clickedEventEndpointPath, pushContactId, messageDTO.MessageId.ToString());
+            var receivedEventEndpoint = SanityzeEndpointToRegisterEvent(_receivedEventEndpointPath, pushContactId, messageDTO.MessageId.ToString());
+
             var webPushMessage = new DopplerWebPushDTO()
             {
                 Title = messageDTO.Title,
@@ -98,6 +107,8 @@ namespace Doppler.PushContact.Services
                 Subscription = subscription,
                 MessageId = messageDTO.MessageId,
                 PushContactId = pushContactId,
+                ClickedEventEndpoint = clickedEventEndpoint,
+                ReceivedEventEndpoint = receivedEventEndpoint,
             };
 
             string queueName = GetQueueName(subscription.EndPoint);
@@ -130,6 +141,26 @@ namespace Doppler.PushContact.Services
             }
 
             return DEFAULT_QUEUE_NAME;
+        }
+
+        public string SanityzeEndpointToRegisterEvent(string endpointPath, string pushContactId, string messageId)
+        {
+            if (string.IsNullOrEmpty(endpointPath) ||
+                string.IsNullOrEmpty(pushContactId) ||
+                string.IsNullOrEmpty(messageId) ||
+                string.IsNullOrEmpty(_pushApiUrl)
+            )
+            {
+                return null;
+            }
+
+            var encryptedContactId = EncryptionHelper.Encrypt(pushContactId, useBase64Url: true);
+            var encryptedMessageId = EncryptionHelper.Encrypt(messageId, useBase64Url: true);
+
+            return endpointPath
+                .Replace("[pushApiUrl]", _pushApiUrl)
+                .Replace("[encryptedContactId]", encryptedContactId)
+                .Replace("[encryptedMessageId]", encryptedMessageId);
         }
     }
 }

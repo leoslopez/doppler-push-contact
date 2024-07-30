@@ -78,7 +78,12 @@ namespace Doppler.PushContact.WebPushSender.Senders
                             endpoint = message.Subscription.EndPoint,
                             p256DH = message.Subscription.Keys.P256DH,
                             auth = message.Subscription.Keys.Auth,
-                        }
+                            subscriptionExtraData = new
+                            {
+                                clickedEventEndpoint = message.ClickedEventEndpoint,
+                                receivedEventEndpoint = message.ReceivedEventEndpoint,
+                            },
+                        },
                     },
                     notificationTitle = message.Title,
                     notificationBody = message.Body,

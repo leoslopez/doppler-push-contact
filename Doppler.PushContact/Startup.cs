@@ -5,6 +5,7 @@ using Doppler.PushContact.Repositories.Interfaces;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,11 @@ namespace Doppler.PushContact
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Initialize EncryptionHelper
+            services.Configure<EncryptionSettings>(Configuration.GetSection("EncryptionSettings"));
+            var encryptionSettings = Configuration.GetSection("EncryptionSettings").Get<EncryptionSettings>();
+            EncryptionHelper.Initialize(encryptionSettings.Key, encryptionSettings.IV);
+
             services.AddDopplerSecurity();
             services.AddHttpContextAccessor();
             services.AddPushMongoContext(Configuration);
