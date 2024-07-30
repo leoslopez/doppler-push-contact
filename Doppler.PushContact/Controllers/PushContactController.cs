@@ -344,14 +344,17 @@ namespace Doppler.PushContact.Controllers
             {
                 try
                 {
-                    var contactDomain = await _webPushEventService.RegisterWebPushEventAsync(
+                    await _webPushEventService.RegisterWebPushEventAsync(
                         contactId,
                         messageIdToGuid,
                         type,
                         cancellationToken
                     );
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // TODO: add error treatment
+                }
             });
 
             return Accepted();
