@@ -43,10 +43,15 @@ namespace Doppler.PushContact.Repositories
                 .Group(new BsonDocument
                 {
                     { "_id", "$" + WebPushEventDocumentProps.MessageId_PropName },
+                    // TODO: consider re-analyze summarization when ProcessingFailed and DeliveryFailedButRetry will be treated
                     { "NotDelivered", new BsonDocument("$sum", new BsonDocument("$cond", new BsonArray
                         {
-                            new BsonDocument("$eq", new BsonArray {
-                                "$" + WebPushEventDocumentProps.Type_PropName, (int)WebPushEventType.DeliveryFailed }),
+                            new BsonDocument("$in", new BsonArray {
+                                "$" + WebPushEventDocumentProps.Type_PropName, new BsonArray {
+                                    (int)WebPushEventType.DeliveryFailed,
+                                    (int)WebPushEventType.ProcessingFailed,
+                                    (int)WebPushEventType.DeliveryFailedButRetry
+                                }}),
                             1,
                             0
                         })
