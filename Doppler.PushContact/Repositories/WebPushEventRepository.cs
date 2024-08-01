@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Doppler.PushContact.Repositories
@@ -80,6 +81,47 @@ namespace Doppler.PushContact.Repositories
                 Delivered = result["Delivered"].AsInt32,
                 NotDelivered = result["NotDelivered"].AsInt32,
             };
+        }
+
+        public async Task<bool> InsertAsync(WebPushEvent webPushEvent, CancellationToken cancellationToken)
+        {
+            var eventBsonDocument = webPushEvent.ToBsonDocument();
+
+            await WebPushEvents.InsertOneAsync(
+                document: eventBsonDocument,
+                options: default,
+                cancellationToken: cancellationToken
+            );
+
+            return true;
+        }
+
+        public async Task<bool> IsWebPushEventRegistered(string pushContactId, Guid messageId, WebPushEventType type)
+        {
+            var formattedMessageId = new BsonBinaryData(messageId, GuidRepresentation.Standard);
+
+            var filter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Eq(WebPushEventDocumentProps.PushContactId_PropName, pushContactId),
+                Builders<BsonDocument>.Filter.Eq(WebPushEventDocumentProps.Type_PropName, (int)type),
+                Builders<BsonDocument>.Filter.Eq(WebPushEventDocumentProps.MessageId_PropName, formattedMessageId)
+            );
+
+            try
+            {
+                var webPushEvent = await WebPushEvents.Find(filter).FirstOrDefaultAsync();
+                return webPushEvent != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error checking if WebPushEvent exists for pushContactId: {pushContactId}, messageId: {messageId}, type: {type}",
+                    pushContactId,
+                    messageId,
+                    type.ToString()
+                );
+                throw;
+            }
         }
 
         private IMongoCollection<BsonDocument> WebPushEvents

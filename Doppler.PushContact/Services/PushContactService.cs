@@ -1,17 +1,17 @@
+using Doppler.PushContact.ApiModels;
+using Doppler.PushContact.DTOs;
 using Doppler.PushContact.Models;
+using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Models.Entities;
+using Doppler.PushContact.Services.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using Doppler.PushContact.ApiModels;
-using Doppler.PushContact.Services.Messages;
-using Doppler.PushContact.DTOs;
-using Doppler.PushContact.Models.Entities;
-using Doppler.PushContact.Models.DTOs;
+using System.Threading.Tasks;
 
 namespace Doppler.PushContact.Services
 {
@@ -759,6 +759,28 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                 throw;
             }
 
+        }
+
+        public async Task<string> GetPushContactDomainAsync(string pushContactId)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.IdPropName, pushContactId);
+
+            try
+            {
+                var pushContact = await PushContacts.Find(filter).FirstOrDefaultAsync();
+                return pushContact != null ?
+                    pushContact.GetValue(PushContactDocumentProps.DomainPropName, null)?.AsString : null;
+            }
+            catch (MongoException ex)
+            {
+                _logger.LogError(ex, $"MongoException getting Push-Contact by {nameof(pushContactId)} {pushContactId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unexpected error getting Push-Contact by {nameof(pushContactId)} {pushContactId}");
+                throw;
+            }
         }
 
         private IMongoCollection<BsonDocument> PushContacts

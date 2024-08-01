@@ -1,13 +1,11 @@
-using Doppler.PushContact.Models;
+using Doppler.PushContact.ApiModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using Doppler.PushContact.ApiModels;
+using System.Threading.Tasks;
 
 namespace Doppler.PushContact.Services.Messages
 {
@@ -228,6 +226,29 @@ namespace Doppler.PushContact.Services.Messages
             catch (Exception e)
             {
                 _logger.LogError(e, @$"Error incrementing message stats for {nameof(messageId)} {messageId}");
+                throw;
+            }
+        }
+
+        public async Task<string> GetMessageDomainAsync(Guid messageId)
+        {
+            BsonBinaryData messageIdFormatted = new BsonBinaryData(messageId, GuidRepresentation.Standard);
+            var filter = Builders<BsonDocument>.Filter.Eq(MessageDocumentProps.MessageIdPropName, messageIdFormatted);
+
+            try
+            {
+                var message = await Messages.Find(filter).FirstOrDefaultAsync();
+                return message != null ?
+                    message.GetValue(MessageDocumentProps.DomainPropName, null)?.AsString : null;
+            }
+            catch (MongoException ex)
+            {
+                _logger.LogError(ex, $"MongoException getting Message by {nameof(messageId)} {messageId}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unexpected error getting Message by {nameof(messageId)} {messageId}");
                 throw;
             }
         }

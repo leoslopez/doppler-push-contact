@@ -2,10 +2,12 @@ using Doppler.PushContact.ApiModels;
 using Doppler.PushContact.DopplerSecurity;
 using Doppler.PushContact.Models;
 using Doppler.PushContact.Models.DTOs;
+using Doppler.PushContact.Models.Enums;
 using Doppler.PushContact.Models.PushContactApiResponses;
 using Doppler.PushContact.Services;
 using Doppler.PushContact.Services.Messages;
 using Doppler.PushContact.Services.Queue;
+using Doppler.PushContact.Transversal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -303,6 +305,59 @@ namespace Doppler.PushContact.Controllers
 
             var apiPage = await _pushContactService.GetDomains(page, per_page);
             return Ok(apiPage);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/clicked")]
+        public IActionResult RegisterWebPushClickedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
+        {
+            return RegisterWebPushEvent(encryptedContactId, encryptedMessageId, WebPushEventType.Clicked);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("push-contacts/{encryptedContactId}/messages/{encryptedMessageId}/received")]
+        public IActionResult RegisterWebPushReceivedEvent([FromRoute] string encryptedContactId, [FromRoute] string encryptedMessageId)
+        {
+            return RegisterWebPushEvent(encryptedContactId, encryptedMessageId, WebPushEventType.Received);
+        }
+
+        private IActionResult RegisterWebPushEvent(string encryptedContactId, string encryptedMessageId, WebPushEventType type)
+        {
+            string contactId;
+            Guid messageIdToGuid;
+            try
+            {
+                contactId = EncryptionHelper.Decrypt(encryptedContactId, useBase64Url: true);
+
+                string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
+                messageIdToGuid = Guid.Parse(messageId);
+            }
+            catch (Exception)
+            {
+                // add logging
+                return BadRequest("Invalid encrypted data.");
+            }
+
+            _backgroundQueue.QueueBackgroundQueueItem(async (cancellationToken) =>
+            {
+                try
+                {
+                    await _webPushEventService.RegisterWebPushEventAsync(
+                        contactId,
+                        messageIdToGuid,
+                        type,
+                        cancellationToken
+                    );
+                }
+                catch (Exception)
+                {
+                    // TODO: add error treatment
+                }
+            });
+
+            return Accepted();
         }
     }
 }

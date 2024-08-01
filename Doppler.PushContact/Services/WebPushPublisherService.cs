@@ -27,7 +27,7 @@ namespace Doppler.PushContact.Services
 
         private readonly string _clickedEventEndpointPath;
         private readonly string _receivedEventEndpointPath;
-        private readonly string _pushApiUrl;
+        private readonly string _pushContactApiUrl;
 
         public WebPushPublisherService(
             IPushContactService pushContactService,
@@ -44,7 +44,7 @@ namespace Doppler.PushContact.Services
             _logger = logger;
             _messageQueuePublisher = messageQueuePublisher;
             _pushEndpointMappings = webPushQueueSettings.Value.PushEndpointMappings;
-            _pushApiUrl = webPushQueueSettings.Value.PushApiUrl;
+            _pushContactApiUrl = webPushQueueSettings.Value.PushContactApiUrl;
             _clickedEventEndpointPath = webPushQueueSettings.Value.ClickedEventEndpointPath;
             _receivedEventEndpointPath = webPushQueueSettings.Value.ReceivedEventEndpointPath;
         }
@@ -148,7 +148,7 @@ namespace Doppler.PushContact.Services
             if (string.IsNullOrEmpty(endpointPath) ||
                 string.IsNullOrEmpty(pushContactId) ||
                 string.IsNullOrEmpty(messageId) ||
-                string.IsNullOrEmpty(_pushApiUrl)
+                string.IsNullOrEmpty(_pushContactApiUrl)
             )
             {
                 return null;
@@ -158,7 +158,7 @@ namespace Doppler.PushContact.Services
             var encryptedMessageId = EncryptionHelper.Encrypt(messageId, useBase64Url: true);
 
             return endpointPath
-                .Replace("[pushApiUrl]", _pushApiUrl)
+                .Replace("[pushContactApiUrl]", _pushContactApiUrl)
                 .Replace("[encryptedContactId]", encryptedContactId)
                 .Replace("[encryptedMessageId]", encryptedMessageId);
         }
