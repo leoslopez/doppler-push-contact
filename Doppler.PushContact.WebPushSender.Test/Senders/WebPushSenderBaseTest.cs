@@ -256,7 +256,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                     x => x.Log(
                         It.Is<LogLevel>(l => l == LogLevel.Error),
                         It.IsAny<EventId>(),
-                        It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("An error happened sending web push notification")),
+                        It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("An unexpected error occurred sending a web push to endpoint:")),
                         It.IsAny<Exception>(),
                         It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
                     Times.Once);
