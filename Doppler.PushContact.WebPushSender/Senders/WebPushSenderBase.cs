@@ -94,7 +94,12 @@ namespace Doppler.PushContact.WebPushSender.Senders
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error happened sending web push notification: {ex}");
+                _logger.LogError(
+                    ex,
+                    "An unexpected error occurred sending a web push to endpoint: {endpoint} for pushContactId: {pushContactId}.",
+                    message.Subscription.EndPoint,
+                    message.PushContactId
+                );
 
                 return new WebPushProcessingResultDTO()
                 {
