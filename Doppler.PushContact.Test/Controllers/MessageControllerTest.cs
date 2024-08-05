@@ -543,7 +543,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -566,7 +566,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -588,7 +588,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}");
 
             // Act
             var response = await client.SendAsync(request);
@@ -610,7 +610,7 @@ namespace Doppler.PushContact.Test.Controllers
             var fixture = new Fixture();
             var domain = fixture.Create<string>();
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {token}" } }
             };
@@ -660,7 +660,7 @@ namespace Doppler.PushContact.Test.Controllers
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(message)
@@ -715,7 +715,7 @@ namespace Doppler.PushContact.Test.Controllers
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(message)
@@ -779,7 +779,7 @@ namespace Doppler.PushContact.Test.Controllers
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"message/domains/{domain}")
+            var request = new HttpRequestMessage(HttpMethod.Post, $"messages/domains/{domain}")
             {
                 Headers = { { "Authorization", $"Bearer {TestApiUsersData.TOKEN_SUPERUSER_EXPIRE_20330518}" } },
                 Content = JsonContent.Create(message)

@@ -102,7 +102,7 @@ namespace Doppler.PushContact.Controllers
         }
 
         [HttpPost]
-        [Route("message/domains/{domain}")]
+        [Route("messages/domains/{domain}")]
         public async Task<IActionResult> EnqueueWebPush([FromRoute] string domain, [FromBody] Message message)
         {
             Guid messageId;
