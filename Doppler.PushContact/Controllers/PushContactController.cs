@@ -343,9 +343,14 @@ namespace Doppler.PushContact.Controllers
                 string messageId = EncryptionHelper.Decrypt(encryptedMessageId, useBase64Url: true);
                 messageIdToGuid = Guid.Parse(messageId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // add logging
+                _logger.LogError(
+                    ex,
+                    "An unexpected error occurred decrypting contactId: {encryptedContactId} and messageId: {encryptedMessageId}",
+                    encryptedContactId,
+                    encryptedMessageId
+                );
                 return BadRequest("Invalid encrypted data.");
             }
 
@@ -360,9 +365,14 @@ namespace Doppler.PushContact.Controllers
                         cancellationToken
                     );
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // TODO: add error treatment
+                    _logger.LogError(
+                        ex,
+                        "An unexpected error occurred registering a {webPushEventType} event with messageId: {messageId}.",
+                        messageIdToGuid,
+                        type
+                    );
                 }
             });
 
