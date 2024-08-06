@@ -11,6 +11,7 @@ using Doppler.PushContact.Transversal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -27,18 +28,22 @@ namespace Doppler.PushContact.Controllers
         private readonly IMessageRepository _messageRepository;
         private readonly IBackgroundQueue _backgroundQueue;
         private readonly IWebPushEventService _webPushEventService;
+        private readonly ILogger<PushContactController> _logger;
 
         public PushContactController(IPushContactService pushContactService,
             IMessageSender messageSender,
             IMessageRepository messageRepository,
             IBackgroundQueue backgroundQueue,
-            IWebPushEventService webPushEventRepository)
+            IWebPushEventService webPushEventRepository,
+            ILogger<PushContactController> logger
+        )
         {
             _pushContactService = pushContactService;
             _messageSender = messageSender;
             _messageRepository = messageRepository;
             _backgroundQueue = backgroundQueue;
             _webPushEventService = webPushEventRepository;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -153,9 +158,13 @@ namespace Doppler.PushContact.Controllers
 
                     await _messageRepository.UpdateDeliveriesAsync(messageId, sent, delivered, notDelivered);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // TODO: add error treatment
+                    _logger.LogError(
+                        ex,
+                        "An unexpected error occurred processing/sending a message with messageId: {messageId}.",
+                        messageId
+                    );
                 }
             });
 
