@@ -29,7 +29,9 @@ namespace Doppler.PushContact.WebPushSender.Repositories
         {
             var filter = Builders<BsonDocument>.Filter.Eq(PushContactDocumentProps.IdPropName, pushContactId);
 
-            var update = Builders<BsonDocument>.Update.Set(PushContactDocumentProps.DeletedPropName, true);
+            var update = Builders<BsonDocument>.Update
+                .Set(PushContactDocumentProps.DeletedPropName, true)
+                .Set(PushContactDocumentProps.ModifiedPropName, DateTime.UtcNow);
 
             try
             {
@@ -42,6 +44,5 @@ namespace Doppler.PushContact.WebPushSender.Repositories
                 return false;
             }
         }
-
     }
 }
