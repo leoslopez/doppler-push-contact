@@ -98,7 +98,13 @@ namespace Doppler.PushContact.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500);
+                _logger.LogError(
+                    ex,
+                    "An unexpected error occurred updating a contact with token: {DeviceToken} and subscription: {Subscription}.",
+                    deviceToken,
+                    JsonSerializer.Serialize(subscription)
+                );
+                return StatusCode((int)HttpStatusCode.InternalServerError);
             }
         }
 
