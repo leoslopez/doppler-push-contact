@@ -54,6 +54,7 @@ namespace Doppler.PushContact.Services
         {
             return subscription != null &&
                 !string.IsNullOrEmpty(subscription.EndPoint) &&
+                Uri.IsWellFormedUriString(subscription.EndPoint, UriKind.Absolute) &&
                 subscription.Keys != null &&
                 !string.IsNullOrEmpty(subscription.Keys.P256DH) &&
                 !string.IsNullOrEmpty(subscription.Keys.Auth);
@@ -125,12 +126,9 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
 
             if (!IsValidSubscription(subscription))
             {
-                throw new ArgumentException($"'{nameof(subscription)}' fields cannot be null, empty or whitespace.");
-            }
-
-            if (!Uri.IsWellFormedUriString(subscription.EndPoint, UriKind.Absolute))
-            {
-                throw new ArgumentException($"'{nameof(subscription)}' pass a subscription with at least a valid endpoint.");
+                throw new ArgumentException(
+                    $"'{nameof(subscription)}' fields cannot be null, empty or whitespace. Also, a subscription must to have a valid endpoint."
+                );
             }
 
             BsonDocument subscriptionDocument = new BsonDocument {
