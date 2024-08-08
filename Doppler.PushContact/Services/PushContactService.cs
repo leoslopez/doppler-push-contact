@@ -38,12 +38,7 @@ namespace Doppler.PushContact.Services
         {
             BsonDocument subscription = null;
 
-            if (pushContactModel.Subscription != null
-                && !string.IsNullOrEmpty(pushContactModel.Subscription.EndPoint)
-                && pushContactModel.Subscription.Keys != null
-                && !string.IsNullOrEmpty(pushContactModel.Subscription.Keys.P256DH)
-                && !string.IsNullOrEmpty(pushContactModel.Subscription.Keys.Auth)
-            )
+            if (IsValidSubscription(pushContactModel.Subscription))
             {
                 subscription = new BsonDocument {
                     { PushContactDocumentProps.Subscription_EndPoint_PropName, pushContactModel.Subscription.EndPoint },
@@ -128,7 +123,7 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
                 throw new ArgumentException($"'{nameof(subscription)}' cannot be null.");
             }
 
-            if (string.IsNullOrEmpty(subscription.EndPoint) || string.IsNullOrEmpty(subscription.Keys.P256DH) || string.IsNullOrEmpty(subscription.Keys.Auth))
+            if (!IsValidSubscription(subscription))
             {
                 throw new ArgumentException($"'{nameof(subscription)}' fields cannot be null, empty or whitespace.");
             }
