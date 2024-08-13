@@ -66,6 +66,11 @@ namespace Doppler.PushContact.WebPushSender.Senders
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
                 await _pushContactRepository.MarkDeletedAsync(webPushEvent.PushContactId);
             }
+            else if (processingResult.UnknownFail)
+            {
+                webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
+                webPushEvent.ErrorMessage = processingResult.ErrorMessage;
+            }
             else if (processingResult.LimitsExceeded)
             {
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailedButRetry;

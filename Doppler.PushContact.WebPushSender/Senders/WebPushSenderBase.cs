@@ -153,6 +153,18 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
                         processingResult.InvalidSubscription = true;
                         break;
+                    default:
+                        _logger.LogError
+                        (
+                            "(Error {WebPushResponseStatusCode}):\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
+                            response.Exception.MessagingErrorCode,
+                            JsonConvert.SerializeObject(response.Subscription),
+                            JsonConvert.SerializeObject(response.Exception)
+                        );
+
+                        processingResult.UnknownFail = true;
+                        processingResult.ErrorMessage = response.Exception.Message;
+                        break;
                 }
             }
 

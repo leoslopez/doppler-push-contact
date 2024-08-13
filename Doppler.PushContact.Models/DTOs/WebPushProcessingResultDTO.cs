@@ -6,5 +6,7 @@ namespace Doppler.PushContact.Models.DTOs
         public bool LimitsExceeded { get; set; }
         public bool InvalidSubscription { get; set; }
         public bool FailedProcessing { get; set; }
+        public bool UnknownFail { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }
