@@ -46,15 +46,17 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
         }
 
         [Theory]
-        [InlineData(true, false, false, false, WebPushEventType.ProcessingFailed)]
-        [InlineData(false, true, false, false, WebPushEventType.Delivered)]
-        [InlineData(false, false, true, false, WebPushEventType.DeliveryFailed)]
-        [InlineData(false, false, false, true, WebPushEventType.DeliveryFailedButRetry)]
+        [InlineData(true, false, false, false, false, WebPushEventType.ProcessingFailed)]
+        [InlineData(false, true, false, false, false, WebPushEventType.Delivered)]
+        [InlineData(false, false, true, false, false, WebPushEventType.DeliveryFailed)]
+        [InlineData(false, false, false, true, false, WebPushEventType.DeliveryFailedButRetry)]
+        [InlineData(false, false, false, false, true, WebPushEventType.DeliveryFailed)]
         public async Task HandleMessageAsync_Should_Call_Repository_With_Expected_EventType(
             bool failedProcessing,
             bool successfullyDelivered,
             bool invalidSubscription,
             bool limitsExceeded,
+            bool unknownFail,
             WebPushEventType expectedEventType
         )
         {
@@ -69,7 +71,8 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 FailedProcessing = failedProcessing,
                 SuccessfullyDelivered = successfullyDelivered,
                 InvalidSubscription = invalidSubscription,
-                LimitsExceeded = limitsExceeded
+                LimitsExceeded = limitsExceeded,
+                UnknownFail = unknownFail,
             };
 
             var weshPushEventRepository = new Mock<IWebPushEventRepository>();
