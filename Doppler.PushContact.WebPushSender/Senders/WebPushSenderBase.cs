@@ -142,6 +142,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
                     case (int)HttpStatusCode.NotFound:
                     case (int)HttpStatusCode.Gone:
+                    case (int)HttpStatusCode.Unauthorized:
                         _logger.LogDebug
                         (
                             "(Error {WebPushResponseStatusCode}):\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
