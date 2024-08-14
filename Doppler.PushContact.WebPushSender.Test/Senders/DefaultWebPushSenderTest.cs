@@ -65,6 +65,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
 
             var messageId = fixture.Create<Guid>();
             var pushContactId = fixture.Create<string>();
+            var errorMessage = fixture.Create<string>();
 
             var processingResult = new WebPushProcessingResultDTO
             {
@@ -74,6 +75,11 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 LimitsExceeded = limitsExceeded,
                 UnknownFail = unknownFail,
             };
+
+            if (unknownFail)
+            {
+                processingResult.ErrorMessage = errorMessage;
+            }
 
             var weshPushEventRepository = new Mock<IWebPushEventRepository>();
             SendWebPushDelegate delegateWithBehavior = _ => Task.FromResult(processingResult);
@@ -99,7 +105,8 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 It.Is<WebPushEvent>(evt =>
                     evt.MessageId == messageId &&
                     evt.PushContactId == pushContactId &&
-                    evt.Type == (int)expectedEventType
+                    evt.Type == (int)expectedEventType &&
+                    evt.ErrorMessage == (unknownFail ? errorMessage : null)
                 ),
                 cancellationToken
             ), Times.Once);
