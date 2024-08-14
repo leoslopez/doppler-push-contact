@@ -142,6 +142,7 @@ namespace Doppler.PushContact.WebPushSender.Senders
 
                     case (int)HttpStatusCode.NotFound:
                     case (int)HttpStatusCode.Gone:
+                    case (int)HttpStatusCode.Unauthorized:
                         _logger.LogDebug
                         (
                             "(Error {WebPushResponseStatusCode}):\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
@@ -151,6 +152,18 @@ namespace Doppler.PushContact.WebPushSender.Senders
                         );
 
                         processingResult.InvalidSubscription = true;
+                        break;
+                    default:
+                        _logger.LogError
+                        (
+                            "(Error {WebPushResponseStatusCode}):\n\tSubscription: {Subscription}\n\tException: {WebPushResponseException}",
+                            response.Exception.MessagingErrorCode,
+                            JsonConvert.SerializeObject(response.Subscription),
+                            JsonConvert.SerializeObject(response.Exception)
+                        );
+
+                        processingResult.UnknownFail = true;
+                        processingResult.ErrorMessage = response.Exception.Message;
                         break;
                 }
             }

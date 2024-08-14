@@ -46,15 +46,17 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
         }
 
         [Theory]
-        [InlineData(true, false, false, false, WebPushEventType.ProcessingFailed)]
-        [InlineData(false, true, false, false, WebPushEventType.Delivered)]
-        [InlineData(false, false, true, false, WebPushEventType.DeliveryFailed)]
-        [InlineData(false, false, false, true, WebPushEventType.DeliveryFailedButRetry)]
+        [InlineData(true, false, false, false, false, WebPushEventType.ProcessingFailed)]
+        [InlineData(false, true, false, false, false, WebPushEventType.Delivered)]
+        [InlineData(false, false, true, false, false, WebPushEventType.DeliveryFailed)]
+        [InlineData(false, false, false, true, false, WebPushEventType.DeliveryFailedButRetry)]
+        [InlineData(false, false, false, false, true, WebPushEventType.DeliveryFailed)]
         public async Task HandleMessageAsync_Should_Call_Repository_With_Expected_EventType(
             bool failedProcessing,
             bool successfullyDelivered,
             bool invalidSubscription,
             bool limitsExceeded,
+            bool unknownFail,
             WebPushEventType expectedEventType
         )
         {
@@ -63,14 +65,21 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
 
             var messageId = fixture.Create<Guid>();
             var pushContactId = fixture.Create<string>();
+            var errorMessage = fixture.Create<string>();
 
             var processingResult = new WebPushProcessingResultDTO
             {
                 FailedProcessing = failedProcessing,
                 SuccessfullyDelivered = successfullyDelivered,
                 InvalidSubscription = invalidSubscription,
-                LimitsExceeded = limitsExceeded
+                LimitsExceeded = limitsExceeded,
+                UnknownFail = unknownFail,
             };
+
+            if (unknownFail)
+            {
+                processingResult.ErrorMessage = errorMessage;
+            }
 
             var weshPushEventRepository = new Mock<IWebPushEventRepository>();
             SendWebPushDelegate delegateWithBehavior = _ => Task.FromResult(processingResult);
@@ -96,7 +105,8 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 It.Is<WebPushEvent>(evt =>
                     evt.MessageId == messageId &&
                     evt.PushContactId == pushContactId &&
-                    evt.Type == (int)expectedEventType
+                    evt.Type == (int)expectedEventType &&
+                    evt.ErrorMessage == (unknownFail ? errorMessage : null)
                 ),
                 cancellationToken
             ), Times.Once);

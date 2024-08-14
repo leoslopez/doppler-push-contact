@@ -17,5 +17,8 @@ namespace Doppler.PushContact.Models.Entities
 
         [BsonElement(WebPushEventDocumentProps.PushContactId_PropName)]
         public string PushContactId { get; set; }
+
+        [BsonElement(WebPushEventDocumentProps.ErrorMessage_PropName)]
+        public string ErrorMessage { get; set; }
     }
 }
