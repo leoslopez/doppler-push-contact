@@ -105,6 +105,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Assert.True(processingResult.SuccessfullyDelivered);
                 Assert.False(processingResult.LimitsExceeded);
                 Assert.False(processingResult.InvalidSubscription);
+                Assert.False(processingResult.UnknownFail);
             }
         }
 
@@ -158,6 +159,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Assert.False(processingResult.SuccessfullyDelivered);
                 Assert.True(processingResult.LimitsExceeded);
                 Assert.False(processingResult.InvalidSubscription);
+                Assert.False(processingResult.UnknownFail);
             }
         }
 
@@ -215,6 +217,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Assert.False(processingResult.SuccessfullyDelivered);
                 Assert.False(processingResult.LimitsExceeded);
                 Assert.True(processingResult.InvalidSubscription);
+                Assert.False(processingResult.UnknownFail);
             }
         }
 
@@ -251,6 +254,7 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                 Assert.False(processingResult.SuccessfullyDelivered);
                 Assert.False(processingResult.LimitsExceeded);
                 Assert.False(processingResult.InvalidSubscription);
+                Assert.False(processingResult.UnknownFail);
 
                 mockLogger.Verify(
                     x => x.Log(
@@ -260,6 +264,58 @@ namespace Doppler.PushContact.WebPushSender.Test.Senders
                         It.IsAny<Exception>(),
                         It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
                     Times.Once);
+            }
+        }
+
+        [Fact]
+        public async Task SendWebPush_Should_Return_UnknownFail_And_An_ErrorMessage_When_IsSuccess_False_And_MessagingErrorCode_IsNotExpected()
+        {
+            // Arrange
+            var fixture = new Fixture();
+
+            var message = GetMessage(
+                fixture.Create<string>(),
+                fixture.Create<string>(),
+                fixture.Create<string>(),
+                fixture.Create<string>(),
+                fixture.Create<string>()
+            );
+
+            var exceptionMessage = fixture.Create<string>();
+
+            var sendMessageResponseExpected = new SendMessageResponse
+            {
+                Responses = new List<SendMessageResponseDetail>
+                {
+                    new SendMessageResponseDetail
+                    {
+                        IsSuccess = false,
+                        Exception = new SendMessageResponseException
+                        {
+                            MessagingErrorCode = 999, // some unexpected error code
+                            Message = exceptionMessage,
+                        }
+                    }
+                }
+            };
+
+            var webPushSender = CreateSUT();
+
+            // mock the HTTP response
+            using (var httpTest = new HttpTest())
+            {
+                httpTest.RespondWithJson(sendMessageResponseExpected);
+
+                // Act
+                var processingResult = await webPushSender.TestSendWebPush(message);
+
+                // Assert
+                Assert.False(processingResult.FailedProcessing);
+                Assert.False(processingResult.SuccessfullyDelivered);
+                Assert.False(processingResult.LimitsExceeded);
+                Assert.False(processingResult.InvalidSubscription);
+                Assert.True(processingResult.UnknownFail);
+                Assert.Equal(processingResult.ErrorMessage, exceptionMessage);
             }
         }
     }
