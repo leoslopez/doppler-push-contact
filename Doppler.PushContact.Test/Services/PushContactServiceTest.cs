@@ -8,10 +8,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
+using MongoDB.Driver.Core.Connections;
+using MongoDB.Driver.Core.Servers;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -157,6 +161,59 @@ with following {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceT
             // Act
             // Assert
             await sut.AddAsync(pushContactModel);
+        }
+
+        [Fact]
+        public async Task AddAsync_should_treat_as_successful_when_a_push_contact_was_not_added_due_to_a_duplicated_deviceToken()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            var pushContactModel = fixture.Create<PushContactModel>();
+
+            var deviceTokenValidator = new Mock<IDeviceTokenValidator>();
+            deviceTokenValidator
+                .Setup(x => x.IsValidAsync(pushContactModel.DeviceToken))
+                .ReturnsAsync(true);
+
+            var pushMongoContextSettings = fixture.Create<PushMongoContextSettings>();
+
+            var mongoWriteException = CreateMongoWriteException();
+
+            var pushContactsCollectionMock = new Mock<IMongoCollection<BsonDocument>>();
+            pushContactsCollectionMock
+                .Setup(x => x.InsertOneAsync(It.IsAny<BsonDocument>(), null, default))
+                .ThrowsAsync(mongoWriteException);
+
+            var mongoDatabaseMock = new Mock<IMongoDatabase>();
+            mongoDatabaseMock
+                .Setup(x => x.GetCollection<BsonDocument>(pushMongoContextSettings.PushContactsCollectionName, null))
+                .Returns(pushContactsCollectionMock.Object);
+
+            var mongoClientMock = new Mock<IMongoClient>();
+            mongoClientMock
+                .Setup(x => x.GetDatabase(pushMongoContextSettings.DatabaseName, null))
+                .Returns(mongoDatabaseMock.Object);
+
+            var loggerMock = new Mock<ILogger<PushContactService>>();
+
+            var sut = CreateSut(
+                mongoClientMock.Object,
+                Options.Create(pushMongoContextSettings),
+                deviceTokenValidator.Object,
+                loggerMock.Object);
+
+            // Act
+            await sut.AddAsync(pushContactModel);
+
+            // Assert
+            loggerMock.Verify(
+                x => x.Log(
+                    It.Is<LogLevel>(l => l == LogLevel.Information),
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Duplicate key error for")),
+                    It.IsAny<Exception>(),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                Times.Once);
         }
 
         [Theory]
@@ -1971,6 +2028,25 @@ with {nameof(deviceToken)} {deviceToken}. {PushContactDocumentProps.EmailPropNam
                     };
                 })
                 .ToList();
+        }
+
+        private MongoWriteException CreateMongoWriteException()
+        {
+            var writeError = typeof(WriteError).GetConstructors(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .FirstOrDefault(c => c.GetParameters().Length == 4)?
+                .Invoke(new object[]
+                {
+                    ServerErrorCategory.DuplicateKey,
+                    11000,
+                    "E11000 duplicate key error collection: push-local.push-contacts index: device_token_1 dup key",
+                    new BsonDocument()
+                });
+
+            var endPoint = new DnsEndPoint("localhost", 27017);
+            var serverId = new ServerId(new ClusterId(1), endPoint);
+            var connectionId = new ConnectionId(serverId, 0);
+
+            return new MongoWriteException(connectionId, (WriteError)writeError, null, null);
         }
     }
 }
