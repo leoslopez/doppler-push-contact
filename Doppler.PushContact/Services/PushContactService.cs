@@ -103,6 +103,11 @@ namespace Doppler.PushContact.Services
             {
                 await PushContacts.InsertOneAsync(pushContactDocument);
             }
+            catch (MongoWriteException ex) when (ex.WriteError?.Category == ServerErrorCategory.DuplicateKey)
+            {
+                // If a duplicate key error is encountered, treat it as a success and proceed
+                _logger.LogInformation($"Duplicate key error for {nameof(pushContactModel.DeviceToken)}: {pushContactModel.DeviceToken}. Treating as successful insert.");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, @$"Error inserting {nameof(pushContactModel)}
