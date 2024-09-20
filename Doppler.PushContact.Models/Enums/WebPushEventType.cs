@@ -9,4 +9,12 @@ namespace Doppler.PushContact.Models.Enums
         DeliveryFailed = 4,
         DeliveryFailedButRetry = 5,
     }
+
+    public enum WebPushEventSubType
+    {
+        None = 0,
+        InvalidSubcription = 1,
+        UnknownFailure = 2,
+        LimitsExceeded = 3,
+    }
 }

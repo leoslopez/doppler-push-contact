@@ -55,25 +55,30 @@ namespace Doppler.PushContact.WebPushSender.Senders
             if (processingResult.FailedProcessing)
             {
                 webPushEvent.Type = (int)WebPushEventType.ProcessingFailed;
+                webPushEvent.SubType = (int)WebPushEventSubType.None;
                 // TODO: it must to retry
             }
             else if (processingResult.SuccessfullyDelivered)
             {
                 webPushEvent.Type = (int)WebPushEventType.Delivered;
+                webPushEvent.SubType = (int)WebPushEventSubType.None;
             }
             else if (processingResult.InvalidSubscription)
             {
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
+                webPushEvent.SubType = (int)WebPushEventSubType.InvalidSubcription;
                 await _pushContactRepository.MarkDeletedAsync(webPushEvent.PushContactId);
             }
             else if (processingResult.UnknownFail)
             {
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailed;
+                webPushEvent.SubType = (int)WebPushEventSubType.UnknownFailure;
                 webPushEvent.ErrorMessage = processingResult.ErrorMessage;
             }
             else if (processingResult.LimitsExceeded)
             {
                 webPushEvent.Type = (int)WebPushEventType.DeliveryFailedButRetry;
+                webPushEvent.SubType = (int)WebPushEventSubType.LimitsExceeded;
                 // TODO: it must to retry
             }
 

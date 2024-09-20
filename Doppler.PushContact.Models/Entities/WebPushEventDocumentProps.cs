@@ -8,5 +8,6 @@ namespace Doppler.PushContact.Models.Entities
         public const string PushContactId_PropName = "push_contact_id";
         public const string Date_PropName = "date";
         public const string ErrorMessage_PropName = "error_message";
+        public const string SubType_PropName = "sub_type";
     }
 }
